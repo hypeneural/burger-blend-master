@@ -34,10 +34,10 @@ const ingredientOverrides: Record<string, Partial<Record<FlavorKey, number>>> = 
   bacon: { Salgado: 5, Umami: 4 },
   cogumelo: { Umami: 4, Amargo: 2 },
   picanha: { Umami: 4, Salgado: 3 },
-  gordura-bovina: { Umami: 2, Salgado: 2 },
-  feijao-preto: { Umami: 3, Doce: 1 },
+  "gordura-bovina": { Umami: 2, Salgado: 2 },
+  "feijao-preto": { Umami: 3, Doce: 1 },
   lentilha: { Umami: 3, Doce: 1 },
-  grao-de-bico: { Doce: 2, Umami: 2 },
+  "grao-de-bico": { Doce: 2, Umami: 2 },
   queijo: { Salgado: 4, Umami: 3 },
   tutano: { Umami: 3, Salgado: 2 },
 };

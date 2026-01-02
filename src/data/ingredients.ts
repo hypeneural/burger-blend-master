@@ -1,4 +1,6 @@
-﻿export interface Ingredient {
+import { getCutById, type Cut } from "@/data/cuts";
+
+export interface Ingredient {
   id: string;
   name: string;
   category: 'bovine' | 'pork' | 'vegan' | 'extra';
@@ -10,6 +12,7 @@
     fat: number;
     carbs?: number;
   };
+  cutId?: string;
 }
 
 export const ingredients: Ingredient[] = [
@@ -20,8 +23,9 @@ export const ingredients: Ingredient[] = [
     category: 'bovine',
     fatPercentage: 18,
     description: 'Sabor intenso, base classica',
-    icon: '🥩',
+    icon: '??',
     nutrition: { protein: 18, fat: 18 },
+    cutId: 'acem',
   },
   {
     id: 'fraldinha',
@@ -29,8 +33,9 @@ export const ingredients: Ingredient[] = [
     category: 'bovine',
     fatPercentage: 12,
     description: 'Macio e suculento',
-    icon: '🥩',
+    icon: '??',
     nutrition: { protein: 19, fat: 12 },
+    cutId: 'fraldinha',
   },
   {
     id: 'picanha',
@@ -38,8 +43,9 @@ export const ingredients: Ingredient[] = [
     category: 'bovine',
     fatPercentage: 30,
     description: 'Corte premium, rico em gordura',
-    icon: '🥩',
+    icon: '??',
     nutrition: { protein: 17, fat: 30 },
+    cutId: 'picanha',
   },
   {
     id: 'costela',
@@ -47,8 +53,9 @@ export const ingredients: Ingredient[] = [
     category: 'bovine',
     fatPercentage: 25,
     description: 'Extremamente suculento',
-    icon: '🥩',
+    icon: '??',
     nutrition: { protein: 16, fat: 25 },
+    cutId: 'costela',
   },
   {
     id: 'peito',
@@ -56,8 +63,9 @@ export const ingredients: Ingredient[] = [
     category: 'bovine',
     fatPercentage: 35,
     description: 'Alto teor de gordura',
-    icon: '🥩',
+    icon: '??',
     nutrition: { protein: 16, fat: 35 },
+    cutId: 'peito',
   },
   {
     id: 'patinho',
@@ -65,7 +73,7 @@ export const ingredients: Ingredient[] = [
     category: 'bovine',
     fatPercentage: 8,
     description: 'Magro, ideal para blends lean',
-    icon: '🥩',
+    icon: '??',
     nutrition: { protein: 21, fat: 8 },
   },
   {
@@ -74,8 +82,29 @@ export const ingredients: Ingredient[] = [
     category: 'bovine',
     fatPercentage: 6,
     description: 'Magro e firme, pede gordura extra',
-    icon: '🥩',
+    icon: '??',
     nutrition: { protein: 22, fat: 6 },
+    cutId: 'coxao-duro',
+  },
+  {
+    id: 'alcatra',
+    name: 'Alcatra',
+    category: 'bovine',
+    fatPercentage: 12,
+    description: 'Base leve e mineral',
+    icon: '??',
+    nutrition: { protein: 20, fat: 12 },
+    cutId: 'alcatra',
+  },
+  {
+    id: 'pescoco',
+    name: 'Pescoco',
+    category: 'bovine',
+    fatPercentage: 12,
+    description: 'Sabor rustico e intenso',
+    icon: '??',
+    nutrition: { protein: 19, fat: 12 },
+    cutId: 'pescoco',
   },
   {
     id: 'gordura-bovina',
@@ -83,7 +112,7 @@ export const ingredients: Ingredient[] = [
     category: 'bovine',
     fatPercentage: 90,
     description: 'Para ajuste de gordura',
-    icon: '🧈',
+    icon: '??',
     nutrition: { protein: 0, fat: 90 },
   },
 
@@ -94,7 +123,7 @@ export const ingredients: Ingredient[] = [
     category: 'pork',
     fatPercentage: 15,
     description: 'Sabor suave e versatil',
-    icon: '🐖',
+    icon: '??',
     nutrition: { protein: 19, fat: 15 },
   },
   {
@@ -103,7 +132,7 @@ export const ingredients: Ingredient[] = [
     category: 'pork',
     fatPercentage: 50,
     description: 'Altissimo sabor',
-    icon: '🥓',
+    icon: '??',
     nutrition: { protein: 9, fat: 50 },
   },
   {
@@ -112,7 +141,7 @@ export const ingredients: Ingredient[] = [
     category: 'extra',
     fatPercentage: 45,
     description: 'Defumado e irresistivel',
-    icon: '🥓',
+    icon: '??',
     nutrition: { protein: 12, fat: 45 },
   },
   {
@@ -121,7 +150,7 @@ export const ingredients: Ingredient[] = [
     category: 'pork',
     fatPercentage: 10,
     description: 'Magro e macio',
-    icon: '🐖',
+    icon: '??',
     nutrition: { protein: 20, fat: 10 },
   },
 
@@ -132,7 +161,7 @@ export const ingredients: Ingredient[] = [
     category: 'vegan',
     fatPercentage: 1,
     description: 'Base proteica, textura firme',
-    icon: '🫘',
+    icon: '??',
     nutrition: { protein: 8.5, fat: 1, carbs: 23 },
   },
   {
@@ -141,7 +170,7 @@ export const ingredients: Ingredient[] = [
     category: 'vegan',
     fatPercentage: 3,
     description: 'Cremoso, rico em proteina',
-    icon: '🫘',
+    icon: '??',
     nutrition: { protein: 9, fat: 3, carbs: 27 },
   },
   {
@@ -150,7 +179,7 @@ export const ingredients: Ingredient[] = [
     category: 'vegan',
     fatPercentage: 1,
     description: 'Umami intenso',
-    icon: '🍄',
+    icon: '??',
     nutrition: { protein: 3, fat: 1, carbs: 3 },
   },
   {
@@ -159,7 +188,7 @@ export const ingredients: Ingredient[] = [
     category: 'vegan',
     fatPercentage: 1,
     description: 'Textura densa',
-    icon: '🫘',
+    icon: '??',
     nutrition: { protein: 9, fat: 1, carbs: 20 },
   },
   {
@@ -168,7 +197,7 @@ export const ingredients: Ingredient[] = [
     category: 'vegan',
     fatPercentage: 0,
     description: 'Cor vibrante, levemente doce',
-    icon: '🥕',
+    icon: '??',
     nutrition: { protein: 1.6, fat: 0, carbs: 10 },
   },
 
@@ -179,7 +208,7 @@ export const ingredients: Ingredient[] = [
     category: 'extra',
     fatPercentage: 30,
     description: 'Para juicy lucy',
-    icon: '🧀',
+    icon: '??',
     nutrition: { protein: 25, fat: 30, carbs: 2 },
   },
   {
@@ -188,7 +217,7 @@ export const ingredients: Ingredient[] = [
     category: 'extra',
     fatPercentage: 85,
     description: 'Cremosidade extrema',
-    icon: '🦴',
+    icon: '??',
     nutrition: { protein: 7, fat: 85 },
   },
 ];
@@ -199,4 +228,10 @@ export const getIngredientById = (id: string): Ingredient | undefined => {
 
 export const getIngredientsByCategory = (category: Ingredient['category']): Ingredient[] => {
   return ingredients.filter((ingredient) => ingredient.category === category);
+};
+
+export const getCutForIngredient = (ingredientId: string): Cut | undefined => {
+  const ingredient = getIngredientById(ingredientId);
+  if (!ingredient?.cutId) return undefined;
+  return getCutById(ingredient.cutId);
 };

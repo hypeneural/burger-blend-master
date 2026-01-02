@@ -12,6 +12,7 @@ import { FatDonutChart } from '@/components/FatDonutChart';
 import { FatExplanationDialog } from '@/components/FatExplanationDialog';
 import { FlavorRadarChart } from '@/components/FlavorRadarChart';
 import { Header } from '@/components/Header';
+import { IngredientWikiCard } from '@/components/IngredientWikiCard';
 import { IngredientPicker } from '@/components/IngredientPicker';
 import { IngredientSlider } from '@/components/IngredientSlider';
 import { QuantityCalculator } from '@/components/QuantityCalculator';
@@ -61,7 +62,7 @@ const wikiSections = [
   {
     id: 'pork',
     title: 'Suinos',
-    description: 'Suinos trazem doçura e gordura equilibrada para misturas.',
+    description: 'Suinos trazem docura e gordura equilibrada para misturas.',
   },
   {
     id: 'vegan',
@@ -309,6 +310,11 @@ export default function Index() {
       }
       return [...prev, { ingredientId, grams }];
     });
+  };
+
+  const handleWakeLockToggle = (value: boolean) => {
+    setWakeLockEnabled(value);
+    setPreference('wakeLockEnabled', value);
   };
 
   const groupedIngredients = useMemo(() => {
@@ -606,19 +612,7 @@ export default function Index() {
                   </div>
                   <div className="space-y-2">
                     {section.items.map((item) => (
-                      <div
-                        key={item.id}
-                        className="p-4 rounded-xl bg-card border border-border flex items-center justify-between"
-                      >
-                        <div className="flex items-center gap-3">
-                          <span className="text-2xl">{item.icon}</span>
-                          <div>
-                            <h3 className="font-medium text-foreground">{item.name}</h3>
-                            <p className="text-xs text-muted-foreground">{item.description}</p>
-                          </div>
-                        </div>
-                        <span className="text-sm font-semibold text-primary">{item.fatPercentage}%</span>
-                      </div>
+                      <IngredientWikiCard key={item.id} ingredient={item} />
                     ))}
                   </div>
                 </div>
@@ -691,7 +685,7 @@ export default function Index() {
                         <div>
                           <p className="font-medium text-foreground">{entry.name}</p>
                           <p className="text-xs text-muted-foreground">
-                            {entry.snapshot.burgerCount}x {entry.snapshot.burgerWeight}g • {entry.snapshot.fatPercentage}% gordura
+                            {entry.snapshot.burgerCount}x {entry.snapshot.burgerWeight}g - {entry.snapshot.fatPercentage}% gordura
                           </p>
                         </div>
                         <span className="text-xs text-muted-foreground">{formatDate(entry.createdAt)}</span>
@@ -723,9 +717,19 @@ export default function Index() {
                 <p className="text-sm text-muted-foreground">
                   Ative para manter a tela ligada durante o preparo.
                 </p>
-                <Button variant="warm" className="w-full" disabled>
-                  Ativar (em breve)
-                </Button>
+                <div className="flex items-center justify-between rounded-xl bg-background p-3">
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Tela sempre ativa</p>
+                    <p className="text-xs text-muted-foreground">
+                      {wakeLockSupported ? "Evita que a tela apague." : "Nao suportado neste navegador."}
+                    </p>
+                  </div>
+                  <Switch
+                    checked={wakeLockEnabled}
+                    onCheckedChange={handleWakeLockToggle}
+                    disabled={!wakeLockSupported}
+                  />
+                </div>
               </div>
             </motion.section>
           )}

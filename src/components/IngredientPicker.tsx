@@ -1,7 +1,13 @@
 ﻿import { motion } from 'framer-motion';
 import { Plus, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { ingredients } from '@/data/ingredients';
+import { getCutForIngredient, ingredients } from '@/data/ingredients';
+import {
+  formatCutFatRange,
+  formatCutFunction,
+  formatCutRoles,
+  formatGrindRecommendation,
+} from '@/lib/cutHelpers';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 
@@ -65,6 +71,7 @@ export function IngredientPicker({ selectedIds, onSelect, onClose }: IngredientP
         <div className="p-4 space-y-2 max-h-[50vh] overflow-y-auto">
           {filteredIngredients.map((ingredient) => {
             const isSelected = selectedIds.includes(ingredient.id);
+            const cut = getCutForIngredient(ingredient.id);
             return (
               <motion.button
                 key={ingredient.id}
@@ -88,6 +95,29 @@ export function IngredientPicker({ selectedIds, onSelect, onClose }: IngredientP
                   <h4 className="font-medium text-foreground">{ingredient.name}</h4>
                   <p className="text-sm text-muted-foreground">{ingredient.description}</p>
                   <span className="text-xs text-muted-foreground">{ingredient.fatPercentage}% gordura</span>
+                  {cut && (
+                    <div className="mt-2 space-y-1 text-xs text-muted-foreground">
+                      <p>
+                        Funcao: <span className="text-foreground">{formatCutFunction(cut)}</span>
+                      </p>
+                      <p>
+                        Gordura estimada: <span className="text-foreground">{formatCutFatRange(cut)}</span>
+                      </p>
+                      <p>
+                        Por que entra: <span className="text-foreground">{cut.whyBlend}</span>
+                      </p>
+                      <p>
+                        Nome EN: <span className="text-foreground">{cut.nameEn}</span>
+                      </p>
+                      <p>
+                        Recomendado: <span className="text-foreground">{formatCutRoles(cut)}</span>
+                      </p>
+                      <p className="text-muted-foreground">{formatGrindRecommendation(cut)}</p>
+                      {cut.warnings.length > 0 && (
+                        <p className="text-fat-warning">Alerta: {cut.warnings.join(' / ')}</p>
+                      )}
+                    </div>
+                  )}
                 </div>
                 {isSelected ? (
                   <span className="text-xs text-muted-foreground px-2 py-1 rounded bg-muted">

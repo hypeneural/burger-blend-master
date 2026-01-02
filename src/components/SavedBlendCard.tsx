@@ -26,11 +26,11 @@ export function SavedBlendCard({ blend, onLoad, onDelete }: SavedBlendCardProps)
             <span>
               {blend.burgerCount}x {blend.burgerWeight}g
             </span>
-            <span>•</span>
+            <span>-</span>
             <span>Total {formatWeight(totalWeight)}</span>
             {extras.length > 0 && (
               <>
-                <span>•</span>
+                <span>-</span>
                 <span>{extras.length} extras</span>
               </>
             )}
