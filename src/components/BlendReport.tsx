@@ -20,6 +20,7 @@ import { FatIndicator } from '@/components/FatIndicator';
 import { ButcherGuide } from '@/components/ButcherGuide';
 import { IngredientBreakdown } from '@/components/IngredientBreakdown';
 import { NutritionSummary } from '@/components/NutritionSummary';
+import { ProductionSheet } from '@/components/ProductionSheet';
 import { getIngredientById } from '@/data/ingredients';
 import type { GrindPass, GrindSize, BurgerStyle } from '@/data/constants';
 import {
@@ -306,6 +307,17 @@ export function BlendReport({
           burgerStyle={burgerStyle}
           grindSize={grindSize}
           grindPass={grindPass}
+        />
+
+        <ProductionSheet
+          ingredients={ingredients}
+          extras={extras}
+          burgerCount={burgerCount}
+          burgerWeight={burgerWeight}
+          burgerStyle={burgerStyle}
+          grindSize={grindSize}
+          grindPass={grindPass}
+          prepStyle={prepStyle}
         />
 
         <NutritionSummary

@@ -45,10 +45,12 @@ interface BlendStore {
   showPicker: boolean;
   showExtrasPicker: boolean;
   targetFat: number;
+  cmvTarget: number;
   roundingStep: number;
   fatSourceId: string;
   wakeLockEnabled: boolean;
   alertThresholds: AlertThresholds;
+  priceOverrides: Record<string, number>;
   savedBlends: SavedBlend[];
   historyEntries: BlendHistoryEntry[];
   setCatalog: (catalog: Partial<Pick<BlendStore, "catalogCuts" | "catalogIngredients" | "catalogPresets">>) => void;
@@ -69,10 +71,12 @@ interface BlendStore {
   setShowPicker: (value: boolean) => void;
   setShowExtrasPicker: (value: boolean) => void;
   setTargetFat: (value: number) => void;
+  setCmvTarget: (value: number) => void;
   setRoundingStep: (value: number) => void;
   setFatSourceId: (value: string) => void;
   setWakeLockEnabled: (value: boolean) => void;
   setAlertThresholds: (value: Partial<AlertThresholds>) => void;
+  setPriceOverrides: (value: Record<string, number>) => void;
   setSavedBlends: (value: SavedBlend[]) => void;
   setHistoryEntries: (value: BlendHistoryEntry[]) => void;
   applyPreset: (preset: Preset) => void;
@@ -112,10 +116,12 @@ export const useBlendStore = create<BlendStore>((set) => ({
   showPicker: false,
   showExtrasPicker: false,
   targetFat: 22,
+  cmvTarget: 30,
   roundingStep: 10,
   fatSourceId: "gordura-bovina",
   wakeLockEnabled: false,
   alertThresholds: DEFAULT_ALERT_THRESHOLDS,
+  priceOverrides: {},
   savedBlends: [],
   historyEntries: [],
   setCatalog: (catalog) => set(catalog),
@@ -136,6 +142,7 @@ export const useBlendStore = create<BlendStore>((set) => ({
   setShowPicker: (value) => set({ showPicker: value }),
   setShowExtrasPicker: (value) => set({ showExtrasPicker: value }),
   setTargetFat: (value) => set({ targetFat: value }),
+  setCmvTarget: (value) => set({ cmvTarget: value }),
   setRoundingStep: (value) => set({ roundingStep: value }),
   setFatSourceId: (value) => set({ fatSourceId: value }),
   setWakeLockEnabled: (value) => set({ wakeLockEnabled: value }),
@@ -143,6 +150,7 @@ export const useBlendStore = create<BlendStore>((set) => ({
     set((state) => ({
       alertThresholds: { ...state.alertThresholds, ...value },
     })),
+  setPriceOverrides: (value) => set({ priceOverrides: value }),
   setSavedBlends: (value) => set({ savedBlends: value }),
   setHistoryEntries: (value) => set({ historyEntries: value }),
   applyPreset: (preset) =>

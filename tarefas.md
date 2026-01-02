@@ -30,11 +30,12 @@ Checklist atualizado conforme o estado atual do app.
 - [ ] **Fluxo em 3 toques** para chegar em blend, historico e ferramentas.
 
 ## P1 - Profissional (CMV, escala e padronizacao)
-- [ ] **Simulador de custo/CMV em tempo real** (custo por burger + preco sugerido).
-- [ ] **Calculadora de proporcao reversa** (meta de gordura com 2 cortes).
-- [ ] **Ficha tecnica operacional** (gramas por lote, moagem, preparo, rendimento).
-- [ ] **Conversor de escala (batch)** 4 -> 50 burgers com 1 toque.
-- [ ] **Estimativa de yield/encolhimento** por metodo de cocao.
+- [x] **Simulador de custo/CMV em tempo real** (custo por burger + preco sugerido).
+- [x] **Edicao manual de precos por corte** (ajuste por regiao).
+- [x] **Calculadora de proporcao reversa** (meta de gordura com 2 cortes).
+- [x] **Ficha tecnica operacional** (gramas por lote, moagem, preparo, rendimento).
+- [x] **Conversor de escala (batch)** 4 -> 50 burgers com 1 toque.
+- [x] **Estimativa de yield/encolhimento** por metodo de cocao.
 - [ ] **Substituicao inteligente de cortes** (ex: acem -> paleta) com impacto.
 
 ## P1 - Viralidade e onboarding

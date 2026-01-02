@@ -5,6 +5,7 @@ import { BlendCard } from "@/components/BlendCard";
 import { BlendSummary } from "@/components/BlendSummary";
 import { BottomNav } from "@/components/BottomNav";
 import { ConnectionBanner } from "@/components/ConnectionBanner";
+import { CostSimulator } from "@/components/CostSimulator";
 import { ExtraPicker } from "@/components/ExtraPicker";
 import { ExtrasSection } from "@/components/ExtrasSection";
 import { FatIndicator } from "@/components/FatIndicator";
@@ -13,7 +14,9 @@ import { Header } from "@/components/Header";
 import { IngredientWikiCard } from "@/components/IngredientWikiCard";
 import { IngredientPicker } from "@/components/IngredientPicker";
 import { IngredientSlider } from "@/components/IngredientSlider";
+import { PriceEditor } from "@/components/PriceEditor";
 import { QuantityCalculator } from "@/components/QuantityCalculator";
+import { ReverseBlendCalculator } from "@/components/ReverseBlendCalculator";
 import { SavedBlendCard } from "@/components/SavedBlendCard";
 import { SmartAlerts } from "@/components/SmartAlerts";
 import { Stepper } from "@/components/Stepper";
@@ -103,16 +106,19 @@ export default function Index() {
     savedBlends,
     historyEntries,
     targetFat,
+    cmvTarget,
     roundingStep,
     fatSourceId,
     wakeLockEnabled,
     alertThresholds,
+    priceOverrides,
     setActiveTab,
     setStep,
     setBlendName,
     setBlendDescription,
     setBurgerCount,
     setBurgerWeight,
+    setIngredients,
     setBurgerStyle,
     setGrindSize,
     setGrindPass,
@@ -121,10 +127,12 @@ export default function Index() {
     setShowPicker,
     setShowExtrasPicker,
     setTargetFat,
+    setCmvTarget,
     setRoundingStep,
     setFatSourceId,
     setWakeLockEnabled,
     setAlertThresholds,
+    setPriceOverrides,
     setSavedBlends,
     setHistoryEntries,
     setCatalog,
@@ -180,7 +188,17 @@ export default function Index() {
   useEffect(() => {
     let isActive = true;
     const loadData = async () => {
-      const [blends, history, prefTarget, prefStep, prefSource, prefWake, prefAlerts] = await Promise.all([
+      const [
+        blends,
+        history,
+        prefTarget,
+        prefStep,
+        prefSource,
+        prefWake,
+        prefAlerts,
+        prefCmv,
+        prefPrices,
+      ] = await Promise.all([
         loadSavedBlends(),
         loadHistory(10),
         getPreference("targetFat"),
@@ -188,6 +206,8 @@ export default function Index() {
         getPreference("fatSourceId"),
         getPreference("wakeLockEnabled"),
         getPreference("alertThresholds"),
+        getPreference("cmvTarget"),
+        getPreference("priceOverrides"),
       ]);
       if (!isActive) return;
       setSavedBlends(blends);
@@ -196,6 +216,10 @@ export default function Index() {
       if (typeof prefStep === "number") setRoundingStep(prefStep);
       if (typeof prefSource === "string") setFatSourceId(prefSource);
       if (typeof prefWake === "boolean") setWakeLockEnabled(prefWake);
+      if (typeof prefCmv === "number") setCmvTarget(prefCmv);
+      if (prefPrices && typeof prefPrices === "object") {
+        setPriceOverrides(prefPrices as Record<string, number>);
+      }
       if (prefAlerts && typeof prefAlerts === "object") {
         setAlertThresholds(prefAlerts as Record<string, number>);
       }
@@ -212,6 +236,8 @@ export default function Index() {
     setTargetFat,
     setWakeLockEnabled,
     setAlertThresholds,
+    setCmvTarget,
+    setPriceOverrides,
   ]);
 
   useEffect(() => {
@@ -346,6 +372,17 @@ export default function Index() {
   const handleRoundingChange = (value: number) => {
     setRoundingStep(value);
     setPreference("roundingStep", value);
+  };
+
+  const handleCmvTargetChange = (value: number) => {
+    const clamped = Math.min(60, Math.max(20, value));
+    setCmvTarget(clamped);
+    setPreference("cmvTarget", clamped);
+  };
+
+  const handlePriceOverridesChange = (next: Record<string, number>) => {
+    setPriceOverrides(next);
+    setPreference("priceOverrides", next);
   };
 
   const handleFatSourceChange = (value: string) => {
@@ -569,6 +606,19 @@ export default function Index() {
                       onRoundingStepChange={handleRoundingChange}
                       onFatSourceChange={handleFatSourceChange}
                       onApplySuggestion={handleApplyTargetSuggestion}
+                    />
+
+                    <ReverseBlendCalculator
+                      ingredients={catalogIngredients}
+                      baseWeight={baseWeight}
+                      onApply={(next) => {
+                        setIngredients(
+                          next.map((item) => ({
+                            ingredientId: item.ingredientId,
+                            percentage: item.percentage,
+                          })),
+                        );
+                      }}
                     />
 
                     <div className="p-5 rounded-2xl bg-card border border-border space-y-3">
@@ -828,6 +878,16 @@ export default function Index() {
                       burgerWeight={burgerWeight}
                       onBurgerCountChange={setBurgerCount}
                       onBurgerWeightChange={setBurgerWeight}
+                    />
+
+                    <CostSimulator
+                      ingredients={ingredientsState}
+                      extras={extras}
+                      burgerCount={burgerCount}
+                      burgerWeight={burgerWeight}
+                      cmvTarget={cmvTarget}
+                      priceOverrides={priceOverrides}
+                      onCmvTargetChange={handleCmvTargetChange}
                     />
 
                     <AnimatePresence>
@@ -1149,6 +1209,12 @@ export default function Index() {
                   </div>
                 </div>
               </div>
+
+              <PriceEditor
+                ingredients={catalogIngredients}
+                priceOverrides={priceOverrides}
+                onChange={handlePriceOverridesChange}
+              />
             </motion.section>
           )}
           </AnimatePresence>

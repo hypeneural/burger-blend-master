@@ -7,6 +7,7 @@ export interface Ingredient {
   category: IngredientCategory;
   fatPercentage: number;
   description: string;
+  avgPriceBrlKg?: number;
   nutrition: {
     protein: number;
     fat: number;
@@ -169,6 +170,7 @@ export const ingredients: Ingredient[] = [
     category: "pork",
     fatPercentage: 15,
     description: "Sabor suave e versatil",
+    avgPriceBrlKg: 28,
     nutrition: { protein: 19, fat: 15 },
   },
   {
@@ -177,6 +179,7 @@ export const ingredients: Ingredient[] = [
     category: "pork",
     fatPercentage: 50,
     description: "Altissimo sabor",
+    avgPriceBrlKg: 35,
     nutrition: { protein: 9, fat: 50 },
   },
   {
@@ -185,6 +188,7 @@ export const ingredients: Ingredient[] = [
     category: "extra",
     fatPercentage: 45,
     description: "Defumado e irresistivel",
+    avgPriceBrlKg: 45,
     nutrition: { protein: 12, fat: 45 },
   },
   {
@@ -193,6 +197,7 @@ export const ingredients: Ingredient[] = [
     category: "pork",
     fatPercentage: 10,
     description: "Magro e macio",
+    avgPriceBrlKg: 32,
     nutrition: { protein: 20, fat: 10 },
   },
 
@@ -203,6 +208,7 @@ export const ingredients: Ingredient[] = [
     category: "vegan",
     fatPercentage: 1,
     description: "Base proteica, textura firme",
+    avgPriceBrlKg: 12,
     nutrition: { protein: 8.5, fat: 1, carbs: 23 },
   },
   {
@@ -211,6 +217,7 @@ export const ingredients: Ingredient[] = [
     category: "vegan",
     fatPercentage: 3,
     description: "Cremoso, rico em proteina",
+    avgPriceBrlKg: 16,
     nutrition: { protein: 9, fat: 3, carbs: 27 },
   },
   {
@@ -219,6 +226,7 @@ export const ingredients: Ingredient[] = [
     category: "vegan",
     fatPercentage: 1,
     description: "Umami intenso",
+    avgPriceBrlKg: 38,
     nutrition: { protein: 3, fat: 1, carbs: 3 },
   },
   {
@@ -227,6 +235,7 @@ export const ingredients: Ingredient[] = [
     category: "vegan",
     fatPercentage: 1,
     description: "Textura densa",
+    avgPriceBrlKg: 14,
     nutrition: { protein: 9, fat: 1, carbs: 20 },
   },
   {
@@ -235,6 +244,7 @@ export const ingredients: Ingredient[] = [
     category: "vegan",
     fatPercentage: 0,
     description: "Cor vibrante, levemente doce",
+    avgPriceBrlKg: 6,
     nutrition: { protein: 1.6, fat: 0, carbs: 10 },
   },
 
@@ -245,6 +255,7 @@ export const ingredients: Ingredient[] = [
     category: "extra",
     fatPercentage: 30,
     description: "Para juicy lucy",
+    avgPriceBrlKg: 60,
     nutrition: { protein: 25, fat: 30, carbs: 2 },
   },
   {
@@ -253,6 +264,7 @@ export const ingredients: Ingredient[] = [
     category: "extra",
     fatPercentage: 85,
     description: "Cremosidade extrema",
+    avgPriceBrlKg: 50,
     nutrition: { protein: 7, fat: 85 },
   },
 ];
