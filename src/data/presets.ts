@@ -1,4 +1,4 @@
-﻿export interface BlendIngredient {
+export interface BlendIngredient {
   ingredientId: string;
   percentage: number;
 }
@@ -13,7 +13,6 @@ export interface Preset {
   prepStyle: string;
   prepTips: string[];
   seasonings: string[];
-  icon: string;
   category: 'classic' | 'premium' | 'smash' | 'vegan' | 'custom';
   color: 'meat' | 'gold' | 'orange' | 'green';
 }
@@ -37,7 +36,6 @@ export const presets: Preset[] = [
       'Deixe descansar 2 min antes de servir',
     ],
     seasonings: ['Sal grosso', 'Pimenta-do-reino', 'Alho em po'],
-    icon: '🍔',
     category: 'classic',
     color: 'meat',
   },
@@ -59,7 +57,6 @@ export const presets: Preset[] = [
       'Aproveite a gordura para sabor defumado',
     ],
     seasonings: ['Sal grosso', 'Paprica defumada', 'Chimichurri'],
-    icon: '🥩',
     category: 'premium',
     color: 'gold',
   },
@@ -82,7 +79,6 @@ export const presets: Preset[] = [
       'Nao mexa ate formar crosta',
     ],
     seasonings: ['Sal na hora', 'Pimenta-do-reino', 'Paprica defumada'],
-    icon: '🔥',
     category: 'smash',
     color: 'orange',
   },
@@ -105,7 +101,6 @@ export const presets: Preset[] = [
       'Manuseie com cuidado ao virar',
     ],
     seasonings: ['Cominho', 'Coentro em po', 'Paprica picante', 'Alho'],
-    icon: '🌱',
     category: 'vegan',
     color: 'green',
   },

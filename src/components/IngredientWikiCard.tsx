@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { IngredientIcon } from '@/components/IngredientIcon';
 import { getCutForIngredient, type Ingredient } from '@/data/ingredients';
 import { getSeasoningById } from '@/data/seasonings';
@@ -37,7 +38,7 @@ export function IngredientWikiCard({ ingredient }: IngredientWikiCardProps) {
   };
 
   return (
-    <div className="p-4 rounded-xl bg-card border border-border space-y-2">
+    <motion.div layout className="p-4 rounded-xl bg-card border border-border space-y-2">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-muted">
@@ -88,79 +89,87 @@ export function IngredientWikiCard({ ingredient }: IngredientWikiCardProps) {
         >
           {expanded ? 'Mostrar menos' : 'Ler mais'}
         </button>
-        {expanded && (
-          <div className="space-y-1 pt-2">
-            {cut ? (
-              <>
-                <p>
-                  Calorias: <span className="text-foreground">{formatCalories(cut)}</span>
-                </p>
-                <p>
-                  Gordura:{' '}
-                  <span className="text-foreground">
-                    {formatFatType(cut)} ({formatMeltingProfile(cut)})
-                  </span>
-                </p>
-                <p>
-                  Por que entra: <span className="text-foreground">{cut.shortDescription}</span>
-                </p>
-                <p>
-                  Dicas: <span className="text-foreground">{cut.tips}</span>
-                </p>
-                <p>
-                  Nome EN: <span className="text-foreground">{cut.nameEn}</span>
-                </p>
-                <p>
-                  Custo: <span className="text-foreground">{formatCostTier(cut)}</span>
-                </p>
-                <p>
-                  Recomendado: <span className="text-foreground">{formatCutRoles(cut)}</span>
-                </p>
-                {cut.flavorTags.length > 0 && (
+        <AnimatePresence initial={false}>
+          {expanded && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="space-y-1 pt-2 overflow-hidden"
+            >
+              {cut ? (
+                <>
                   <p>
-                    Sabor: <span className="text-foreground">{formatSimpleList(cut.flavorTags)}</span>
+                    Calorias: <span className="text-foreground">{formatCalories(cut)}</span>
                   </p>
-                )}
-                {cut.bestCheeses && (
                   <p>
-                    Queijo: <span className="text-foreground">{formatSimpleList(cut.bestCheeses)}</span>
+                    Gordura:{' '}
+                    <span className="text-foreground">
+                      {formatFatType(cut)} ({formatMeltingProfile(cut)})
+                    </span>
                   </p>
-                )}
-                {cut.bestBuns && (
                   <p>
-                    Pao: <span className="text-foreground">{formatSimpleList(cut.bestBuns)}</span>
+                    Por que entra: <span className="text-foreground">{cut.shortDescription}</span>
                   </p>
-                )}
-                {formatGrindRecommendation(cut) && <p>{formatGrindRecommendation(cut)}</p>}
-                {getCutDynamicTips(cut)
-                  .slice(0, 2)
-                  .map((tip) => (
-                    <p key={tip} className="text-foreground">
-                      {tip}
+                  <p>
+                    Dicas: <span className="text-foreground">{cut.tips}</span>
+                  </p>
+                  <p>
+                    Nome EN: <span className="text-foreground">{cut.nameEn}</span>
+                  </p>
+                  <p>
+                    Custo: <span className="text-foreground">{formatCostTier(cut)}</span>
+                  </p>
+                  <p>
+                    Recomendado: <span className="text-foreground">{formatCutRoles(cut)}</span>
+                  </p>
+                  {cut.flavorTags.length > 0 && (
+                    <p>
+                      Sabor:{' '}
+                      <span className="text-foreground">{formatSimpleList(cut.flavorTags)}</span>
                     </p>
-                  ))}
-                {cut.warnings.length > 0 && (
-                  <p className="text-fat-warning">Alerta: {cut.warnings.join(' / ')}</p>
-                )}
-              </>
-            ) : (
-              <>
-                <p>
-                  Proteina: <span className="text-foreground">{ingredient.nutrition.protein}g</span>
-                </p>
-                <p>
-                  Gordura: <span className="text-foreground">{ingredient.nutrition.fat}g</span>
-                </p>
-                {ingredient.nutrition.carbs !== undefined && (
+                  )}
+                  {cut.bestCheeses && (
+                    <p>
+                      Queijo: <span className="text-foreground">{formatSimpleList(cut.bestCheeses)}</span>
+                    </p>
+                  )}
+                  {cut.bestBuns && (
+                    <p>
+                      Pao: <span className="text-foreground">{formatSimpleList(cut.bestBuns)}</span>
+                    </p>
+                  )}
+                  {formatGrindRecommendation(cut) && <p>{formatGrindRecommendation(cut)}</p>}
+                  {getCutDynamicTips(cut)
+                    .slice(0, 2)
+                    .map((tip) => (
+                      <p key={tip} className="text-foreground">
+                        {tip}
+                      </p>
+                    ))}
+                  {cut.warnings.length > 0 && (
+                    <p className="text-fat-warning">Alerta: {cut.warnings.join(' / ')}</p>
+                  )}
+                </>
+              ) : (
+                <>
                   <p>
-                    Carbo: <span className="text-foreground">{ingredient.nutrition.carbs}g</span>
+                    Proteina: <span className="text-foreground">{ingredient.nutrition.protein}g</span>
                   </p>
-                )}
-              </>
-            )}
-          </div>
-        )}
+                  <p>
+                    Gordura: <span className="text-foreground">{ingredient.nutrition.fat}g</span>
+                  </p>
+                  {ingredient.nutrition.carbs !== undefined && (
+                    <p>
+                      Carbo: <span className="text-foreground">{ingredient.nutrition.carbs}g</span>
+                    </p>
+                  )}
+                </>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
-    </div>
+    </motion.div>
   );
 }

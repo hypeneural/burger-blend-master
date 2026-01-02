@@ -7,7 +7,6 @@ export interface Ingredient {
   category: IngredientCategory;
   fatPercentage: number;
   description: string;
-  icon: string;
   nutrition: {
     protein: number;
     fat: number;
@@ -24,7 +23,6 @@ export const ingredients: Ingredient[] = [
     category: "bovine",
     fatPercentage: 18,
     description: "Equilibrio natural entre carne e gordura",
-    icon: "??",
     nutrition: { protein: 14.5, fat: 18 },
     cutId: "acem",
   },
@@ -34,7 +32,6 @@ export const ingredients: Ingredient[] = [
     category: "bovine",
     fatPercentage: 10,
     description: "Base economica com textura firme",
-    icon: "??",
     nutrition: { protein: 22.5, fat: 10 },
     cutId: "paleta",
   },
@@ -44,7 +41,6 @@ export const ingredients: Ingredient[] = [
     category: "bovine",
     fatPercentage: 5,
     description: "Magro e suave para equilibrar blends gordurosos",
-    icon: "??",
     nutrition: { protein: 23.8, fat: 5 },
     cutId: "patinho",
   },
@@ -54,7 +50,6 @@ export const ingredients: Ingredient[] = [
     category: "bovine",
     fatPercentage: 8,
     description: "Magro e relativamente macio",
-    icon: "??",
     nutrition: { protein: 24.5, fat: 8 },
     cutId: "coxao-mole",
   },
@@ -64,7 +59,6 @@ export const ingredients: Ingredient[] = [
     category: "bovine",
     fatPercentage: 7,
     description: "Fibra longa e magra, pede gordura extra",
-    icon: "??",
     nutrition: { protein: 24.3, fat: 7 },
     cutId: "coxao-duro",
   },
@@ -74,7 +68,6 @@ export const ingredients: Ingredient[] = [
     category: "bovine",
     fatPercentage: 8,
     description: "Corte macio e de sabor suave",
-    icon: "??",
     nutrition: { protein: 22, fat: 8 },
     cutId: "alcatra",
   },
@@ -84,7 +77,6 @@ export const ingredients: Ingredient[] = [
     category: "bovine",
     fatPercentage: 10,
     description: "Sabor marcante e suculencia equilibrada",
-    icon: "??",
     nutrition: { protein: 20, fat: 10 },
     cutId: "fraldinha",
   },
@@ -94,7 +86,6 @@ export const ingredients: Ingredient[] = [
     category: "bovine",
     fatPercentage: 10,
     description: "Maciez extra com sabor suave",
-    icon: "??",
     nutrition: { protein: 22.5, fat: 10 },
     cutId: "maminha",
   },
@@ -104,7 +95,6 @@ export const ingredients: Ingredient[] = [
     category: "bovine",
     fatPercentage: 12,
     description: "Marmoreio moderado e sabor nobre",
-    icon: "??",
     nutrition: { protein: 23, fat: 12 },
     cutId: "contrafile",
   },
@@ -114,7 +104,6 @@ export const ingredients: Ingredient[] = [
     category: "bovine",
     fatPercentage: 20,
     description: "Corte nobre com capa de gordura",
-    icon: "??",
     nutrition: { protein: 17.5, fat: 20 },
     cutId: "picanha",
   },
@@ -124,7 +113,6 @@ export const ingredients: Ingredient[] = [
     category: "bovine",
     fatPercentage: 5,
     description: "Extremamente macio e magro",
-    icon: "??",
     nutrition: { protein: 21.3, fat: 5 },
     cutId: "file-mignon",
   },
@@ -134,7 +122,6 @@ export const ingredients: Ingredient[] = [
     category: "bovine",
     fatPercentage: 18,
     description: "Sabor intenso e gordura entremeada",
-    icon: "??",
     nutrition: { protein: 22, fat: 18 },
     cutId: "costela",
   },
@@ -144,7 +131,6 @@ export const ingredients: Ingredient[] = [
     category: "bovine",
     fatPercentage: 22,
     description: "Gordura firme para suculencia",
-    icon: "??",
     nutrition: { protein: 18, fat: 22 },
     cutId: "peito",
   },
@@ -154,7 +140,6 @@ export const ingredients: Ingredient[] = [
     category: "bovine",
     fatPercentage: 25,
     description: "Marmoreio alto e sabor marcante",
-    icon: "??",
     nutrition: { protein: 18.8, fat: 25 },
     cutId: "cupim",
   },
@@ -164,7 +149,6 @@ export const ingredients: Ingredient[] = [
     category: "bovine",
     fatPercentage: 90,
     description: "Gordura pura para ajuste de teor",
-    icon: "??",
     nutrition: { protein: 0, fat: 90 },
     cutId: "gordura-peito",
   },
@@ -174,7 +158,6 @@ export const ingredients: Ingredient[] = [
     category: "bovine",
     fatPercentage: 5,
     description: "Sabor intenso e rico em colageno",
-    icon: "??",
     nutrition: { protein: 21.3, fat: 5 },
     cutId: "musculo",
   },
@@ -186,7 +169,6 @@ export const ingredients: Ingredient[] = [
     category: "pork",
     fatPercentage: 15,
     description: "Sabor suave e versatil",
-    icon: "??",
     nutrition: { protein: 19, fat: 15 },
   },
   {
@@ -195,7 +177,6 @@ export const ingredients: Ingredient[] = [
     category: "pork",
     fatPercentage: 50,
     description: "Altissimo sabor",
-    icon: "??",
     nutrition: { protein: 9, fat: 50 },
   },
   {
@@ -204,7 +185,6 @@ export const ingredients: Ingredient[] = [
     category: "extra",
     fatPercentage: 45,
     description: "Defumado e irresistivel",
-    icon: "??",
     nutrition: { protein: 12, fat: 45 },
   },
   {
@@ -213,7 +193,6 @@ export const ingredients: Ingredient[] = [
     category: "pork",
     fatPercentage: 10,
     description: "Magro e macio",
-    icon: "??",
     nutrition: { protein: 20, fat: 10 },
   },
 
@@ -224,7 +203,6 @@ export const ingredients: Ingredient[] = [
     category: "vegan",
     fatPercentage: 1,
     description: "Base proteica, textura firme",
-    icon: "??",
     nutrition: { protein: 8.5, fat: 1, carbs: 23 },
   },
   {
@@ -233,7 +211,6 @@ export const ingredients: Ingredient[] = [
     category: "vegan",
     fatPercentage: 3,
     description: "Cremoso, rico em proteina",
-    icon: "??",
     nutrition: { protein: 9, fat: 3, carbs: 27 },
   },
   {
@@ -242,7 +219,6 @@ export const ingredients: Ingredient[] = [
     category: "vegan",
     fatPercentage: 1,
     description: "Umami intenso",
-    icon: "??",
     nutrition: { protein: 3, fat: 1, carbs: 3 },
   },
   {
@@ -251,7 +227,6 @@ export const ingredients: Ingredient[] = [
     category: "vegan",
     fatPercentage: 1,
     description: "Textura densa",
-    icon: "??",
     nutrition: { protein: 9, fat: 1, carbs: 20 },
   },
   {
@@ -260,7 +235,6 @@ export const ingredients: Ingredient[] = [
     category: "vegan",
     fatPercentage: 0,
     description: "Cor vibrante, levemente doce",
-    icon: "??",
     nutrition: { protein: 1.6, fat: 0, carbs: 10 },
   },
 
@@ -271,7 +245,6 @@ export const ingredients: Ingredient[] = [
     category: "extra",
     fatPercentage: 30,
     description: "Para juicy lucy",
-    icon: "??",
     nutrition: { protein: 25, fat: 30, carbs: 2 },
   },
   {
@@ -280,7 +253,6 @@ export const ingredients: Ingredient[] = [
     category: "extra",
     fatPercentage: 85,
     description: "Cremosidade extrema",
-    icon: "??",
     nutrition: { protein: 7, fat: 85 },
   },
 ];

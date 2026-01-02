@@ -113,6 +113,7 @@ export function IngredientPicker({
             return (
               <motion.div
                 key={ingredient.id}
+                layout
                 className={cn(
                   'w-full p-4 rounded-xl border-2 flex flex-col gap-3 text-left transition-all',
                   isSelected

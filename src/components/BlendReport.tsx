@@ -178,14 +178,16 @@ export function BlendReport({
   const handleExportPdf = async () => {
     if (!reportRef.current || exporting) return;
     setExporting(true);
+    const reportNode = reportRef.current;
     try {
       if (document.fonts?.ready) {
         await document.fonts.ready;
       }
       await new Promise((resolve) => setTimeout(resolve, 120));
-      const reportNode = reportRef.current;
+      const density = window.devicePixelRatio || 1;
+      const scale = reportNode.scrollHeight > 5200 ? Math.min(1.5, density) : Math.min(2, density);
       const canvas = await html2canvas(reportNode, {
-        scale: Math.min(2, window.devicePixelRatio || 2),
+        scale,
         backgroundColor: '#F7F2E9',
         useCORS: true,
         allowTaint: true,
@@ -215,10 +217,32 @@ export function BlendReport({
         description: 'Receita exportada com sucesso.',
       });
     } catch {
-      toast({
-        title: 'Falha ao exportar',
-        description: 'Nao foi possivel gerar o PDF.',
-      });
+      try {
+        const pdf = new jsPDF({ orientation: 'p', unit: 'pt', format: 'a4' });
+        const margin = 24;
+        const pageWidth = pdf.internal.pageSize.getWidth() - margin * 2;
+        await pdf.html(reportNode, {
+          x: margin,
+          y: margin,
+          width: pageWidth,
+          windowWidth: reportNode.scrollWidth,
+          html2canvas: {
+            scale: 1.5,
+            backgroundColor: '#F7F2E9',
+          },
+        });
+        pdf.save(`${name || 'blend'}.pdf`);
+        toast({
+          title: 'PDF pronto!',
+          description: 'Receita exportada com sucesso.',
+        });
+      } catch (error) {
+        console.error('Falha ao exportar PDF', error);
+        toast({
+          title: 'Falha ao exportar',
+          description: 'Nao foi possivel gerar o PDF.',
+        });
+      }
     } finally {
       setExporting(false);
     }

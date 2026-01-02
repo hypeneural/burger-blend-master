@@ -98,8 +98,8 @@ export function ButcherGuide({ ingredients, extras, baseWeight }: ButcherGuidePr
                   <div className="text-xs text-muted-foreground">
                     {item.cut ? (
                       <>
-                        Funcao: {formatCutFunction(item.cut)} · Gordura:{" "}
-                        {formatCutFatRange(item.cut)} · Tipo: {formatFatType(item.cut)}
+                        Funcao: {formatCutFunction(item.cut)} | Gordura:{" "}
+                        {formatCutFatRange(item.cut)} | Tipo: {formatFatType(item.cut)}
                       </>
                     ) : (
                       <>Gordura estimada: {item.ingredient.fatPercentage}%</>
@@ -140,3 +140,5 @@ export function ButcherGuide({ ingredients, extras, baseWeight }: ButcherGuidePr
     </div>
   );
 }
+
+

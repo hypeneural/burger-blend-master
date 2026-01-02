@@ -4,7 +4,7 @@ import { presets } from "@/data/presets";
 import { db } from "@/lib/db";
 import type { CatalogContent, ContentMetaEntry } from "@/types/content";
 
-const CONTENT_VERSION = "2026-01-02";
+const CONTENT_VERSION = "2026-02-04";
 const META_KEY = "catalogVersion";
 
 const nowIso = () => new Date().toISOString();
