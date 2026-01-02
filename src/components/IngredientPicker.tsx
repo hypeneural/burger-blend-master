@@ -2,7 +2,7 @@
 import { Plus, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { INGREDIENT_CATEGORIES, type IngredientCategory } from '@/data/constants';
-import { getCutForIngredient, ingredients } from '@/data/ingredients';
+import { getCutForIngredient, type Ingredient } from '@/data/ingredients';
 import {
   formatCalories,
   formatCostTier,
@@ -17,6 +17,7 @@ import { cn } from '@/lib/utils';
 import { useState } from 'react';
 
 interface IngredientPickerProps {
+  ingredients: Ingredient[];
   selectedIds: string[];
   onSelect: (ingredientId: string) => void;
   onClose: () => void;
@@ -31,7 +32,12 @@ const categoryLabels: Record<IngredientCategory, { name: string; icon: string }>
   extra: { name: 'Extras', icon: '??' },
 };
 
-export function IngredientPicker({ selectedIds, onSelect, onClose }: IngredientPickerProps) {
+export function IngredientPicker({
+  ingredients,
+  selectedIds,
+  onSelect,
+  onClose,
+}: IngredientPickerProps) {
   const [activeCategory, setActiveCategory] = useState<IngredientCategory>('bovine');
 
   const filteredIngredients = ingredients.filter((ingredient) => ingredient.category === activeCategory);

@@ -1,6 +1,8 @@
 import { create } from "zustand";
 import type { BottomTab } from "@/components/BottomNav";
-import type { BlendIngredient, Preset } from "@/data/presets";
+import { presets, type Preset, type BlendIngredient } from "@/data/presets";
+import { cuts, type Cut } from "@/data/cuts";
+import { ingredients, type Ingredient } from "@/data/ingredients";
 import type { BlendExtra, BlendHistoryEntry, SavedBlend } from "@/types/blend";
 
 export type AppStep = "home" | "customize" | "report";
@@ -15,6 +17,9 @@ const DEFAULT_PREP_TIPS = [
 const DEFAULT_SEASONINGS = ["Sal grosso", "Pimenta-do-reino"];
 
 interface BlendStore {
+  catalogCuts: Cut[];
+  catalogIngredients: Ingredient[];
+  catalogPresets: Preset[];
   activeTab: BottomTab;
   step: AppStep;
   ingredients: BlendIngredient[];
@@ -34,6 +39,7 @@ interface BlendStore {
   wakeLockEnabled: boolean;
   savedBlends: SavedBlend[];
   historyEntries: BlendHistoryEntry[];
+  setCatalog: (catalog: Partial<Pick<BlendStore, "catalogCuts" | "catalogIngredients" | "catalogPresets">>) => void;
   setActiveTab: (value: BottomTab) => void;
   setStep: (value: AppStep) => void;
   setIngredients: (value: BlendIngredient[]) => void;
@@ -66,6 +72,9 @@ interface BlendStore {
 }
 
 export const useBlendStore = create<BlendStore>((set) => ({
+  catalogCuts: cuts,
+  catalogIngredients: ingredients,
+  catalogPresets: presets,
   activeTab: "lab",
   step: "home",
   ingredients: [],
@@ -85,6 +94,7 @@ export const useBlendStore = create<BlendStore>((set) => ({
   wakeLockEnabled: false,
   savedBlends: [],
   historyEntries: [],
+  setCatalog: (catalog) => set(catalog),
   setActiveTab: (value) => set({ activeTab: value }),
   setStep: (value) => set({ step: value }),
   setIngredients: (value) => set({ ingredients: value }),

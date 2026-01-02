@@ -1,4 +1,5 @@
 import { BookOpen, FlaskConical, Flame, Wrench } from "lucide-react";
+import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 export type BottomTab = "lab" | "wiki" | "grill" | "tools";
@@ -28,15 +29,22 @@ export function BottomNav({ activeTab, onChange }: BottomNavProps) {
               type="button"
               onClick={() => onChange(tab.id)}
               className={cn(
-                "flex flex-col items-center gap-1 px-2 py-1 rounded-xl transition-colors",
+                "relative flex flex-col items-center gap-1 px-2 py-1 rounded-xl transition-colors",
                 isActive ? "text-primary" : "text-muted-foreground",
               )}
               aria-current={isActive ? "page" : undefined}
             >
+              {isActive && (
+                <motion.span
+                  layoutId="bottom-nav-indicator"
+                  className="absolute inset-x-1 top-1 h-10 rounded-2xl bg-primary/10"
+                  transition={{ type: "spring", stiffness: 260, damping: 24 }}
+                />
+              )}
               <span
                 className={cn(
-                  "w-9 h-9 rounded-xl flex items-center justify-center",
-                  isActive ? "bg-primary/10" : "bg-transparent",
+                  "relative w-9 h-9 rounded-xl flex items-center justify-center",
+                  isActive ? "text-primary" : "text-muted-foreground",
                 )}
               >
                 <Icon className="w-5 h-5" />

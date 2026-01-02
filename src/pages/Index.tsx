@@ -1,33 +1,27 @@
-import { useEffect, useMemo } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowLeft, Bookmark, Plus, Sparkles } from 'lucide-react';
-import { BlendCard } from '@/components/BlendCard';
-import { BlendReport } from '@/components/BlendReport';
-import { BurgerStack } from '@/components/BurgerStack';
-import { BottomNav } from '@/components/BottomNav';
-import { ExtraPicker } from '@/components/ExtraPicker';
-import { ExtrasSection } from '@/components/ExtrasSection';
-import { FatIndicator } from '@/components/FatIndicator';
-import { FatDonutChart } from '@/components/FatDonutChart';
-import { FatExplanationDialog } from '@/components/FatExplanationDialog';
-import { FlavorRadarChart } from '@/components/FlavorRadarChart';
-import { Header } from '@/components/Header';
-import { IngredientWikiCard } from '@/components/IngredientWikiCard';
-import { IngredientPicker } from '@/components/IngredientPicker';
-import { IngredientSlider } from '@/components/IngredientSlider';
-import { QuantityCalculator } from '@/components/QuantityCalculator';
-import { SavedBlendCard } from '@/components/SavedBlendCard';
-import { SmartAlerts } from '@/components/SmartAlerts';
-import { Stepper } from '@/components/Stepper';
-import { TargetLock } from '@/components/TargetLock';
-import { TargetProgress } from '@/components/TargetProgress';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Switch } from '@/components/ui/switch';
-import { Textarea } from '@/components/ui/textarea';
-import { ingredients } from '@/data/ingredients';
-import { presets } from '@/data/presets';
-import { calculateFatPercentage } from '@/lib/blendMath';
+import { Suspense, lazy, useEffect, useMemo } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { ArrowLeft, Bookmark, Plus, Sparkles } from "lucide-react";
+import { BlendCard } from "@/components/BlendCard";
+import { BottomNav } from "@/components/BottomNav";
+import { ExtraPicker } from "@/components/ExtraPicker";
+import { ExtrasSection } from "@/components/ExtrasSection";
+import { FatIndicator } from "@/components/FatIndicator";
+import { FatExplanationDialog } from "@/components/FatExplanationDialog";
+import { Header } from "@/components/Header";
+import { IngredientWikiCard } from "@/components/IngredientWikiCard";
+import { IngredientPicker } from "@/components/IngredientPicker";
+import { IngredientSlider } from "@/components/IngredientSlider";
+import { QuantityCalculator } from "@/components/QuantityCalculator";
+import { SavedBlendCard } from "@/components/SavedBlendCard";
+import { SmartAlerts } from "@/components/SmartAlerts";
+import { Stepper } from "@/components/Stepper";
+import { TargetLock } from "@/components/TargetLock";
+import { TargetProgress } from "@/components/TargetProgress";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
+import { calculateFatPercentage } from "@/lib/blendMath";
 import {
   addHistoryEntry,
   addSavedBlend,
@@ -36,39 +30,55 @@ import {
   loadHistory,
   loadSavedBlends,
   setPreference,
-} from '@/lib/blendStorage';
-import { toast } from '@/hooks/use-toast';
-import { useWakeLock } from '@/hooks/use-wake-lock';
-import { useBlendStore } from '@/store/useBlendStore';
-import type { SavedBlend } from '@/types/blend';
+} from "@/lib/blendStorage";
+import { loadCatalog, seedCatalogIfNeeded } from "@/lib/contentStorage";
+import { toast } from "@/hooks/use-toast";
+import { useWakeLock } from "@/hooks/use-wake-lock";
+import { useBlendStore } from "@/store/useBlendStore";
+import type { SavedBlend } from "@/types/blend";
 
-const formatDate = (value: string) => new Date(value).toLocaleDateString('pt-BR');
+const BlendReport = lazy(() =>
+  import("@/components/BlendReport").then((module) => ({ default: module.BlendReport })),
+);
+const BurgerStack = lazy(() =>
+  import("@/components/BurgerStack").then((module) => ({ default: module.BurgerStack })),
+);
+const FatDonutChart = lazy(() =>
+  import("@/components/FatDonutChart").then((module) => ({ default: module.FatDonutChart })),
+);
+const FlavorRadarChart = lazy(() =>
+  import("@/components/FlavorRadarChart").then((module) => ({ default: module.FlavorRadarChart })),
+);
+
+const formatDate = (value: string) => new Date(value).toLocaleDateString("pt-BR");
 
 const wikiSections = [
   {
-    id: 'bovine',
-    title: 'Bovinos',
-    description: 'Cortes ricos em sabor e textura para blends tradicionais.',
+    id: "bovine",
+    title: "Bovinos",
+    description: "Cortes ricos em sabor e textura para blends tradicionais.",
   },
   {
-    id: 'pork',
-    title: 'Suinos',
-    description: 'Suinos trazem docura e gordura equilibrada para misturas.',
+    id: "pork",
+    title: "Suinos",
+    description: "Suinos trazem docura e gordura equilibrada para misturas.",
   },
   {
-    id: 'vegan',
-    title: 'Veganos',
-    description: 'Bases vegetais com fibras, textura e umami natural.',
+    id: "vegan",
+    title: "Veganos",
+    description: "Bases vegetais com fibras, textura e umami natural.",
   },
   {
-    id: 'extra',
-    title: 'Extras',
-    description: 'Adicoes aromaticas para ajustar sabor e suculencia.',
+    id: "extra",
+    title: "Extras",
+    description: "Adicoes aromaticas para ajustar sabor e suculencia.",
   },
 ] as const;
 
 export default function Index() {
   const {
+    catalogIngredients,
+    catalogPresets,
     activeTab,
     step,
     ingredients: ingredientsState,
@@ -102,6 +112,7 @@ export default function Index() {
     setWakeLockEnabled,
     setSavedBlends,
     setHistoryEntries,
+    setCatalog,
     applyPreset,
     startCustomBlend,
     loadSavedBlend,
@@ -114,7 +125,7 @@ export default function Index() {
     applyTargetSuggestion,
   } = useBlendStore();
 
-  const wakeLockSupported = typeof navigator !== 'undefined' && 'wakeLock' in navigator;
+  const wakeLockSupported = typeof navigator !== "undefined" && "wakeLock" in navigator;
 
   useWakeLock(wakeLockEnabled);
 
@@ -124,24 +135,49 @@ export default function Index() {
       const [blends, history, prefTarget, prefStep, prefSource, prefWake] = await Promise.all([
         loadSavedBlends(),
         loadHistory(10),
-        getPreference('targetFat'),
-        getPreference('roundingStep'),
-        getPreference('fatSourceId'),
-        getPreference('wakeLockEnabled'),
+        getPreference("targetFat"),
+        getPreference("roundingStep"),
+        getPreference("fatSourceId"),
+        getPreference("wakeLockEnabled"),
       ]);
       if (!isActive) return;
       setSavedBlends(blends);
       setHistoryEntries(history);
-      if (typeof prefTarget === 'number') setTargetFat(prefTarget);
-      if (typeof prefStep === 'number') setRoundingStep(prefStep);
-      if (typeof prefSource === 'string') setFatSourceId(prefSource);
-      if (typeof prefWake === 'boolean') setWakeLockEnabled(prefWake);
+      if (typeof prefTarget === "number") setTargetFat(prefTarget);
+      if (typeof prefStep === "number") setRoundingStep(prefStep);
+      if (typeof prefSource === "string") setFatSourceId(prefSource);
+      if (typeof prefWake === "boolean") setWakeLockEnabled(prefWake);
     };
     loadData();
     return () => {
       isActive = false;
     };
-  }, [setFatSourceId, setHistoryEntries, setRoundingStep, setSavedBlends, setTargetFat, setWakeLockEnabled]);
+  }, [
+    setFatSourceId,
+    setHistoryEntries,
+    setRoundingStep,
+    setSavedBlends,
+    setTargetFat,
+    setWakeLockEnabled,
+  ]);
+
+  useEffect(() => {
+    let isActive = true;
+    const loadCatalogData = async () => {
+      await seedCatalogIfNeeded();
+      const catalog = await loadCatalog();
+      if (!isActive) return;
+      setCatalog({
+        catalogCuts: catalog.cuts,
+        catalogIngredients: catalog.ingredients,
+        catalogPresets: catalog.presets,
+      });
+    };
+    loadCatalogData();
+    return () => {
+      isActive = false;
+    };
+  }, [setCatalog]);
 
   const fatPercentage = useMemo(
     () => calculateFatPercentage(ingredientsState, extras, burgerCount, burgerWeight),
@@ -153,7 +189,19 @@ export default function Index() {
     [ingredientsState],
   );
 
-  const handlePresetSelect = (preset: (typeof presets)[number]) => {
+  const groupedIngredients = useMemo(() => {
+    return wikiSections.map((section) => ({
+      ...section,
+      items: catalogIngredients.filter((ingredient) => ingredient.category === section.id),
+    }));
+  }, [catalogIngredients]);
+
+  const extraIngredients = useMemo(
+    () => catalogIngredients.filter((ingredient) => ingredient.category === "extra"),
+    [catalogIngredients],
+  );
+
+  const handlePresetSelect = (preset: (typeof catalogPresets)[number]) => {
     applyPreset(preset);
   };
 
@@ -194,59 +242,35 @@ export default function Index() {
     setSavedBlends(blends);
     setHistoryEntries(history);
     toast({
-      title: 'Blend salvo!',
-      description: 'Seu blend foi adicionado aos favoritos.',
+      title: "Blend salvo!",
+      description: "Seu blend foi adicionado aos favoritos.",
     });
   };
 
   const handleDeleteBlend = async (blend: SavedBlend) => {
-    if (!window.confirm('Excluir blend salvo?')) return;
+    if (!window.confirm("Excluir blend salvo?")) return;
     await deleteSavedBlend(blend.id);
     const blends = await loadSavedBlends();
     setSavedBlends(blends);
     toast({
-      title: 'Blend removido',
-      description: 'O blend foi removido da sua lista.',
+      title: "Blend removido",
+      description: "O blend foi removido da sua lista.",
     });
-  };
-
-  const handleIngredientPercentageChange = (ingredientId: string, newPercentage: number) => {
-    updateIngredientPercentage(ingredientId, newPercentage);
-  };
-
-  const handleRemoveIngredient = (ingredientId: string) => {
-    removeIngredient(ingredientId);
-  };
-
-  const handleAddIngredient = (ingredientId: string) => {
-    addIngredient(ingredientId);
-  };
-
-  const handleAddExtra = (ingredientId: string) => {
-    addExtra(ingredientId);
-  };
-
-  const handleExtraChange = (ingredientId: string, grams: number) => {
-    updateExtra(ingredientId, grams);
-  };
-
-  const handleRemoveExtra = (ingredientId: string) => {
-    removeExtra(ingredientId);
   };
 
   const handleTargetChange = (value: number) => {
     setTargetFat(value);
-    setPreference('targetFat', value);
+    setPreference("targetFat", value);
   };
 
   const handleRoundingChange = (value: number) => {
     setRoundingStep(value);
-    setPreference('roundingStep', value);
+    setPreference("roundingStep", value);
   };
 
   const handleFatSourceChange = (value: string) => {
     setFatSourceId(value);
-    setPreference('fatSourceId', value);
+    setPreference("fatSourceId", value);
   };
 
   const handleApplyTargetSuggestion = (ingredientId: string, grams: number) => {
@@ -255,21 +279,26 @@ export default function Index() {
 
   const handleWakeLockToggle = (value: boolean) => {
     setWakeLockEnabled(value);
-    setPreference('wakeLockEnabled', value);
+    setPreference("wakeLockEnabled", value);
   };
 
-  const groupedIngredients = useMemo(() => {
-    return wikiSections.map((section) => ({
-      ...section,
-      items: ingredients.filter((ingredient) => ingredient.category === section.id),
-    }));
-  }, []);
+  const chartFallback = <div className="h-48 rounded-2xl bg-muted/40 animate-pulse" />;
+  const stackFallback = (
+    <div className="rounded-2xl border border-border bg-card p-4 text-sm text-muted-foreground">
+      Montando o stack visual...
+    </div>
+  );
+  const reportFallback = (
+    <div className="rounded-2xl border border-border bg-card p-6 text-sm text-muted-foreground">
+      Gerando receita completa...
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-md mx-auto px-4 pb-24">
         <AnimatePresence mode="wait">
-          {activeTab === 'lab' && (
+          {activeTab === "lab" && (
             <motion.section
               key="lab"
               initial={{ opacity: 0, y: 10 }}
@@ -280,7 +309,7 @@ export default function Index() {
               <Stepper current={step} onStepChange={setStep} />
 
               <AnimatePresence mode="wait">
-                {step === 'home' && (
+                {step === "home" && (
                   <motion.div
                     key="lab-home"
                     initial={{ opacity: 0, x: -20 }}
@@ -297,7 +326,7 @@ export default function Index() {
                           Blends Prontos
                         </h2>
                         <div className="space-y-3">
-                          {presets.map((preset, index) => (
+                          {catalogPresets.map((preset, index) => (
                             <BlendCard
                               key={preset.id}
                               preset={preset}
@@ -321,7 +350,7 @@ export default function Index() {
                   </motion.div>
                 )}
 
-                {step === 'customize' && (
+                {step === "customize" && (
                   <motion.div
                     key="lab-customize"
                     initial={{ opacity: 0, x: 20 }}
@@ -330,7 +359,7 @@ export default function Index() {
                     className="space-y-6 pt-6"
                   >
                     <div className="flex items-start gap-3">
-                      <Button variant="ghost" size="icon" onClick={() => setStep('home')}>
+                      <Button variant="ghost" size="icon" onClick={() => setStep("home")}>
                         <ArrowLeft className="w-5 h-5" />
                       </Button>
                       <div className="flex-1 space-y-3">
@@ -379,7 +408,9 @@ export default function Index() {
                         </h3>
                         <span className="text-xs text-muted-foreground">Gordura x Magro</span>
                       </div>
-                      <FatDonutChart fatPercentage={fatPercentage} />
+                      <Suspense fallback={chartFallback}>
+                        <FatDonutChart fatPercentage={fatPercentage} />
+                      </Suspense>
                       <TargetProgress current={fatPercentage} target={targetFat} />
                     </div>
 
@@ -407,7 +438,7 @@ export default function Index() {
                       <div className="flex items-center justify-between">
                         <h3 className="font-display text-lg font-semibold text-foreground">Ingredientes</h3>
                         <span
-                          className={`text-sm ${totalPercentage === 100 ? 'text-vegan-green' : 'text-fat-warning'}`}
+                          className={`text-sm ${totalPercentage === 100 ? "text-vegan-green" : "text-fat-warning"}`}
                         >
                           {totalPercentage}%
                         </span>
@@ -420,9 +451,9 @@ export default function Index() {
                             ingredientId={item.ingredientId}
                             percentage={item.percentage}
                             onPercentageChange={(value) =>
-                              handleIngredientPercentageChange(item.ingredientId, value)
+                              updateIngredientPercentage(item.ingredientId, value)
                             }
-                            onRemove={() => handleRemoveIngredient(item.ingredientId)}
+                            onRemove={() => removeIngredient(item.ingredientId)}
                             showRemove={ingredientsState.length > 1}
                           />
                         ))}
@@ -437,11 +468,13 @@ export default function Index() {
                     <ExtrasSection
                       extras={extras}
                       onAddClick={() => setShowExtrasPicker(true)}
-                      onChange={handleExtraChange}
-                      onRemove={handleRemoveExtra}
+                      onChange={updateExtra}
+                      onRemove={removeExtra}
                     />
 
-                    <BurgerStack extras={extras} />
+                    <Suspense fallback={stackFallback}>
+                      <BurgerStack extras={extras} />
+                    </Suspense>
 
                     <div className="p-5 rounded-2xl bg-card border border-border space-y-4">
                       <div className="flex items-center justify-between">
@@ -450,12 +483,14 @@ export default function Index() {
                         </h3>
                         <span className="text-xs text-muted-foreground">Salgado ao picante</span>
                       </div>
-                      <FlavorRadarChart
-                        ingredients={ingredientsState}
-                        extras={extras}
-                        burgerCount={burgerCount}
-                        burgerWeight={burgerWeight}
-                      />
+                      <Suspense fallback={chartFallback}>
+                        <FlavorRadarChart
+                          ingredients={ingredientsState}
+                          extras={extras}
+                          burgerCount={burgerCount}
+                          burgerWeight={burgerWeight}
+                        />
+                      </Suspense>
                     </div>
 
                     <QuantityCalculator
@@ -469,7 +504,7 @@ export default function Index() {
                       variant="warm"
                       size="xl"
                       className="w-full"
-                      onClick={() => setStep('report')}
+                      onClick={() => setStep("report")}
                     >
                       Gerar Receita Completa
                     </Button>
@@ -477,8 +512,9 @@ export default function Index() {
                     <AnimatePresence>
                       {showPicker && (
                         <IngredientPicker
+                          ingredients={catalogIngredients}
                           selectedIds={ingredientsState.map((item) => item.ingredientId)}
-                          onSelect={handleAddIngredient}
+                          onSelect={addIngredient}
                           onClose={() => setShowPicker(false)}
                         />
                       )}
@@ -487,8 +523,9 @@ export default function Index() {
                     <AnimatePresence>
                       {showExtrasPicker && (
                         <ExtraPicker
+                          ingredients={extraIngredients}
                           selectedIds={extras.map((extra) => extra.ingredientId)}
-                          onSelect={handleAddExtra}
+                          onSelect={addExtra}
                           onClose={() => setShowExtrasPicker(false)}
                         />
                       )}
@@ -496,7 +533,7 @@ export default function Index() {
                   </motion.div>
                 )}
 
-                {step === 'report' && (
+                {step === "report" && (
                   <motion.div
                     key="lab-report"
                     initial={{ opacity: 0, x: 20 }}
@@ -504,26 +541,28 @@ export default function Index() {
                     exit={{ opacity: 0, x: -20 }}
                     className="pt-6"
                   >
-                    <BlendReport
-                      name={blendName}
-                      description={blendDescription}
-                      ingredients={ingredientsState}
-                      extras={extras}
-                      burgerCount={burgerCount}
-                      burgerWeight={burgerWeight}
-                      prepStyle={prepStyle}
-                      prepTips={prepTips}
-                      seasonings={seasonings}
-                      onBack={() => setStep('customize')}
-                      onSave={handleSaveBlend}
-                    />
+                    <Suspense fallback={reportFallback}>
+                      <BlendReport
+                        name={blendName}
+                        description={blendDescription}
+                        ingredients={ingredientsState}
+                        extras={extras}
+                        burgerCount={burgerCount}
+                        burgerWeight={burgerWeight}
+                        prepStyle={prepStyle}
+                        prepTips={prepTips}
+                        seasonings={seasonings}
+                        onBack={() => setStep("customize")}
+                        onSave={handleSaveBlend}
+                      />
+                    </Suspense>
                   </motion.div>
                 )}
               </AnimatePresence>
             </motion.section>
           )}
 
-          {activeTab === 'wiki' && (
+          {activeTab === "wiki" && (
             <motion.section
               key="wiki"
               initial={{ opacity: 0, y: 10 }}
@@ -561,7 +600,7 @@ export default function Index() {
             </motion.section>
           )}
 
-          {activeTab === 'grill' && (
+          {activeTab === "grill" && (
             <motion.section
               key="grill"
               initial={{ opacity: 0, y: 10 }}
@@ -638,7 +677,7 @@ export default function Index() {
             </motion.section>
           )}
 
-          {activeTab === 'tools' && (
+          {activeTab === "tools" && (
             <motion.section
               key="tools"
               initial={{ opacity: 0, y: 10 }}

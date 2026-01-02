@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BlendLab Burger - Offline</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+      }
+      body {
+        margin: 0;
+        font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+        display: grid;
+        place-items: center;
+        min-height: 100vh;
+        background: #f7f2e9;
+        color: #3f2a1a;
+      }
+      .card {
+        max-width: 320px;
+        padding: 24px;
+        border-radius: 20px;
+        background: #fff6ea;
+        border: 1px solid #e2d6c8;
+        box-shadow: 0 10px 30px rgba(63, 42, 26, 0.15);
+        text-align: center;
+      }
+      h1 {
+        margin: 0 0 8px;
+        font-size: 22px;
+      }
+      p {
+        margin: 0 0 16px;
+        font-size: 14px;
+        color: #6b4a33;
+      }
+      button {
+        border: none;
+        padding: 12px 16px;
+        border-radius: 12px;
+        background: #c4622d;
+        color: white;
+        font-size: 14px;
+        cursor: pointer;
+      }
+      button:active {
+        transform: scale(0.98);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Modo Offline</h1>
+      <p>Sem conexao no momento. Seus blends salvos continuam disponiveis.</p>
+      <button onclick="location.reload()">Tentar novamente</button>
+    </div>
+  </body>
+</html>

@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 interface TargetProgressProps {
@@ -17,12 +18,15 @@ export function TargetProgress({ current, target }: TargetProgressProps) {
         <span>Alvo: {target}%</span>
       </div>
       <div className="h-3 rounded-full bg-secondary overflow-hidden">
-        <div
+        <motion.div
           className={cn(
             "h-full rounded-full transition-all",
             current <= target ? "bg-vegan-green" : "bg-cheese-gold",
           )}
           style={{ width: `${progress}%` }}
+          initial={{ width: 0 }}
+          animate={{ width: `${progress}%` }}
+          transition={{ type: "spring", stiffness: 120, damping: 18 }}
         />
       </div>
     </div>

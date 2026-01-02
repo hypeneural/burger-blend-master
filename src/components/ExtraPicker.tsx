@@ -1,18 +1,17 @@
 import { motion } from "framer-motion";
 import { Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ingredients } from "@/data/ingredients";
+import type { Ingredient } from "@/data/ingredients";
 import { cn } from "@/lib/utils";
 
 interface ExtraPickerProps {
+  ingredients: Ingredient[];
   selectedIds: string[];
   onSelect: (ingredientId: string) => void;
   onClose: () => void;
 }
 
-const extraIngredients = ingredients.filter((ingredient) => ingredient.category === "extra");
-
-export function ExtraPicker({ selectedIds, onSelect, onClose }: ExtraPickerProps) {
+export function ExtraPicker({ ingredients, selectedIds, onSelect, onClose }: ExtraPickerProps) {
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -40,7 +39,7 @@ export function ExtraPicker({ selectedIds, onSelect, onClose }: ExtraPickerProps
         </div>
 
         <div className="p-4 space-y-2 max-h-[60vh] overflow-y-auto">
-          {extraIngredients.map((ingredient) => {
+          {ingredients.map((ingredient) => {
             const isSelected = selectedIds.includes(ingredient.id);
             return (
               <motion.button
