@@ -23,7 +23,7 @@ export function SmartAlerts({ ingredients, fatPercentage, prepStyle }: SmartAler
   return (
     <div className="space-y-3">
       {alerts.map((alert) => (
-        <div key={alert.title} className="p-4 rounded-2xl bg-card border border-border space-y-2">
+        <div key={alert.id} className="p-4 rounded-2xl bg-card border border-border space-y-2">
           <div className="flex items-center gap-2">
             <AlertTriangle className="w-4 h-4 text-fat-danger" />
             <p className="font-medium text-foreground">{alert.title}</p>

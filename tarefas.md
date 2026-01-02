@@ -3,15 +3,15 @@
 Checklist focado em viralidade, UX/UI explicativa e estrutura robusta, considerando o estado atual do app.
 
 ## P0 - Fundacao tecnica e arquitetura (obrigatorio)
-- [ ] **P0 - Estado global com Zustand (ou Redux Toolkit):** centralizar Builder, presets, preferencias e historico em um store unico para reduzir acoplamento do `Index.tsx`, evitar props profundas, facilitar persistencia e testes.
-- [ ] **P0 - Camada de dominio/calculos isolada:** criar modulo de engenharia do blend (peso, gordura, target lock, alertas, moagem) com testes unitarios; hoje as regras estao espalhadas em componentes.
+- [x] **P0 - Estado global com Zustand (ou Redux Toolkit):** centralizar Builder, presets, preferencias e historico em um store unico para reduzir acoplamento do `Index.tsx`, evitar props profundas, facilitar persistencia e testes.
+- [x] **P0 - Camada de dominio/calculos isolada:** criar modulo de engenharia do blend (peso, gordura, target lock, alertas, moagem) com testes unitarios; hoje as regras estao espalhadas em componentes.
 - [ ] **P0 - Persistencia Dexie completa + migracoes:** validar schema, indices e migracoes; adicionar `history`, `preferences` e export/import; hoje Dexie existe, mas falta versionamento real e politicas de limpeza.
 - [ ] **P0 - PWA offline-first real:** cachear conteudo da Wiki e presets em IndexedDB; adicionar fallback offline e pagina offline; hoje o SW cacheia assets, mas nao garante conteudo dinamico.
 - [ ] **P0 - Code splitting e performance mobile:** separar graficos e PDF em `lazy()`; reduzir bundle para evitar travamentos em celulares antigos; build alerta chunk grande.
 
 ## P0 - Base de dados (materia-prima) e schema tecnico
-- [ ] **P0 - Modelos Cut/Ingredient completos:** criar `Cut` e `Ingredient` com campos técnicos (fat range, collagen, myoglobin, texture tags, flavor notes, warnings, grind, cooking best). Isso eh base para educacao e calculos.
-- [ ] **P0 - Seed inicial robusto (BR + EN):** incluir cortes obrigatorios (Acem, Peito/Brisket, Costela, Fraldinha, Coxao duro, Alcatra, Picanha, Pescoco) com equivalentes EN e tags regionais.
+- [x] **P0 - Modelos Cut/Ingredient completos:** criar `Cut` e `Ingredient` com campos técnicos (fat range, collagen, myoglobin, texture tags, flavor notes, warnings, grind, cooking best). Isso eh base para educacao e calculos.
+- [x] **P0 - Seed inicial robusto (BR + EN):** incluir cortes obrigatorios (Acem, Peito/Brisket, Costela, Fraldinha, Coxao duro, Alcatra, Picanha, Pescoco) com equivalentes EN e tags regionais.
 - [ ] **P0 - Normalizacao e consistencia dos dados:** padronizar nomes, IDs, traducoes e unidades; evitar string solta e manter `enum` para categorias e funcoes.
 
 ## P0 - Calculadora e explicacoes (core do produto)
@@ -52,7 +52,7 @@ Checklist focado em viralidade, UX/UI explicativa e estrutura robusta, considera
 - [ ] **P2 - Export/import e backup:** permitir exportar blends/historico e importar em outro dispositivo.
 
 ## P2 - Qualidade e confianca
-- [ ] **P2 - Testes unitarios dos calculos:** cobrir target lock, media ponderada e alertas.
+- [x] **P2 - Testes unitarios dos calculos:** cobrir target lock, media ponderada e alertas.
 - [ ] **P2 - Telemetria anonima (opcional):** entender onde o usuario cai no funil e ajustar UX.
 - [ ] **P2 - Acessibilidade:** contrastes, tamanhos de toque >= 72px no Cooking Mode, labels de acessibilidade.
 

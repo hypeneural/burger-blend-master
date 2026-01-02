@@ -1,10 +1,10 @@
-﻿import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowLeft, Bookmark, Plus, Sparkles } from 'lucide-react';
 import { BlendCard } from '@/components/BlendCard';
 import { BlendReport } from '@/components/BlendReport';
 import { BurgerStack } from '@/components/BurgerStack';
-import { BottomNav, type BottomTab } from '@/components/BottomNav';
+import { BottomNav } from '@/components/BottomNav';
 import { ExtraPicker } from '@/components/ExtraPicker';
 import { ExtrasSection } from '@/components/ExtrasSection';
 import { FatIndicator } from '@/components/FatIndicator';
@@ -26,7 +26,7 @@ import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { ingredients } from '@/data/ingredients';
-import { presets, type BlendIngredient, type Preset } from '@/data/presets';
+import { presets } from '@/data/presets';
 import { calculateFatPercentage } from '@/lib/blendMath';
 import {
   addHistoryEntry,
@@ -39,18 +39,9 @@ import {
 } from '@/lib/blendStorage';
 import { toast } from '@/hooks/use-toast';
 import { useWakeLock } from '@/hooks/use-wake-lock';
-import type { BlendExtra, BlendHistoryEntry, SavedBlend } from '@/types/blend';
+import { useBlendStore } from '@/store/useBlendStore';
+import type { SavedBlend } from '@/types/blend';
 
-type AppStep = 'home' | 'customize' | 'report';
-
-const DEFAULT_PREP_STYLE = 'Chapa ou Grelha';
-const DEFAULT_PREP_TIPS = [
-  'Misture os ingredientes e moa duas vezes',
-  'Molde sem apertar demais',
-  'Grelhe em fogo alto',
-  'Deixe descansar antes de servir',
-];
-const DEFAULT_SEASONINGS = ['Sal grosso', 'Pimenta-do-reino'];
 const formatDate = (value: string) => new Date(value).toLocaleDateString('pt-BR');
 
 const wikiSections = [
@@ -77,25 +68,52 @@ const wikiSections = [
 ] as const;
 
 export default function Index() {
-  const [activeTab, setActiveTab] = useState<BottomTab>('lab');
-  const [step, setStep] = useState<AppStep>('home');
-  const [ingredientsState, setIngredients] = useState<BlendIngredient[]>([]);
-  const [extras, setExtras] = useState<BlendExtra[]>([]);
-  const [burgerCount, setBurgerCount] = useState(4);
-  const [burgerWeight, setBurgerWeight] = useState(150);
-  const [blendName, setBlendName] = useState('Meu Blend');
-  const [blendDescription, setBlendDescription] = useState('Blend personalizado');
-  const [prepStyle, setPrepStyle] = useState(DEFAULT_PREP_STYLE);
-  const [prepTips, setPrepTips] = useState(DEFAULT_PREP_TIPS);
-  const [seasonings, setSeasonings] = useState(DEFAULT_SEASONINGS);
-  const [showPicker, setShowPicker] = useState(false);
-  const [showExtrasPicker, setShowExtrasPicker] = useState(false);
-  const [savedBlends, setSavedBlends] = useState<SavedBlend[]>([]);
-  const [historyEntries, setHistoryEntries] = useState<BlendHistoryEntry[]>([]);
-  const [targetFat, setTargetFat] = useState(22);
-  const [roundingStep, setRoundingStep] = useState(10);
-  const [fatSourceId, setFatSourceId] = useState('gordura-bovina');
-  const [wakeLockEnabled, setWakeLockEnabled] = useState(false);
+  const {
+    activeTab,
+    step,
+    ingredients: ingredientsState,
+    extras,
+    burgerCount,
+    burgerWeight,
+    blendName,
+    blendDescription,
+    prepStyle,
+    prepTips,
+    seasonings,
+    showPicker,
+    showExtrasPicker,
+    savedBlends,
+    historyEntries,
+    targetFat,
+    roundingStep,
+    fatSourceId,
+    wakeLockEnabled,
+    setActiveTab,
+    setStep,
+    setBlendName,
+    setBlendDescription,
+    setBurgerCount,
+    setBurgerWeight,
+    setShowPicker,
+    setShowExtrasPicker,
+    setTargetFat,
+    setRoundingStep,
+    setFatSourceId,
+    setWakeLockEnabled,
+    setSavedBlends,
+    setHistoryEntries,
+    applyPreset,
+    startCustomBlend,
+    loadSavedBlend,
+    updateIngredientPercentage,
+    removeIngredient,
+    addIngredient,
+    addExtra,
+    updateExtra,
+    removeExtra,
+    applyTargetSuggestion,
+  } = useBlendStore();
+
   const wakeLockSupported = typeof navigator !== 'undefined' && 'wakeLock' in navigator;
 
   useWakeLock(wakeLockEnabled);
@@ -123,7 +141,7 @@ export default function Index() {
     return () => {
       isActive = false;
     };
-  }, []);
+  }, [setFatSourceId, setHistoryEntries, setRoundingStep, setSavedBlends, setTargetFat, setWakeLockEnabled]);
 
   const fatPercentage = useMemo(
     () => calculateFatPercentage(ingredientsState, extras, burgerCount, burgerWeight),
@@ -135,45 +153,16 @@ export default function Index() {
     [ingredientsState],
   );
 
-  const handlePresetSelect = (preset: Preset) => {
-    setIngredients([...preset.ingredients]);
-    setExtras([]);
-    setBlendName(preset.name);
-    setBlendDescription(preset.description);
-    setPrepStyle(preset.prepStyle);
-    setPrepTips(preset.prepTips);
-    setSeasonings(preset.seasonings);
-    setStep('customize');
-    setActiveTab('lab');
+  const handlePresetSelect = (preset: (typeof presets)[number]) => {
+    applyPreset(preset);
   };
 
   const handleCustomBlend = () => {
-    setIngredients([
-      { ingredientId: 'acem', percentage: 70 },
-      { ingredientId: 'fraldinha', percentage: 30 },
-    ]);
-    setExtras([]);
-    setBlendName('Blend Personalizado');
-    setBlendDescription('Criacao exclusiva');
-    setPrepStyle(DEFAULT_PREP_STYLE);
-    setPrepTips(DEFAULT_PREP_TIPS);
-    setSeasonings(DEFAULT_SEASONINGS);
-    setStep('customize');
-    setActiveTab('lab');
+    startCustomBlend();
   };
 
   const handleLoadSavedBlend = (blend: SavedBlend) => {
-    setIngredients(blend.ingredients);
-    setExtras(blend.extras ?? []);
-    setBurgerCount(blend.burgerCount);
-    setBurgerWeight(blend.burgerWeight);
-    setBlendName(blend.name);
-    setBlendDescription(blend.description);
-    setPrepStyle(blend.prepStyle || DEFAULT_PREP_STYLE);
-    setPrepTips(blend.prepTips?.length ? blend.prepTips : DEFAULT_PREP_TIPS);
-    setSeasonings(blend.seasonings?.length ? blend.seasonings : DEFAULT_SEASONINGS);
-    setStep('customize');
-    setActiveTab('lab');
+    loadSavedBlend(blend);
   };
 
   const handleSaveBlend = async () => {
@@ -222,67 +211,27 @@ export default function Index() {
   };
 
   const handleIngredientPercentageChange = (ingredientId: string, newPercentage: number) => {
-    setIngredients((prev) => {
-      const updated = prev.map((item) =>
-        item.ingredientId === ingredientId ? { ...item, percentage: newPercentage } : item,
-      );
-
-      const total = updated.reduce((sum, item) => sum + item.percentage, 0);
-      if (total !== 100 && total > 0) {
-        const factor = 100 / total;
-        return updated.map((item) => ({
-          ...item,
-          percentage: Math.round(item.percentage * factor),
-        }));
-      }
-      return updated;
-    });
+    updateIngredientPercentage(ingredientId, newPercentage);
   };
 
   const handleRemoveIngredient = (ingredientId: string) => {
-    if (ingredientsState.length <= 1) return;
-
-    const remaining = ingredientsState.filter((item) => item.ingredientId !== ingredientId);
-    const total = remaining.reduce((sum, item) => sum + item.percentage, 0);
-
-    if (total > 0) {
-      const factor = 100 / total;
-      setIngredients(
-        remaining.map((item) => ({
-          ...item,
-          percentage: Math.round(item.percentage * factor),
-        })),
-      );
-    }
+    removeIngredient(ingredientId);
   };
 
   const handleAddIngredient = (ingredientId: string) => {
-    const newPercentage = 10;
-    const remainingPercentage = 100 - newPercentage;
-    const factor = remainingPercentage / 100;
-
-    setIngredients((prev) => [
-      ...prev.map((item) => ({ ...item, percentage: Math.round(item.percentage * factor) })),
-      { ingredientId, percentage: newPercentage },
-    ]);
+    addIngredient(ingredientId);
   };
 
   const handleAddExtra = (ingredientId: string) => {
-    setExtras((prev) => {
-      if (prev.some((extra) => extra.ingredientId === ingredientId)) return prev;
-      return [...prev, { ingredientId, grams: 50 }];
-    });
+    addExtra(ingredientId);
   };
 
   const handleExtraChange = (ingredientId: string, grams: number) => {
-    const clamped = Math.min(300, Math.max(0, grams));
-    setExtras((prev) =>
-      prev.map((extra) => (extra.ingredientId === ingredientId ? { ...extra, grams: clamped } : extra)),
-    );
+    updateExtra(ingredientId, grams);
   };
 
   const handleRemoveExtra = (ingredientId: string) => {
-    setExtras((prev) => prev.filter((extra) => extra.ingredientId !== ingredientId));
+    removeExtra(ingredientId);
   };
 
   const handleTargetChange = (value: number) => {
@@ -301,15 +250,7 @@ export default function Index() {
   };
 
   const handleApplyTargetSuggestion = (ingredientId: string, grams: number) => {
-    setExtras((prev) => {
-      const existing = prev.find((extra) => extra.ingredientId === ingredientId);
-      if (existing) {
-        return prev.map((extra) =>
-          extra.ingredientId === ingredientId ? { ...extra, grams } : extra,
-        );
-      }
-      return [...prev, { ingredientId, grams }];
-    });
+    applyTargetSuggestion(ingredientId, grams);
   };
 
   const handleWakeLockToggle = (value: boolean) => {

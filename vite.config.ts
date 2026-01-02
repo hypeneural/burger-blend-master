@@ -67,6 +67,11 @@ export default defineConfig(({ mode }) => ({
       },
     }),
   ].filter(Boolean),
+  test: {
+    environment: "node",
+    globals: true,
+    include: ["src/domain/**/*.test.ts"],
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
