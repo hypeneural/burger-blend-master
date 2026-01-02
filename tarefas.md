@@ -6,8 +6,8 @@ Checklist focado em viralidade, UX/UI explicativa e estrutura robusta, considera
 - [x] **P0 - Estado global com Zustand (ou Redux Toolkit):** centralizar Builder, presets, preferencias e historico em um store unico para reduzir acoplamento do `Index.tsx`, evitar props profundas, facilitar persistencia e testes.
 - [x] **P0 - Camada de dominio/calculos isolada:** criar modulo de engenharia do blend (peso, gordura, target lock, alertas, moagem) com testes unitarios; hoje as regras estao espalhadas em componentes.
 - [ ] **P0 - Persistencia Dexie completa + migracoes:** validar schema, indices e migracoes; adicionar `history`, `preferences` e export/import; hoje Dexie existe, mas falta versionamento real e politicas de limpeza.
-- [ ] **P0 - PWA offline-first real:** cachear conteudo da Wiki e presets em IndexedDB; adicionar fallback offline e pagina offline; hoje o SW cacheia assets, mas nao garante conteudo dinamico.
-- [ ] **P0 - Code splitting e performance mobile:** separar graficos e PDF em `lazy()`; reduzir bundle para evitar travamentos em celulares antigos; build alerta chunk grande.
+- [x] **P0 - PWA offline-first real:** cachear conteudo da Wiki e presets em IndexedDB; adicionar fallback offline e pagina offline; hoje o SW cacheia assets, mas nao garante conteudo dinamico.
+- [x] **P0 - Code splitting e performance mobile:** separar graficos e PDF em `lazy()`; reduzir bundle para evitar travamentos em celulares antigos; build alerta chunk grande.
 
 ## P0 - Base de dados (materia-prima) e schema tecnico
 - [x] **P0 - Modelos Cut/Ingredient completos:** criar `Cut` e `Ingredient` com campos técnicos (fat range, collagen, myoglobin, texture tags, flavor notes, warnings, grind, cooking best). Isso eh base para educacao e calculos.
@@ -24,8 +24,9 @@ Checklist focado em viralidade, UX/UI explicativa e estrutura robusta, considera
 - [ ] **P1 - Onboarding rapido em 3 telas:** explicar o que eh blend, por que alvo de gordura importa e como usar o app; reduz churn.
 - [ ] **P1 - Templates de compartilhamento (viral):** gerar cards de receita com visual forte (nome, % gordura, foto/icone, selo) para Instagram/WhatsApp; aumentar viralidade.
 - [ ] **P1 - Pontuacao/score do blend:** score simples (equilibrio, suculencia, textura) com explicacao para motivar ajustes e compartilhamento.
-- [ ] **P1 - Feedback imediato e micro interacoes:** reforcar mudancas em graficos e alertas com animacoes suaves e cores de estado; hoje existe, mas sem padrao global.
-- [ ] **P1 - Dark mode automatico:** importante para cozinha noturna e contraste alto; necessario para UX em ambiente hostil.
+- [x] **P1 - Feedback imediato e micro interacoes:** reforcar mudancas em graficos e alertas com animacoes suaves e cores de estado; hoje existe, mas sem padrao global.
+- [x] **P1 - Temperos inteligentes no relatorio:** sugestoes dinamicas por corte + personalizacao com explicacoes e avisos.
+- [x] **P1 - Dark mode automatico:** importante para cozinha noturna e contraste alto; necessario para UX em ambiente hostil.
 
 ## P1 - Navegacao rasa e ferramentas
 - [ ] **P1 - Ferramentas reais:** timers, finger test interativo, conversores, checklist de moagem e sal; hoje a aba Ferramentas eh placeholder.

@@ -18,6 +18,7 @@ import {
   type RecommendedRole,
   type RegionTag,
 } from "@/data/constants";
+import type { SeasoningProfile } from "@/data/seasonings";
 
 export interface Cut {
   id: string;
@@ -36,6 +37,7 @@ export interface Cut {
   tips: string;
   tags: string[];
   warnings: string[];
+  seasoningProfile?: SeasoningProfile;
   recommendedRoles: RecommendedRole[];
   grindRecommendation?: {
     size: GrindSize;
@@ -104,6 +106,11 @@ export const cuts: Cut[] = [
     tips: "Use de 50% a 100% no blend como base. Ideal para iniciantes.",
     tags: ["estrutura", "equilibrado", "versatil"],
     warnings: [],
+    seasoningProfile: {
+      base: ["sal-fino", "pimenta-do-reino"],
+      secondary: ["cebola-em-po", "alho-em-po"],
+      chef: ["mostarda-em-po", "paprica-doce"],
+    },
     recommendedRoles: [base],
     grindRecommendation: { size: MEDIUM_GRIND, passes: SINGLE },
     cookingBest: ["chapa", "grelha"],
@@ -125,6 +132,11 @@ export const cuts: Cut[] = [
     tips: "Pode compor 30% a 70% do blend como base. Ideal para reduzir custo mantendo boa estrutura.",
     tags: ["estrutura", "economico", "textura firme"],
     warnings: [],
+    seasoningProfile: {
+      base: ["sal-fino", "pimenta-do-reino"],
+      secondary: ["cebola-em-po", "alho-em-po"],
+      chef: ["paprica-doce"],
+    },
     recommendedRoles: [base],
     grindRecommendation: { size: MEDIUM_GRIND, passes: SINGLE },
     cookingBest: ["chapa", "grelha"],
@@ -146,6 +158,11 @@ export const cuts: Cut[] = [
       "Use ~20% a 50% no blend para reduzir gordura sem perder consistencia. Evite usar 100% patinho para o hamburguer nao ficar seco.",
     tags: ["estrutura", "magro", "suave"],
     warnings: ["Nao use 100% patinho sem gordura extra."],
+    seasoningProfile: {
+      base: ["sal-fino", "pimenta-do-reino"],
+      secondary: ["alho-em-po"],
+      chef: ["mostarda-em-po"],
+    },
     recommendedRoles: [base],
     grindRecommendation: { size: MEDIUM_GRIND, passes: SINGLE },
     cookingBest: ["chapa", "grelha"],
@@ -168,6 +185,11 @@ export const cuts: Cut[] = [
     tips: "Substitui o patinho como parte magra. Utilize ~20% a 40% no blend.",
     tags: ["estrutura", "magro", "macio"],
     warnings: ["Use gordura extra para evitar ressecamento."],
+    seasoningProfile: {
+      base: ["sal-fino", "pimenta-do-reino"],
+      secondary: ["alho-em-po"],
+      chef: ["mostarda-em-po"],
+    },
     recommendedRoles: [base],
     grindRecommendation: { size: MEDIUM_GRIND, passes: SINGLE },
     cookingBest: ["chapa", "grelha"],
@@ -190,6 +212,11 @@ export const cuts: Cut[] = [
     tips: "Use ate ~30% no blend combinado a cortes gordurosos. Adicione gordura extra.",
     tags: ["estrutura", "economico", "marcado"],
     warnings: ["Acima de 30% precisa de gordura extra."],
+    seasoningProfile: {
+      base: ["sal-fino", "pimenta-do-reino"],
+      secondary: ["alho-em-po"],
+      chef: ["paprica-doce"],
+    },
     recommendedRoles: [base],
     grindRecommendation: { size: MEDIUM_GRIND, passes: DOUBLE, note: "Moagem dupla ajuda na maciez." },
     cookingBest: ["chapa", "smash"],
@@ -211,6 +238,11 @@ export const cuts: Cut[] = [
     tips: "Use 50% a 80% no blend como base macia. Combine com cortes mais gordurosos.",
     tags: ["estrutura", "macio", "suave"],
     warnings: [],
+    seasoningProfile: {
+      base: ["sal-marinho", "pimenta-do-reino"],
+      secondary: ["alho-em-po"],
+      accent: ["chimichurri-seco"],
+    },
     recommendedRoles: [base, booster],
     grindRecommendation: { size: MEDIUM_GRIND, passes: SINGLE },
     cookingBest: ["chapa", "grelha"],
@@ -232,6 +264,12 @@ export const cuts: Cut[] = [
     tips: "Use 20% a 50% do blend para adicionar sabor marcante. Combine com cortes mais magros.",
     tags: ["sabor", "macio", "marcado"],
     warnings: ["Pode oxidar rapido, moa e use em seguida."],
+    seasoningProfile: {
+      base: ["sal-marinho", "pimenta-do-reino"],
+      secondary: ["alho-em-po"],
+      chef: ["cafe-em-po", "cogumelo-em-po"],
+      accent: ["tomilho", "molho-ingles"],
+    },
     recommendedRoles: [booster],
     grindRecommendation: { size: COARSE, passes: SINGLE },
     cookingBest: ["chapa", "grelha"],
@@ -253,6 +291,12 @@ export const cuts: Cut[] = [
     tips: "Use 20% a 40% no blend para dar maciez sem sabor excessivo.",
     tags: ["sabor", "macio", "suave"],
     warnings: [],
+    seasoningProfile: {
+      base: ["sal-marinho", "pimenta-do-reino"],
+      secondary: ["alho-em-po"],
+      chef: ["paprica-doce"],
+      accent: ["chimichurri-seco"],
+    },
     recommendedRoles: [booster],
     grindRecommendation: { size: MEDIUM_GRIND, passes: SINGLE },
     cookingBest: ["chapa", "grelha"],
@@ -274,6 +318,11 @@ export const cuts: Cut[] = [
     tips: "Por ser caro, use ~20% a 30% no blend para dar sabor de carne nobre.",
     tags: ["sabor", "marcado", "gourmet"],
     warnings: [],
+    seasoningProfile: {
+      base: ["sal-marinho", "pimenta-do-reino"],
+      secondary: ["alho-em-po"],
+      accent: ["chimichurri-seco"],
+    },
     recommendedRoles: [booster, luxury],
     grindRecommendation: { size: MEDIUM_GRIND, passes: SINGLE },
     cookingBest: ["grelha", "chapa"],
@@ -295,6 +344,12 @@ export const cuts: Cut[] = [
     tips: "Use moderadamente (~20% a 30%). Combine com cortes magros na base.",
     tags: ["sabor", "marcado", "gourmet"],
     warnings: ["Use com moderacao por custo alto."],
+    seasoningProfile: {
+      base: ["sal-parrilla"],
+      accent: ["chimichurri-seco"],
+      avoid: ["paprica-defumada", "cominho", "acucar-mascavo", "pimenta-chili", "pimenta-caiena"],
+      notes: "Tempero minimo para nao mascarar a capa de gordura.",
+    },
     recommendedRoles: [booster, luxury],
     grindRecommendation: { size: MEDIUM_GRIND, passes: SINGLE },
     cookingBest: ["churrasqueira", "grelha"],
@@ -316,6 +371,11 @@ export const cuts: Cut[] = [
     tips: "Combine com cortes gordurosos. Use ate ~30% no blend.",
     tags: ["gourmet", "macio", "suave"],
     warnings: ["Magro: precisa de gordura extra."],
+    seasoningProfile: {
+      base: ["sal-fino", "pimenta-do-reino"],
+      secondary: ["alho-em-po"],
+      accent: ["chimichurri-seco"],
+    },
     recommendedRoles: [booster, luxury],
     grindRecommendation: { size: MEDIUM_GRIND, passes: SINGLE },
     cookingBest: ["chapa"],
@@ -337,6 +397,11 @@ export const cuts: Cut[] = [
     tips: "Use 20% a 50% no blend. Moa bem a costela para obter textura uniforme.",
     tags: ["sabor", "marcado", "suculento"],
     warnings: ["Exige limpeza de cartilagens e ossos."],
+    seasoningProfile: {
+      base: ["sal-parrilla"],
+      secondary: ["paprica-defumada", "pimenta-do-reino"],
+      chef: ["acucar-mascavo", "cominho", "pimenta-caiena"],
+    },
     recommendedRoles: [booster],
     grindRecommendation: { size: COARSE, passes: SINGLE },
     cookingBest: ["chapa", "smash"],
@@ -358,6 +423,11 @@ export const cuts: Cut[] = [
     tips: "Use 20% a 30% no blend para adicionar gordura. Combine com cortes magros.",
     tags: ["gordura", "suculento", "economico"],
     warnings: ["Gordura alta, use com moderacao."],
+    seasoningProfile: {
+      base: ["sal-parrilla"],
+      secondary: ["pimenta-do-reino", "alho-granulado"],
+      chef: ["pimenta-chili"],
+    },
     recommendedRoles: [fatSource],
     grindRecommendation: { size: MEDIUM_GRIND, passes: DOUBLE },
     cookingBest: ["chapa", "grelha"],
@@ -379,6 +449,11 @@ export const cuts: Cut[] = [
     tips: "Use em pequenas proporcoes (~10% a 20%) devido a gordura elevada.",
     tags: ["gordura", "marcado", "suculento"],
     warnings: ["Uso alto deixa o blend pesado."],
+    seasoningProfile: {
+      base: ["sal-marinho"],
+      secondary: ["lemon-pepper"],
+      accent: ["salvia", "tomilho", "raspas-citricas"],
+    },
     recommendedRoles: [fatSource, booster],
     grindRecommendation: { size: MEDIUM_GRIND, passes: SINGLE },
     cookingBest: ["chapa", "grelha"],
@@ -400,6 +475,10 @@ export const cuts: Cut[] = [
     tips: "Adicione 5% a 15% no blend para atingir cerca de 20% de gordura total.",
     tags: ["gordura", "suculento", "economico"],
     warnings: ["Misture bem para evitar blocos de gordura."],
+    seasoningProfile: {
+      base: ["sal-fino"],
+      secondary: ["pimenta-do-reino"],
+    },
     recommendedRoles: [fatSource],
     grindRecommendation: { size: FINE, passes: SINGLE, note: "Moer semi-congelado." },
     cookingBest: ["chapa", "grelha"],
@@ -421,6 +500,11 @@ export const cuts: Cut[] = [
     tips: "Use baixa proporcao (~10%) para intensificar sabor. Moa duas vezes para liberar colageno.",
     tags: ["sabor", "economico", "marcado"],
     warnings: ["Excesso deixa textura borrachuda."],
+    seasoningProfile: {
+      base: ["sal-fino", "pimenta-do-reino"],
+      secondary: ["alho-em-po"],
+      chef: ["paprica-doce"],
+    },
     recommendedRoles: [booster],
     grindRecommendation: { size: FINE, passes: DOUBLE },
     cookingBest: ["chapa", "grelha"],

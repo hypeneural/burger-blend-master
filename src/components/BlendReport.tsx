@@ -1,13 +1,31 @@
-﻿import { useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { motion } from 'framer-motion';
-import { ArrowLeft, ChefHat, Flame, Leaf, Save, Share2 } from 'lucide-react';
+import {
+  AlertTriangle,
+  ArrowLeft,
+  Check,
+  ChefHat,
+  Flame,
+  Leaf,
+  Plus,
+  Save,
+  Share2,
+  X,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { FatIndicator } from '@/components/FatIndicator';
 import { IngredientBreakdown } from '@/components/IngredientBreakdown';
 import { NutritionSummary } from '@/components/NutritionSummary';
 import { getIngredientById } from '@/data/ingredients';
+import {
+  buildSeasoningSuggestions,
+  getSeasoningLabel,
+  getSeasoningUsageLabel,
+  normalizeSeasoningList,
+} from '@/domain/seasoningEngine';
 import {
   calculateBaseWeight,
   calculateExtrasWeight,
@@ -31,6 +49,7 @@ interface BlendReportProps {
   seasonings: string[];
   onBack: () => void;
   onSave: () => void;
+  onSeasoningsChange: (value: string[]) => void;
 }
 
 export function BlendReport({
@@ -45,15 +64,73 @@ export function BlendReport({
   seasonings,
   onBack,
   onSave,
+  onSeasoningsChange,
 }: BlendReportProps) {
   const reportRef = useRef<HTMLDivElement | null>(null);
   const [exporting, setExporting] = useState(false);
+  const [customInput, setCustomInput] = useState('');
+  const [isCustomized, setIsCustomized] = useState(false);
 
   const baseWeight = calculateBaseWeight(burgerCount, burgerWeight);
   const extrasWeight = calculateExtrasWeight(extras);
   const totalWeight = baseWeight + extrasWeight;
   const fatPercentage = calculateFatPercentage(ingredients, extras, burgerCount, burgerWeight);
   const nutrition = calculateNutritionPerBurger(ingredients, extras, burgerCount, burgerWeight);
+
+  const seasoningSuggestions = useMemo(
+    () =>
+      buildSeasoningSuggestions({
+        ingredients,
+        extras,
+        fatPercentage,
+      }),
+    [ingredients, extras, fatPercentage],
+  );
+
+  const [selectedSeasonings, setSelectedSeasonings] = useState<string[]>(() => {
+    const normalized = normalizeSeasoningList(seasonings);
+    if (normalized.length > 0) return normalized;
+    return seasoningSuggestions.suggested.map((item) => item.id);
+  });
+
+  useEffect(() => {
+    if (isCustomized) return;
+    const normalized = normalizeSeasoningList(seasonings);
+    const fallback = seasoningSuggestions.suggested.map((item) => item.id);
+    const next = normalized.length > 0 ? normalized : fallback;
+    setSelectedSeasonings(next);
+    const currentKey = normalized.join('|');
+    const nextKey = next.join('|');
+    if (nextKey !== currentKey && next.length > 0) {
+      onSeasoningsChange(next);
+    }
+  }, [seasonings, seasoningSuggestions, isCustomized, onSeasoningsChange]);
+
+  const updateSelection = (next: string[]) => {
+    setSelectedSeasonings(next);
+    setIsCustomized(true);
+    onSeasoningsChange(next);
+  };
+
+  const handleToggleSeasoning = (id: string) => {
+    if (selectedSeasonings.includes(id)) {
+      updateSelection(selectedSeasonings.filter((item) => item !== id));
+      return;
+    }
+    updateSelection([...selectedSeasonings, id]);
+  };
+
+  const handleRemoveCustom = (value: string) => {
+    updateSelection(selectedSeasonings.filter((item) => item !== value));
+  };
+
+  const handleAddCustom = () => {
+    const trimmed = customInput.trim();
+    if (!trimmed) return;
+    const merged = normalizeSeasoningList([...selectedSeasonings, trimmed]);
+    updateSelection(merged);
+    setCustomInput('');
+  };
 
   const handleSave = () => {
     onSave();
@@ -75,8 +152,13 @@ export function BlendReport({
       .join('\n');
 
     const extrasBlock = extras.length > 0 ? `\n\nExtras:\n${extrasLines}` : '';
+    const seasoningsLines = selectedSeasonings
+      .map((item) => `- ${getSeasoningLabel(item)}`)
+      .join('\n');
+    const seasoningsBlock =
+      selectedSeasonings.length > 0 ? `\n\nTemperos:\n${seasoningsLines}` : '';
 
-    const shareText = `${name}\n${description}\n\nIngredientes:\n${ingredientLines}${extrasBlock}\n\nGordura: ${fatPercentage}%\nTotal: ${formatWeight(totalWeight)}`;
+    const shareText = `${name}\n${description}\n\nIngredientes:\n${ingredientLines}${extrasBlock}${seasoningsBlock}\n\nGordura: ${fatPercentage}%\nTotal: ${formatWeight(totalWeight)}`;
 
     if (navigator.share) {
       navigator.share({
@@ -206,23 +288,121 @@ export function BlendReport({
               <Leaf className="w-5 h-5 text-meat-red" />
             </div>
             <div>
-              <h3 className="font-display text-lg font-semibold text-foreground">Temperos Sugeridos</h3>
-              <p className="text-sm text-muted-foreground">Para realcar o sabor</p>
+              <h3 className="font-display text-lg font-semibold text-foreground">
+                Temperos e finalizacao
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Sugestoes dinamicas com base nas carnes
+              </p>
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-2">
-            {seasonings.map((seasoning, index) => (
-              <motion.span
-                key={seasoning}
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.4 + index * 0.1 }}
-                className="px-3 py-1.5 rounded-full bg-background text-sm text-foreground border border-border"
-              >
-                {seasoning}
-              </motion.span>
-            ))}
+          <div className="rounded-xl border border-border bg-background p-3 text-xs text-muted-foreground">
+            Regra do sal: salgue a superficie no momento do preparo. Evite misturar sal na
+            carne para nao alterar a textura.
+          </div>
+
+          <div className="space-y-3">
+            <p className="text-sm font-semibold text-foreground">Sugeridos para este blend</p>
+            <div className="space-y-2">
+              {seasoningSuggestions.suggested.map((item, index) => {
+                const selected = selectedSeasonings.includes(item.id);
+                return (
+                  <motion.button
+                    key={item.id}
+                    type="button"
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 + index * 0.06 }}
+                    onClick={() => handleToggleSeasoning(item.id)}
+                    className={`w-full text-left rounded-xl border px-3 py-3 transition ${
+                      selected ? 'border-vegan-green bg-vegan-green/10' : 'border-border bg-background'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-foreground">{item.name}</span>
+                      <span className="text-xs text-muted-foreground flex items-center gap-1">
+                        {selected ? (
+                          <>
+                            <Check className="w-3 h-3" />
+                            Selecionado
+                          </>
+                        ) : (
+                          <>
+                            <Plus className="w-3 h-3" />
+                            Toque para adicionar
+                          </>
+                        )}
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {item.reason} Uso: {getSeasoningUsageLabel(item.usage)}.
+                    </p>
+                  </motion.button>
+                );
+              })}
+            </div>
+          </div>
+
+          {seasoningSuggestions.avoid.length > 0 && (
+            <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-amber-900">
+              <div className="flex items-center gap-2 text-sm font-semibold">
+                <AlertTriangle className="w-4 h-4" />
+                Evite ou use com moderacao
+              </div>
+              <div className="mt-2 space-y-2 text-xs">
+                {seasoningSuggestions.avoid.map((item) => (
+                  <div key={item.id} className="flex items-start justify-between gap-2">
+                    <span className="font-medium">{item.name}</span>
+                    <span className="text-amber-800">{item.reason}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {seasoningSuggestions.notes.length > 0 && (
+            <div className="rounded-xl border border-border bg-background p-3 text-xs text-muted-foreground">
+              {seasoningSuggestions.notes.join(' ')}
+            </div>
+          )}
+
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-semibold text-foreground">Personalizar</p>
+              <span className="text-xs text-muted-foreground">
+                {selectedSeasonings.length} selecionados
+              </span>
+            </div>
+            <div className="flex gap-2">
+              <Input
+                value={customInput}
+                onChange={(event) => setCustomInput(event.target.value)}
+                placeholder="Ex: alecrim, pimenta rosa"
+              />
+              <Button variant="secondary" onClick={handleAddCustom}>
+                Adicionar
+              </Button>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {selectedSeasonings.map((item, index) => (
+                <motion.span
+                  key={`${item}-${index}`}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="inline-flex items-center gap-1 rounded-full border border-border bg-background px-3 py-1 text-xs text-foreground"
+                >
+                  {getSeasoningLabel(item)}
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveCustom(item)}
+                    className="text-muted-foreground hover:text-foreground"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </motion.span>
+              ))}
+            </div>
           </div>
         </div>
       </div>

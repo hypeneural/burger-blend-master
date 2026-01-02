@@ -14,7 +14,7 @@ const DEFAULT_PREP_TIPS = [
   "Grelhe em fogo alto",
   "Deixe descansar antes de servir",
 ];
-const DEFAULT_SEASONINGS = ["Sal grosso", "Pimenta-do-reino"];
+const DEFAULT_SEASONINGS = ["sal-fino", "pimenta-do-reino"];
 
 interface BlendStore {
   catalogCuts: Cut[];

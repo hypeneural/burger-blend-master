@@ -104,6 +104,7 @@ export default function Index() {
     setBlendDescription,
     setBurgerCount,
     setBurgerWeight,
+    setSeasonings,
     setShowPicker,
     setShowExtrasPicker,
     setTargetFat,
@@ -554,6 +555,7 @@ export default function Index() {
                         seasonings={seasonings}
                         onBack={() => setStep("customize")}
                         onSave={handleSaveBlend}
+                        onSeasoningsChange={setSeasonings}
                       />
                     </Suspense>
                   </motion.div>
