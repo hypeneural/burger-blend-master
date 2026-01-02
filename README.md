@@ -1,73 +1,80 @@
-# Welcome to your Lovable project
+# BlendLab Burger
 
-## Project info
+Criado por Anderson Marques Vieira da Hype Neural para amadores de hamburguer apaixonados e profissionais.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+BlendLab Burger e um app mobile-first para criar blends de carne com precisao tecnica e linguagem simples, mantendo o foco em suculencia, textura e resultado final. O app funciona offline, entrega explicacoes claras e guia o usuario do blend ate a receita completa.
 
-## How can I edit this code?
+## Objetivo
+- Ajudar qualquer pessoa a montar blends profissionais com alvo de gordura correto.
+- Ensinar o "por que" de cada escolha (cortes, gordura, moagem e preparo).
+- Entregar uma receita completa com lista de compras e pedido ao acougueiro.
 
-There are several ways of editing your application.
+## Publico-alvo
+- Amadores que querem acertar o hamburger na primeira tentativa.
+- Chefs, churrasqueiros e profissionais que precisam de repeticao e qualidade.
 
-**Use Lovable**
+## Principais funcionalidades
+- Builder de blend com stepper, alvo de gordura e alertas tecnicos.
+- Selecionar cortes, ajustar percentuais e ver gordura em tempo real.
+- Extras separados do % principal (bacon, queijo, tutano, etc).
+- Temperos sugeridos por corte com personalizacao manual.
+- Relatorio final com lista de compras e pedido ao acougueiro.
+- Graficos (donut de gordura e radar de sabor).
+- Salvar blends e historico local (IndexedDB).
+- PWA offline-first com cache de conteudo.
+- Modo de conexao lenta com reducao de animacoes.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+## Stack tecnica
+- React + TypeScript + Vite
+- UI: Tailwind CSS + shadcn/ui + Radix
+- Estado global: Zustand
+- Persistencia: IndexedDB (Dexie)
+- Graficos: Recharts (donut + radar)
+- Animacoes: Framer Motion
+- PWA: vite-plugin-pwa (service worker)
+- Exportacao: html2canvas + jsPDF + Web Share API
+- Icones: Lucide
 
-Changes made via Lovable will be committed automatically to this repo.
+## Estrutura do projeto
+- `src/pages`: telas principais e fluxo do app.
+- `src/components`: componentes de UI e blocos do Builder.
+- `src/data`: cuts, ingredientes, temperos e presets (seed local).
+- `src/domain`: regras e logica do blend (engine de calculos e temperos).
+- `src/lib`: helpers, matematica, storage e utilitarios.
+- `src/store`: Zustand store para o estado do app.
+- `src/hooks`: hooks utilitarios (wake lock, network status, etc).
 
-**Use your preferred IDE**
+## Dados e calculos
+- Gordura calculada por media ponderada dos ingredientes.
+- Alvo de gordura com Target Lock e sugestao automatica de ajuste.
+- Estimativa nutricional por hamburger (calorias, proteina, gordura).
+- Alertas inteligentes (magro, excesso, risco de flare-up, etc).
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## Offline e baixa conexao
+- Conteudo de cuts, ingredientes e presets salva em IndexedDB.
+- PWA instalavel com cache de assets e dados.
+- Banner de offline e de conexao lenta.
+- Reducao de animacoes em modo economia de dados.
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## UX/UI mobile-first
+- Interface pensada para celular, com CTA fixo e stepper.
+- Cards com resumo + "Ler mais" para informacao detalhada.
+- Explicacoes curtas com linguagem simples e objetiva.
 
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+## Scripts
+```bash
 npm run dev
+npm run build
+npm run preview
+npm run lint
+npm run test
 ```
 
-**Edit a file directly in GitHub**
+## Reset de dados locais
+Se precisar limpar os dados locais, apague o IndexedDB `blendMasterDB` no navegador.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Roadmap
+Consulte `tarefas.md` para o backlog e prioridades.
 
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+## Creditos
+BlendLab Burger e uma criacao de Anderson Marques Vieira (Hype Neural).
