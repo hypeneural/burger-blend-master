@@ -1,0 +1,7 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Blend Master">
+  <rect width="512" height="512" rx="120" fill="#C4622D"/>
+  <rect x="96" y="152" width="320" height="64" rx="32" fill="#F3D08A"/>
+  <rect x="96" y="240" width="320" height="48" rx="24" fill="#8A3B20"/>
+  <rect x="96" y="304" width="320" height="56" rx="28" fill="#F3D08A"/>
+  <text x="256" y="250" font-size="64" text-anchor="middle" fill="#F7F2E9" font-family="Arial, sans-serif">BM</text>
+</svg>

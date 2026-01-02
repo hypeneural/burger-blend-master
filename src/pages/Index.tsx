@@ -3,24 +3,41 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowLeft, Bookmark, Plus, Sparkles } from 'lucide-react';
 import { BlendCard } from '@/components/BlendCard';
 import { BlendReport } from '@/components/BlendReport';
+import { BurgerStack } from '@/components/BurgerStack';
 import { BottomNav, type BottomTab } from '@/components/BottomNav';
 import { ExtraPicker } from '@/components/ExtraPicker';
 import { ExtrasSection } from '@/components/ExtrasSection';
 import { FatIndicator } from '@/components/FatIndicator';
+import { FatDonutChart } from '@/components/FatDonutChart';
+import { FatExplanationDialog } from '@/components/FatExplanationDialog';
+import { FlavorRadarChart } from '@/components/FlavorRadarChart';
 import { Header } from '@/components/Header';
 import { IngredientPicker } from '@/components/IngredientPicker';
 import { IngredientSlider } from '@/components/IngredientSlider';
 import { QuantityCalculator } from '@/components/QuantityCalculator';
 import { SavedBlendCard } from '@/components/SavedBlendCard';
+import { SmartAlerts } from '@/components/SmartAlerts';
 import { Stepper } from '@/components/Stepper';
+import { TargetLock } from '@/components/TargetLock';
+import { TargetProgress } from '@/components/TargetProgress';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { ingredients } from '@/data/ingredients';
 import { presets, type BlendIngredient, type Preset } from '@/data/presets';
 import { calculateFatPercentage } from '@/lib/blendMath';
-import { addHistoryEntry, addSavedBlend, deleteSavedBlend, loadHistory, loadSavedBlends } from '@/lib/blendStorage';
+import {
+  addHistoryEntry,
+  addSavedBlend,
+  deleteSavedBlend,
+  getPreference,
+  loadHistory,
+  loadSavedBlends,
+  setPreference,
+} from '@/lib/blendStorage';
 import { toast } from '@/hooks/use-toast';
+import { useWakeLock } from '@/hooks/use-wake-lock';
 import type { BlendExtra, BlendHistoryEntry, SavedBlend } from '@/types/blend';
 
 type AppStep = 'home' | 'customize' | 'report';
@@ -74,14 +91,32 @@ export default function Index() {
   const [showExtrasPicker, setShowExtrasPicker] = useState(false);
   const [savedBlends, setSavedBlends] = useState<SavedBlend[]>([]);
   const [historyEntries, setHistoryEntries] = useState<BlendHistoryEntry[]>([]);
+  const [targetFat, setTargetFat] = useState(22);
+  const [roundingStep, setRoundingStep] = useState(10);
+  const [fatSourceId, setFatSourceId] = useState('gordura-bovina');
+  const [wakeLockEnabled, setWakeLockEnabled] = useState(false);
+  const wakeLockSupported = typeof navigator !== 'undefined' && 'wakeLock' in navigator;
+
+  useWakeLock(wakeLockEnabled);
 
   useEffect(() => {
     let isActive = true;
     const loadData = async () => {
-      const [blends, history] = await Promise.all([loadSavedBlends(), loadHistory(10)]);
+      const [blends, history, prefTarget, prefStep, prefSource, prefWake] = await Promise.all([
+        loadSavedBlends(),
+        loadHistory(10),
+        getPreference('targetFat'),
+        getPreference('roundingStep'),
+        getPreference('fatSourceId'),
+        getPreference('wakeLockEnabled'),
+      ]);
       if (!isActive) return;
       setSavedBlends(blends);
       setHistoryEntries(history);
+      if (typeof prefTarget === 'number') setTargetFat(prefTarget);
+      if (typeof prefStep === 'number') setRoundingStep(prefStep);
+      if (typeof prefSource === 'string') setFatSourceId(prefSource);
+      if (typeof prefWake === 'boolean') setWakeLockEnabled(prefWake);
     };
     loadData();
     return () => {
@@ -249,6 +284,33 @@ export default function Index() {
     setExtras((prev) => prev.filter((extra) => extra.ingredientId !== ingredientId));
   };
 
+  const handleTargetChange = (value: number) => {
+    setTargetFat(value);
+    setPreference('targetFat', value);
+  };
+
+  const handleRoundingChange = (value: number) => {
+    setRoundingStep(value);
+    setPreference('roundingStep', value);
+  };
+
+  const handleFatSourceChange = (value: string) => {
+    setFatSourceId(value);
+    setPreference('fatSourceId', value);
+  };
+
+  const handleApplyTargetSuggestion = (ingredientId: string, grams: number) => {
+    setExtras((prev) => {
+      const existing = prev.find((extra) => extra.ingredientId === ingredientId);
+      if (existing) {
+        return prev.map((extra) =>
+          extra.ingredientId === ingredientId ? { ...extra, grams } : extra,
+        );
+      }
+      return [...prev, { ingredientId, grams }];
+    });
+  };
+
   const groupedIngredients = useMemo(() => {
     return wikiSections.map((section) => ({
       ...section,
@@ -353,9 +415,46 @@ export default function Index() {
                       </div>
                     </div>
 
-                    <div className="p-5 rounded-2xl bg-card border border-border">
+                    <div className="p-5 rounded-2xl bg-card border border-border space-y-3">
                       <FatIndicator percentage={fatPercentage} />
+                      <FatExplanationDialog
+                        ingredients={ingredientsState}
+                        extras={extras}
+                        burgerCount={burgerCount}
+                        burgerWeight={burgerWeight}
+                      />
                     </div>
+
+                    <div className="p-5 rounded-2xl bg-card border border-border space-y-4">
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-display text-lg font-semibold text-foreground">
+                          Visualizacao de gordura
+                        </h3>
+                        <span className="text-xs text-muted-foreground">Gordura x Magro</span>
+                      </div>
+                      <FatDonutChart fatPercentage={fatPercentage} />
+                      <TargetProgress current={fatPercentage} target={targetFat} />
+                    </div>
+
+                    <TargetLock
+                      ingredients={ingredientsState}
+                      extras={extras}
+                      burgerCount={burgerCount}
+                      burgerWeight={burgerWeight}
+                      target={targetFat}
+                      roundingStep={roundingStep}
+                      fatSourceId={fatSourceId}
+                      onTargetChange={handleTargetChange}
+                      onRoundingStepChange={handleRoundingChange}
+                      onFatSourceChange={handleFatSourceChange}
+                      onApplySuggestion={handleApplyTargetSuggestion}
+                    />
+
+                    <SmartAlerts
+                      ingredients={ingredientsState}
+                      fatPercentage={fatPercentage}
+                      prepStyle={prepStyle}
+                    />
 
                     <section className="space-y-3">
                       <div className="flex items-center justify-between">
@@ -394,6 +493,23 @@ export default function Index() {
                       onChange={handleExtraChange}
                       onRemove={handleRemoveExtra}
                     />
+
+                    <BurgerStack extras={extras} />
+
+                    <div className="p-5 rounded-2xl bg-card border border-border space-y-4">
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-display text-lg font-semibold text-foreground">
+                          Roda de sabores
+                        </h3>
+                        <span className="text-xs text-muted-foreground">Salgado ao picante</span>
+                      </div>
+                      <FlavorRadarChart
+                        ingredients={ingredientsState}
+                        extras={extras}
+                        burgerCount={burgerCount}
+                        burgerWeight={burgerWeight}
+                      />
+                    </div>
 
                     <QuantityCalculator
                       burgerCount={burgerCount}
