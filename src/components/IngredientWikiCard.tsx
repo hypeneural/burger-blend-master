@@ -1,9 +1,13 @@
 import { getCutForIngredient, type Ingredient } from "@/data/ingredients";
 import {
+  formatCalories,
+  formatCostTier,
   formatCutFatRange,
   formatCutFunction,
   formatCutRoles,
+  formatFatType,
   formatGrindRecommendation,
+  formatMeltingProfile,
 } from "@/lib/cutHelpers";
 
 interface IngredientWikiCardProps {
@@ -35,15 +39,30 @@ export function IngredientWikiCard({ ingredient }: IngredientWikiCardProps) {
             Gordura estimada: <span className="text-foreground">{formatCutFatRange(cut)}</span>
           </p>
           <p>
-            Por que entra: <span className="text-foreground">{cut.whyBlend}</span>
+            Calorias: <span className="text-foreground">{formatCalories(cut)}</span>
+          </p>
+          <p>
+            Gordura:{" "}
+            <span className="text-foreground">
+              {formatFatType(cut)} ({formatMeltingProfile(cut)})
+            </span>
+          </p>
+          <p>
+            Por que entra: <span className="text-foreground">{cut.shortDescription}</span>
+          </p>
+          <p>
+            Dicas: <span className="text-foreground">{cut.tips}</span>
           </p>
           <p>
             Nome EN: <span className="text-foreground">{cut.nameEn}</span>
           </p>
           <p>
+            Custo: <span className="text-foreground">{formatCostTier(cut)}</span>
+          </p>
+          <p>
             Recomendado: <span className="text-foreground">{formatCutRoles(cut)}</span>
           </p>
-          <p>{formatGrindRecommendation(cut)}</p>
+          {formatGrindRecommendation(cut) && <p>{formatGrindRecommendation(cut)}</p>}
           {cut.warnings.length > 0 && (
             <p className="text-fat-warning">Alerta: {cut.warnings.join(' / ')}</p>
           )}

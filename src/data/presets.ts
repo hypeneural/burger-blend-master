@@ -29,7 +29,7 @@ export const presets: Preset[] = [
       { ingredientId: 'acem', percentage: 70 },
       { ingredientId: 'fraldinha', percentage: 30 },
     ],
-    estimatedFat: 22,
+    estimatedFat: 16,
     prepStyle: 'Grelha ou Chapa',
     prepTips: [
       'Molde hamburgueres de 150-180g',
@@ -51,7 +51,7 @@ export const presets: Preset[] = [
       { ingredientId: 'acem', percentage: 70 },
       { ingredientId: 'picanha', percentage: 30 },
     ],
-    estimatedFat: 28,
+    estimatedFat: 19,
     prepStyle: 'Churrasqueira',
     prepTips: [
       'Ideal para hamburgueres de 180-220g',
@@ -73,7 +73,7 @@ export const presets: Preset[] = [
       { ingredientId: 'acem', percentage: 70 },
       { ingredientId: 'gordura-bovina', percentage: 30 },
     ],
-    estimatedFat: 30,
+    estimatedFat: 40,
     prepStyle: 'Chapa Quente',
     prepTips: [
       'Bolas de 80-100g',
@@ -96,7 +96,7 @@ export const presets: Preset[] = [
       { ingredientId: 'feijao-preto', percentage: 55 },
       { ingredientId: 'cogumelo', percentage: 45 },
     ],
-    estimatedFat: 5,
+    estimatedFat: 1,
     prepStyle: 'Chapa com Azeite',
     prepTips: [
       'Molde hamburgueres firmes de 120-150g',

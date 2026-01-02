@@ -12,7 +12,7 @@ Checklist focado em viralidade, UX/UI explicativa e estrutura robusta, considera
 ## P0 - Base de dados (materia-prima) e schema tecnico
 - [x] **P0 - Modelos Cut/Ingredient completos:** criar `Cut` e `Ingredient` com campos técnicos (fat range, collagen, myoglobin, texture tags, flavor notes, warnings, grind, cooking best). Isso eh base para educacao e calculos.
 - [x] **P0 - Seed inicial robusto (BR + EN):** incluir cortes obrigatorios (Acem, Peito/Brisket, Costela, Fraldinha, Coxao duro, Alcatra, Picanha, Pescoco) com equivalentes EN e tags regionais.
-- [ ] **P0 - Normalizacao e consistencia dos dados:** padronizar nomes, IDs, traducoes e unidades; evitar string solta e manter `enum` para categorias e funcoes.
+- [x] **P0 - Normalizacao e consistencia dos dados:** padronizar nomes, IDs, traducoes e unidades; evitar string solta e manter `enum` para categorias e funcoes.
 
 ## P0 - Calculadora e explicacoes (core do produto)
 - [ ] **P0 - Inputs completos do Builder:** incluir moagem (fina/media/grossa + simples/dupla), equipamento, estilo do burger, alvo de gordura com presets + custom; hoje parte disso nao existe.

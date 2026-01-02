@@ -1,12 +1,17 @@
 ﻿import { motion } from 'framer-motion';
 import { Plus, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { INGREDIENT_CATEGORIES, type IngredientCategory } from '@/data/constants';
 import { getCutForIngredient, ingredients } from '@/data/ingredients';
 import {
+  formatCalories,
+  formatCostTier,
   formatCutFatRange,
   formatCutFunction,
   formatCutRoles,
+  formatFatType,
   formatGrindRecommendation,
+  formatMeltingProfile,
 } from '@/lib/cutHelpers';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
@@ -17,13 +22,13 @@ interface IngredientPickerProps {
   onClose: () => void;
 }
 
-const categories = ['bovine', 'pork', 'vegan'] as const;
-type IngredientCategory = (typeof categories)[number];
+const categories = INGREDIENT_CATEGORIES.filter((category) => category !== 'extra') as IngredientCategory[];
 
 const categoryLabels: Record<IngredientCategory, { name: string; icon: string }> = {
   bovine: { name: 'Bovinos', icon: '🐄' },
   pork: { name: 'Suinos', icon: '🐖' },
   vegan: { name: 'Veganos', icon: '🌱' },
+  extra: { name: 'Extras', icon: '??' },
 };
 
 export function IngredientPicker({ selectedIds, onSelect, onClose }: IngredientPickerProps) {
@@ -104,15 +109,32 @@ export function IngredientPicker({ selectedIds, onSelect, onClose }: IngredientP
                         Gordura estimada: <span className="text-foreground">{formatCutFatRange(cut)}</span>
                       </p>
                       <p>
-                        Por que entra: <span className="text-foreground">{cut.whyBlend}</span>
+                        Calorias: <span className="text-foreground">{formatCalories(cut)}</span>
+                      </p>
+                      <p>
+                        Gordura:{" "}
+                        <span className="text-foreground">
+                          {formatFatType(cut)} ({formatMeltingProfile(cut)})
+                        </span>
+                      </p>
+                      <p>
+                        Por que entra: <span className="text-foreground">{cut.shortDescription}</span>
+                      </p>
+                      <p>
+                        Dicas: <span className="text-foreground">{cut.tips}</span>
                       </p>
                       <p>
                         Nome EN: <span className="text-foreground">{cut.nameEn}</span>
                       </p>
                       <p>
+                        Custo: <span className="text-foreground">{formatCostTier(cut)}</span>
+                      </p>
+                      <p>
                         Recomendado: <span className="text-foreground">{formatCutRoles(cut)}</span>
                       </p>
-                      <p className="text-muted-foreground">{formatGrindRecommendation(cut)}</p>
+                      {formatGrindRecommendation(cut) && (
+                        <p className="text-muted-foreground">{formatGrindRecommendation(cut)}</p>
+                      )}
                       {cut.warnings.length > 0 && (
                         <p className="text-fat-warning">Alerta: {cut.warnings.join(' / ')}</p>
                       )}
