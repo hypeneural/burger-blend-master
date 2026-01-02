@@ -44,6 +44,9 @@ interface BlendStore {
   prepStyle: string;
   prepTips: string[];
   seasonings: string[];
+  traceabilityOrigin: string;
+  traceabilitySupplier: string;
+  traceabilityLot: string;
   showPicker: boolean;
   showExtrasPicker: boolean;
   targetFat: number;
@@ -71,6 +74,9 @@ interface BlendStore {
   setPrepStyle: (value: string) => void;
   setPrepTips: (value: string[]) => void;
   setSeasonings: (value: string[]) => void;
+  setTraceabilityOrigin: (value: string) => void;
+  setTraceabilitySupplier: (value: string) => void;
+  setTraceabilityLot: (value: string) => void;
   setShowPicker: (value: boolean) => void;
   setShowExtrasPicker: (value: boolean) => void;
   setTargetFat: (value: number) => void;
@@ -117,6 +123,9 @@ export const useBlendStore = createWithEqualityFn<BlendStore>((set) => ({
   prepStyle: DEFAULT_PREP_STYLE,
   prepTips: DEFAULT_PREP_TIPS,
   seasonings: DEFAULT_SEASONINGS,
+  traceabilityOrigin: "",
+  traceabilitySupplier: "",
+  traceabilityLot: "",
   showPicker: false,
   showExtrasPicker: false,
   targetFat: 22,
@@ -144,6 +153,9 @@ export const useBlendStore = createWithEqualityFn<BlendStore>((set) => ({
   setPrepStyle: (value) => set({ prepStyle: value }),
   setPrepTips: (value) => set({ prepTips: value }),
   setSeasonings: (value) => set({ seasonings: value }),
+  setTraceabilityOrigin: (value) => set({ traceabilityOrigin: value }),
+  setTraceabilitySupplier: (value) => set({ traceabilitySupplier: value }),
+  setTraceabilityLot: (value) => set({ traceabilityLot: value }),
   setShowPicker: (value) => set({ showPicker: value }),
   setShowExtrasPicker: (value) => set({ showExtrasPicker: value }),
   setTargetFat: (value) => set({ targetFat: value }),
@@ -180,6 +192,9 @@ export const useBlendStore = createWithEqualityFn<BlendStore>((set) => ({
       prepStyle: preset.prepStyle,
       prepTips: preset.prepTips,
       seasonings: preset.seasonings,
+      traceabilityOrigin: "",
+      traceabilitySupplier: "",
+      traceabilityLot: "",
       step: "customize",
       activeTab: "lab",
       };
@@ -199,6 +214,9 @@ export const useBlendStore = createWithEqualityFn<BlendStore>((set) => ({
       prepStyle: DEFAULT_PREP_STYLE,
       prepTips: DEFAULT_PREP_TIPS,
       seasonings: DEFAULT_SEASONINGS,
+      traceabilityOrigin: "",
+      traceabilitySupplier: "",
+      traceabilityLot: "",
       step: "customize",
       activeTab: "lab",
     }),
@@ -216,6 +234,9 @@ export const useBlendStore = createWithEqualityFn<BlendStore>((set) => ({
       prepStyle: blend.prepStyle || DEFAULT_PREP_STYLE,
       prepTips: blend.prepTips?.length ? blend.prepTips : DEFAULT_PREP_TIPS,
       seasonings: blend.seasonings?.length ? blend.seasonings : DEFAULT_SEASONINGS,
+      traceabilityOrigin: blend.traceabilityOrigin ?? "",
+      traceabilitySupplier: blend.traceabilitySupplier ?? "",
+      traceabilityLot: blend.traceabilityLot ?? "",
       step: "customize",
       activeTab: "lab",
     }),

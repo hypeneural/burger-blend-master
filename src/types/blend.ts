@@ -20,6 +20,9 @@ export interface SavedBlend {
   prepStyle: string;
   prepTips: string[];
   seasonings: string[];
+  traceabilityOrigin?: string;
+  traceabilitySupplier?: string;
+  traceabilityLot?: string;
   createdAt: string;
   updatedAt: string;
 }

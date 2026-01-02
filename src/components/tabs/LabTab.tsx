@@ -4,6 +4,7 @@ import { ArrowLeft, Plus, Sparkles } from "lucide-react";
 import { BlendCard } from "@/components/BlendCard";
 import { BlendSummary } from "@/components/BlendSummary";
 import { CostSimulator } from "@/components/CostSimulator";
+import { CutSwapSuggestions } from "@/components/CutSwapSuggestions";
 import { ExtraPicker } from "@/components/ExtraPicker";
 import { ExtrasSection } from "@/components/ExtrasSection";
 import { FatIndicator } from "@/components/FatIndicator";
@@ -70,6 +71,9 @@ export function LabTab({ shouldAnimate, showCharts }: LabTabProps) {
     prepStyle,
     prepTips,
     seasonings,
+    traceabilityOrigin,
+    traceabilitySupplier,
+    traceabilityLot,
     showPicker,
     showExtrasPicker,
     targetFat,
@@ -87,6 +91,9 @@ export function LabTab({ shouldAnimate, showCharts }: LabTabProps) {
     setGrindSize,
     setGrindPass,
     setSeasonings,
+    setTraceabilityOrigin,
+    setTraceabilitySupplier,
+    setTraceabilityLot,
     setPrepStyle,
     setShowPicker,
     setShowExtrasPicker,
@@ -126,6 +133,9 @@ export function LabTab({ shouldAnimate, showCharts }: LabTabProps) {
     prepStyle: state.prepStyle,
     prepTips: state.prepTips,
     seasonings: state.seasonings,
+    traceabilityOrigin: state.traceabilityOrigin,
+    traceabilitySupplier: state.traceabilitySupplier,
+    traceabilityLot: state.traceabilityLot,
     showPicker: state.showPicker,
     showExtrasPicker: state.showExtrasPicker,
     targetFat: state.targetFat,
@@ -143,6 +153,9 @@ export function LabTab({ shouldAnimate, showCharts }: LabTabProps) {
     setGrindSize: state.setGrindSize,
     setGrindPass: state.setGrindPass,
     setSeasonings: state.setSeasonings,
+    setTraceabilityOrigin: state.setTraceabilityOrigin,
+    setTraceabilitySupplier: state.setTraceabilitySupplier,
+    setTraceabilityLot: state.setTraceabilityLot,
     setPrepStyle: state.setPrepStyle,
     setShowPicker: state.setShowPicker,
     setShowExtrasPicker: state.setShowExtrasPicker,
@@ -278,6 +291,9 @@ export function LabTab({ shouldAnimate, showCharts }: LabTabProps) {
       prepStyle,
       prepTips,
       seasonings,
+      traceabilityOrigin,
+      traceabilitySupplier,
+      traceabilityLot,
     });
 
     await addHistoryEntry({
@@ -348,6 +364,30 @@ export function LabTab({ shouldAnimate, showCharts }: LabTabProps) {
       return;
     }
     addIngredient(ingredientId);
+  };
+
+  const handleApplySwap = (fromId: string, toId: string) => {
+    const current = ingredientsState.find((item) => item.ingredientId === fromId);
+    if (!current) return;
+    const existing = ingredientsState.find((item) => item.ingredientId === toId);
+    let next = ingredientsState
+      .filter((item) => item.ingredientId !== fromId)
+      .map((item) => {
+        if (item.ingredientId === toId && existing) {
+          return { ...item, percentage: item.percentage + current.percentage };
+        }
+        return item;
+      });
+    if (!existing) {
+      next = ingredientsState.map((item) =>
+        item.ingredientId === fromId ? { ...item, ingredientId: toId } : item,
+      );
+    }
+    setIngredients(next);
+    toast({
+      title: "Troca aplicada",
+      description: "Atualizamos o blend com o corte sugerido.",
+    });
   };
 
   const chartFallback = <div className="h-48 rounded-2xl bg-muted/40 animate-pulse" />;
@@ -546,6 +586,37 @@ export function LabTab({ shouldAnimate, showCharts }: LabTabProps) {
                         rows={2}
                         className="resize-none"
                         placeholder="Ex: Blend para chapa, sabor intenso"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="p-4 rounded-2xl bg-card border border-border space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                          Rastreabilidade (opcional)
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          Origem, fornecedor e lote para padronizar producao.
+                        </p>
+                      </div>
+                      <InfoTooltip label="Ajuda a repetir o blend com o mesmo fornecedor e lote." />
+                    </div>
+                    <div className="space-y-2">
+                      <Input
+                        value={traceabilityOrigin}
+                        onChange={(event) => setTraceabilityOrigin(event.target.value)}
+                        placeholder="Origem da carne (ex: Fazenda Serra SC)"
+                      />
+                      <Input
+                        value={traceabilitySupplier}
+                        onChange={(event) => setTraceabilitySupplier(event.target.value)}
+                        placeholder="Fornecedor / Acougue"
+                      />
+                      <Input
+                        value={traceabilityLot}
+                        onChange={(event) => setTraceabilityLot(event.target.value)}
+                        placeholder="Lote / Nota fiscal"
                       />
                     </div>
                   </div>
@@ -863,6 +934,13 @@ export function LabTab({ shouldAnimate, showCharts }: LabTabProps) {
                     thresholds={alertThresholds}
                   />
 
+                  <CutSwapSuggestions
+                    ingredients={ingredientsState}
+                    baseWeight={baseWeight}
+                    priceOverrides={priceOverrides}
+                    onApplySwap={handleApplySwap}
+                  />
+
                   <TargetLock
                     ingredients={ingredientsState}
                     extras={extras}
@@ -991,6 +1069,9 @@ export function LabTab({ shouldAnimate, showCharts }: LabTabProps) {
                 prepStyle={prepStyle}
                 prepTips={prepTips}
                 seasonings={seasonings}
+                traceabilityOrigin={traceabilityOrigin}
+                traceabilitySupplier={traceabilitySupplier}
+                traceabilityLot={traceabilityLot}
                 onBack={() => setStep("customize")}
                 onSave={handleSaveBlend}
                 onSeasoningsChange={setSeasonings}

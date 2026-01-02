@@ -20,9 +20,9 @@ Checklist atualizado com foco em mobile-first, performance e offline.
 - [x] **Feedback de acao instantaneo**: toasts curtos para salvar/compartilhar/exportar e erros de validacao.
 
 ## P1 - Profissional (padronizacao e operacao)
-- [ ] **Substituicao inteligente de cortes**: sugerir troca (Acem -> Paleta) mantendo gordura e custo.
-- [ ] **Ficha tecnica exportavel**: gerar PDF simples apenas com pesos, moagem e checklist operacional.
-- [ ] **Campos de rastreabilidade**: origem da carne, fornecedor e lote na receita final.
+- [x] **Substituicao inteligente de cortes**: sugerir troca (Acem -> Paleta) mantendo gordura e custo.
+- [x] **Ficha tecnica exportavel**: gerar PDF simples apenas com pesos, moagem e checklist operacional.
+- [x] **Campos de rastreabilidade**: origem da carne, fornecedor e lote na receita final.
 
 ## P2 - Qualidade e confianca
 - [ ] **Testes para custos e proporcao reversa**: cobrir formulas de CMV e 2 cortes.

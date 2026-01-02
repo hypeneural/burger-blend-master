@@ -51,6 +51,9 @@ interface BlendReportProps {
   prepStyle: string;
   prepTips: string[];
   seasonings: string[];
+  traceabilityOrigin?: string;
+  traceabilitySupplier?: string;
+  traceabilityLot?: string;
   onBack: () => void;
   onSave: () => void;
   onSeasoningsChange: (value: string[]) => void;
@@ -62,6 +65,11 @@ const loadPdfLibs = async () => {
     import('jspdf'),
   ]);
   return { html2canvas, jsPDF };
+};
+
+const loadJsPdf = async () => {
+  const { default: jsPDF } = await import('jspdf');
+  return jsPDF;
 };
 
 export function BlendReport({
@@ -77,6 +85,9 @@ export function BlendReport({
   prepStyle,
   prepTips,
   seasonings,
+  traceabilityOrigin,
+  traceabilitySupplier,
+  traceabilityLot,
   onBack,
   onSave,
   onSeasoningsChange,
@@ -183,8 +194,14 @@ export function BlendReport({
       .join('\n');
     const seasoningsBlock =
       selectedSeasonings.length > 0 ? `\n\nTemperos:\n${seasoningsLines}` : '';
+    const traceabilityBlock =
+      traceabilityOrigin || traceabilitySupplier || traceabilityLot
+        ? `\n\nRastreabilidade:\n- Origem: ${traceabilityOrigin || "Nao informado"}\n- Fornecedor: ${
+            traceabilitySupplier || "Nao informado"
+          }\n- Lote: ${traceabilityLot || "Nao informado"}`
+        : '';
 
-    const shareText = `${name}\n${description}\n\nIngredientes:\n${ingredientLines}${extrasBlock}${seasoningsBlock}\n\nGordura: ${fatPercentage}%\nTotal: ${formatWeight(totalWeight)}`;
+    const shareText = `${name}\n${description}\n\nIngredientes:\n${ingredientLines}${extrasBlock}${seasoningsBlock}${traceabilityBlock}\n\nGordura: ${fatPercentage}%\nTotal: ${formatWeight(totalWeight)}`;
 
     if (navigator.share) {
       navigator.share({
@@ -275,6 +292,71 @@ export function BlendReport({
     }
   };
 
+  const handleExportOpsPdf = async () => {
+    try {
+      const jsPDF = await loadJsPdf();
+      const doc = new jsPDF({ orientation: 'p', unit: 'pt', format: 'a4' });
+      const left = 32;
+      let cursor = 40;
+
+      const addLine = (text: string, size = 11) => {
+        doc.setFontSize(size);
+        doc.text(text, left, cursor, { maxWidth: 520 });
+        cursor += size + 6;
+      };
+
+      const baseList = ingredients.map((item) => {
+        const ing = getIngredientById(item.ingredientId);
+        const grams = Math.round((item.percentage / 100) * baseWeight);
+        return `- ${ing?.name ?? 'Ingrediente'}: ${grams}g (${item.percentage}%)`;
+      });
+      const extrasList = extras.map((extra) => {
+        const ing = getIngredientById(extra.ingredientId);
+        return `- ${ing?.name ?? 'Extra'}: ${formatWeight(extra.grams)}`;
+      });
+
+      addLine('Ficha tecnica operacional', 16);
+      addLine(`${name}`, 13);
+      if (description) addLine(description, 10);
+      addLine(`Atualizado: ${new Date().toLocaleString('pt-BR')}`, 9);
+      addLine('');
+      addLine(`Quantidade: ${burgerCount} burgers x ${burgerWeight}g`, 11);
+      addLine(`Peso total: ${formatWeight(totalWeight)} | Gordura: ${fatPercentage}%`, 11);
+      addLine(`Moagem: ${grindSizeLabels[grindSize]} (${grindPassLabels[grindPass]})`, 11);
+      addLine(`Equipamento: ${prepStyle} | Estilo: ${burgerStyle}`, 11);
+      addLine('');
+      addLine('Ingredientes (pesos):', 12);
+      baseList.forEach((line) => addLine(line, 10));
+      if (extrasList.length > 0) {
+        addLine('');
+        addLine('Extras:', 12);
+        extrasList.forEach((line) => addLine(line, 10));
+      }
+      addLine('');
+      addLine('Checklist operacional:', 12);
+      prepTips.forEach((tip) => addLine(`- ${tip}`, 10));
+      addLine('- Salgar apenas a superficie antes da chapa.', 10);
+      addLine('- Manter a carne gelada (0-2C) ate a moagem.', 10);
+      addLine('');
+      addLine('Rastreabilidade:', 12);
+      addLine(`- Origem: ${traceabilityOrigin || 'Nao informado'}`, 10);
+      addLine(`- Fornecedor: ${traceabilitySupplier || 'Nao informado'}`, 10);
+      addLine(`- Lote: ${traceabilityLot || 'Nao informado'}`, 10);
+
+      doc.save(`${name || 'blend'}-ficha-tecnica.pdf`);
+      toast({
+        title: 'Ficha tecnica exportada',
+        description: 'PDF operacional gerado com sucesso.',
+      });
+    } catch (error) {
+      console.error('Falha ao exportar ficha tecnica', error);
+      toast({
+        title: 'Falha ao exportar',
+        description: 'Nao foi possivel gerar a ficha tecnica.',
+      });
+    }
+  };
+
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
       <div ref={reportRef} className="space-y-6">
@@ -316,6 +398,36 @@ export function BlendReport({
           grindSize={grindSize}
           grindPass={grindPass}
         />
+
+        <div className="p-5 rounded-2xl bg-card border border-border space-y-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+              <Check className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <h3 className="font-display text-lg font-semibold text-foreground">Rastreabilidade</h3>
+              <p className="text-sm text-muted-foreground">Informacoes para padronizar producao.</p>
+            </div>
+          </div>
+          <div className="grid gap-2 text-sm text-foreground">
+            <p>
+              Origem:{" "}
+              <span className="text-muted-foreground">
+                {traceabilityOrigin || "Nao informado"}
+              </span>
+            </p>
+            <p>
+              Fornecedor:{" "}
+              <span className="text-muted-foreground">
+                {traceabilitySupplier || "Nao informado"}
+              </span>
+            </p>
+            <p>
+              Lote:{" "}
+              <span className="text-muted-foreground">{traceabilityLot || "Nao informado"}</span>
+            </p>
+          </div>
+        </div>
 
         <ProductionSheet
           ingredients={ingredients}
@@ -505,6 +617,10 @@ export function BlendReport({
 
       <Button variant="secondary" className="w-full" onClick={handleExportPdf} disabled={exporting}>
         {exporting ? 'Gerando PDF...' : 'Exportar PDF'}
+      </Button>
+
+      <Button variant="outline" className="w-full" onClick={handleExportOpsPdf}>
+        Exportar ficha tecnica
       </Button>
 
       <Button variant="ghost" className="w-full" onClick={onBack}>
