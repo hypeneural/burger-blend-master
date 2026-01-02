@@ -18,10 +18,17 @@ Criado por Anderson Marques Vieira da Hype Neural para amadores de hamburguer ap
 BlendLab Burger e um app mobile-first para criar blends de carne com precisao tecnica e linguagem simples. O foco e suculencia, textura, custo e repeticao. O app funciona offline, entrega explicacoes claras e guia o usuario do blend ate a receita completa.
 
 ## Visao geral
-- App mobile-first com fluxo por etapas (escolher -> customizar -> receita).
+- App mobile-first com fluxo guiado por etapas (Base -> Blend -> Extras -> Analise -> Receita).
 - Builder com calculos em tempo real, alertas e explicacoes tecnicas.
 - Modo offline real com cache de conteudo e fallback por rota.
 - Interface otimizada para uso na cozinha (grandes toques, textos curtos).
+- Resumo sticky (gordura, custo/burger, total) para decisao rapida.
+- Indicador de cache inteligente que some quando o app esta pronto.
+
+## Visuais (GitHub)
+<p align="center">
+  <img src="docs/flow.svg" alt="Fluxo principal BlendLab Burger" width="840" />
+</p>
 
 ## Fluxo principal (ASCII)
 ```
@@ -31,13 +38,25 @@ BlendLab Burger e um app mobile-first para criar blends de carne com precisao te
 [Builder/Lab] ---> [WikiMeat]
      |
      v
-[Relatorio] ---> [Salvar | PDF | Compartilhar]
+[Relatorio] ---> [Salvar | PDF | Compartilhar | Ficha Tecnica]
      |
      v
 [Minha Grelha | Historico]
 
 [Tools] -> Cooking Mode | Calibrar Alertas | Precos
 ```
+
+## Builder (fluxo guiado)
+```
+Base -> Blend -> Extras -> Analise -> Receita
+```
+
+## Diferenciais (o que faz este app ser "profissional")
+- Substituicao inteligente de cortes com impacto de gordura e custo.
+- Ficha tecnica operacional para equipe (pesos, moagem, checklist).
+- Rastreabilidade (origem, fornecedor, lote) direto na receita.
+- Modo economia de dados persistente para performance em rede lenta.
+- Offline-first com precache seletivo por categoria (bovinos, presets).
 
 ## Objetivos do produto
 - Ajudar qualquer pessoa a montar blends profissionais com alvo de gordura correto.
@@ -63,25 +82,36 @@ BlendLab Burger e um app mobile-first para criar blends de carne com precisao te
 ## Funcionalidades (detalhado)
 
 ### Laboratorio (Builder)
-- Stepper por etapas com CTA fixo para gerar receita.
+- Stepper por etapas com fluxo guiado e CTA inteligente por etapa.
 - Selecionar cortes e ajustar percentuais com sliders.
 - Modo avancado por gramas com "Normalizar para 100%".
 - Alvo de gordura com Target Lock e explicacao passo a passo.
 - Calculadora de proporcao reversa (2 cortes + gordura alvo).
 - Indicador de gordura com status e faixa ideal.
+- Resumo sticky com gordura, custo/burger e peso total.
 - Alertas inteligentes por gordura, corte dominante, equipamento e estilo.
 - Roda de sabores (radar) e donut de gordura (ocultos em modo economia).
 - Extras separados do % principal (bacon, queijo, tutano, etc).
 - Temperos sugeridos dinamicamente + personalizacao manual.
 - Simulador de custo/CMV com preco sugerido por burger.
 - Edicao de precos por ingrediente (ajuste por regiao).
+- Trocas inteligentes de cortes (ex: Acem -> Paleta) com impacto estimado.
+- Rastreabilidade (origem, fornecedor, lote) para padronizacao.
 
 ### Relatorio final
 - Lista de compras exata (pesos por ingrediente).
 - Pedido ao acougueiro com moagem, gordura e observacoes.
 - Ficha tecnica operacional (batch, pesos, moagem, rendimento).
+- Exportacao de ficha tecnica separada (PDF simples).
+- Rastreabilidade detalhada na receita (origem, fornecedor, lote).
 - Estimativa nutricional por burger (calorias, proteina, gordura).
 - Exportar PDF e compartilhar.
+
+**Ficha tecnica (PDF operacional) inclui:**
+- Peso total, peso por burger e rendimento estimado.
+- Moagem (disco + passadas) e equipamento.
+- Lista de cortes com pesos reais.
+- Checklist operacional e regras de sal/temperatura.
 
 ### Minha Grelha
 - Blends salvos e historico local.
@@ -99,7 +129,10 @@ BlendLab Burger e um app mobile-first para criar blends de carne com precisao te
 - Conteudo salvo em IndexedDB e seed inicial local.
 - PWA instalavel com service worker.
 - Fallback offline dedicado.
-- Banner de offline e modo economia de dados (reduce animacoes/graficos).
+- Banner de offline e modo economia de dados persistente.
+- Precache seletivo por categoria (bovinos/presets primeiro).
+- Indicador de cache e ultima sincronizacao (auto-hide quando pronto).
+  - quando pronto, o card some para liberar espaco visual.
 
 ## Exemplos praticos (blend assinatura e CMV)
 
@@ -135,6 +168,12 @@ BlendLab Burger e um app mobile-first para criar blends de carne com precisao te
 - Acem (18%) + Peito (22%)
 - Resultado: **500g Acem + 500g Peito**
 
+### 4) Substituicao inteligente (exemplo)
+**Objetivo:** manter gordura e custo com corte equivalente
+- Atual: 40% Acem (18% gordura)
+- Sugestao: 40% Paleta (10% gordura) + ajuste fino no blend
+- Resultado: pequena reducao de gordura e economia por kg, com aviso visual.
+
 ## Logicas e formulas (core)
 - Gordura media ponderada:
   - totalFatGrams = soma(gramas_i * gordura_i)
@@ -150,6 +189,46 @@ BlendLab Burger e um app mobile-first para criar blends de carne com precisao te
   - precoSugerido = custoPorBurger / (cmvAlvo/100)
 - Yield (estimativa):
   - smash ~70%, grelha/churrasqueira ~72%, chapa ~78%, airfryer ~80%
+- Troca inteligente (heuristica):
+  - mesma funcao do corte (estrutura/sabor/gordura)
+  - gordura similar (preferencia ate 3pp de diferenca)
+  - custo por kg mais baixo ou equivalente
+
+## Graficos e visualizacoes (para explicar o resultado)
+```
+Donut de gordura
+[ seco | ideal | encolhe ]
+ 0%        20-30%       40%
+
+Radar de sabor (exemplo)
+Salgado  -----
+Umami    ----
+Doce     ---
+Acido    --
+Amargo   -
+Picante  ---
+```
+
+## Fluxo de dados (Mermaid)
+```mermaid
+flowchart TD
+  UI[Inputs do usuario] --> Store[Zustand]
+  Store --> Domain[Blend Engine + Seasoning Engine]
+  Domain --> UI
+  Store --> Dexie[IndexedDB]
+  Dexie --> UI
+  PWA[Service Worker] --> UI
+```
+
+## Estrategia offline (Mermaid)
+```mermaid
+flowchart LR
+  Seed[Seed local] --> Cache[IndexedDB]
+  Cache --> UI[UI offline]
+  PWA --> Cache
+  UI --> Prefetch[Baixar categoria]
+  Prefetch --> Cache
+```
 
 ## Dados e modelagem
 
@@ -170,6 +249,7 @@ BlendLab Burger e um app mobile-first para criar blends de carne com precisao te
 - cmvTarget e priceOverrides
 - alertThresholds (Smash/Airfryer/Fit/Alto)
 - wakeLockEnabled
+- lowDataMode (auto/on/off)
 
 ## IndexedDB (Dexie) - tabelas e indices
 Banco: `blendMasterDB`
@@ -186,6 +266,11 @@ Versao 2 (atual)
 - `contentMeta`: `key`, `updatedAt`
 
 Observacao: as preferencias guardam chaves como `targetFat`, `cmvTarget`, `alertThresholds`, `priceOverrides`, etc.
+Rastreabilidade fica salva dentro de cada blend (`traceabilityOrigin`, `traceabilitySupplier`, `traceabilityLot`).
+
+### contentMeta (chaves internas)
+- `catalogVersion`: versao do seed atual.
+- `catalogScope`: categorias precacheadas + data da ultima sincronizacao.
 
 ## Estrutura do projeto
 - `src/pages`: telas principais e fluxo do app.
@@ -195,6 +280,7 @@ Observacao: as preferencias guardam chaves como `targetFat`, `cmvTarget`, `alert
 - `src/lib`: helpers, matematica, storage e utilitarios.
 - `src/store`: Zustand store para o estado do app.
 - `src/hooks`: hooks utilitarios (wake lock, network status, etc).
+- `docs`: diagramas e assets para o README.
 
 ## Scripts
 ```bash
