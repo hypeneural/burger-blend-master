@@ -4,9 +4,9 @@ export interface SelectionTip {
   title: string;
   definition: string;
   impact: string;
-  recommendedc: string;
-  tipsc: string[];
-  cautionc: string;
+  recommended?: string;
+  tips?: string[];
+  caution?: string;
 }
 
 export const BURGER_STYLE_TIPS: Record<BurgerStyle, SelectionTip> = {
@@ -153,7 +153,7 @@ const COMBINED_PREP_TIP: SelectionTip = {
   tips: ["Chapa bem quente", "Grelha com zona indireta"],
 };
 
-export const getPrepStyleTip = (prepStylec: string): SelectionTip | undefined => {
+export const getPrepStyleTip = (prepStyle?: string): SelectionTip | undefined => {
   if (!prepStyle) return undefined;
   const value = prepStyle.toLowerCase();
   if (value.includes("airfryer")) return PREP_STYLE_TIPS.Airfryer;

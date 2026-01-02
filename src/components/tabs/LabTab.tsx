@@ -14,6 +14,7 @@ import { IngredientPicker } from "@/components/IngredientPicker";
 import { IngredientSlider } from "@/components/IngredientSlider";
 import { QuantityCalculator } from "@/components/QuantityCalculator";
 import { ReverseBlendCalculator } from "@/components/ReverseBlendCalculator";
+import { SelectionTipCard } from "@/components/SelectionTipCard";
 import { SmartAlerts } from "@/components/SmartAlerts";
 import { Stepper } from "@/components/Stepper";
 import { StickySummaryBar } from "@/components/StickySummaryBar";
@@ -24,6 +25,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { BURGER_STYLES, GRIND_PASSES, GRIND_SIZES } from "@/data/constants";
+import {
+  BURGER_STYLE_TIPS,
+  GRIND_PASS_TIPS,
+  GRIND_SIZE_TIPS,
+  getPrepStyleTip,
+} from "@/data/selectionTips";
 import { calculateBaseWeight, calculateFatPercentage, formatWeight } from "@/lib/blendMath";
 import { calculateBlendCost } from "@/lib/costing";
 import {
@@ -628,100 +635,112 @@ export function LabTab({ shouldAnimate, showCharts }: LabTabProps) {
                     onBurgerWeightChange={setBurgerWeight}
                   />
 
-                  <div className="p-5 rounded-2xl bg-card border border-border space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-display text-lg font-semibold text-foreground">
-                          Estilo do burger
-                        </h3>
-                        <InfoTooltip label="Define textura final e influencia moagem e preparo." />
+                    <div className="p-5 rounded-2xl bg-card border border-border space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-display text-lg font-semibold text-foreground">
+                            Estilo do burger
+                          </h3>
+                          <InfoTooltip label="Define textura final e influencia moagem e preparo." />
+                        </div>
+                        <span className="text-xs text-muted-foreground">Perfil de cocao</span>
                       </div>
-                      <span className="text-xs text-muted-foreground">Perfil de cocao</span>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {burgerStyleOptions.map((option) => (
-                        <Button
-                          key={option.value}
-                          variant={burgerStyle === option.value ? "default" : "secondary"}
-                          size="sm"
-                          onClick={() => setBurgerStyle(option.value)}
-                          className="rounded-full"
-                        >
-                          {option.label}
-                        </Button>
-                      ))}
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      Escolha o estilo que melhor representa a experiencia desejada.
-                    </p>
-                  </div>
-
-                  <div className="p-5 rounded-2xl bg-card border border-border space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-display text-lg font-semibold text-foreground">Moagem</h3>
-                        <InfoTooltip label="Moagem define textura. Fina para smash, grossa para burger alto." />
-                      </div>
-                      <span className="text-xs text-muted-foreground">Granulometria</span>
-                    </div>
-                    <div className="space-y-2">
-                      <p className="text-xs text-muted-foreground">Tamanho do disco</p>
                       <div className="flex flex-wrap gap-2">
-                        {grindSizeOptions.map((option) => (
+                        {burgerStyleOptions.map((option) => (
                           <Button
                             key={option.value}
-                            variant={grindSize === option.value ? "default" : "secondary"}
+                            variant={burgerStyle === option.value ? "default" : "secondary"}
                             size="sm"
-                            onClick={() => setGrindSize(option.value)}
+                            onClick={() => setBurgerStyle(option.value)}
+                            className="rounded-full"
                           >
                             {option.label}
                           </Button>
                         ))}
                       </div>
-                    </div>
-                    <div className="space-y-2">
-                      <p className="text-xs text-muted-foreground">Passadas</p>
-                      <div className="flex flex-wrap gap-2">
-                        {grindPassOptions.map((option) => (
-                          <Button
-                            key={option.value}
-                            variant={grindPass === option.value ? "default" : "secondary"}
-                            size="sm"
-                            onClick={() => setGrindPass(option.value)}
-                          >
-                            {option.label}
-                          </Button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="p-5 rounded-2xl bg-card border border-border space-y-3">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-display text-lg font-semibold text-foreground">
-                          Equipamento de cocao
-                        </h3>
-                        <InfoTooltip label="Afeta alertas de gordura e sugestoes de preparo." />
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        Afeta alertas e recomendacoes de gordura.
+                      <p className="text-xs text-muted-foreground">
+                        Escolha o estilo que melhor representa a experiencia desejada.
                       </p>
+                      <SelectionTipCard
+                        label="Dica do estilo"
+                        tip={BURGER_STYLE_TIPS[burgerStyle]}
+                      />
                     </div>
-                    <div className="flex flex-wrap gap-2">
-                      {prepOptions.map((option) => (
-                        <Button
-                          key={option.value}
-                          variant={prepStyle === option.value ? "default" : "secondary"}
-                          size="sm"
-                          onClick={() => setPrepStyle(option.value)}
-                          className="rounded-full"
-                        >
-                          {option.label}
-                        </Button>
-                      ))}
+
+                    <div className="p-5 rounded-2xl bg-card border border-border space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-display text-lg font-semibold text-foreground">Moagem</h3>
+                          <InfoTooltip label="Moagem define textura. Fina para smash, grossa para burger alto." />
+                        </div>
+                        <span className="text-xs text-muted-foreground">Granulometria</span>
+                      </div>
+                      <div className="space-y-2">
+                        <p className="text-xs text-muted-foreground">Tamanho do disco</p>
+                        <div className="flex flex-wrap gap-2">
+                          {grindSizeOptions.map((option) => (
+                            <Button
+                              key={option.value}
+                              variant={grindSize === option.value ? "default" : "secondary"}
+                              size="sm"
+                              onClick={() => setGrindSize(option.value)}
+                            >
+                              {option.label}
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <p className="text-xs text-muted-foreground">Passadas</p>
+                        <div className="flex flex-wrap gap-2">
+                          {grindPassOptions.map((option) => (
+                            <Button
+                              key={option.value}
+                              variant={grindPass === option.value ? "default" : "secondary"}
+                              size="sm"
+                              onClick={() => setGrindPass(option.value)}
+                            >
+                              {option.label}
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <SelectionTipCard
+                          label="Granulometria"
+                          tip={GRIND_SIZE_TIPS[grindSize]}
+                        />
+                        <SelectionTipCard label="Passadas" tip={GRIND_PASS_TIPS[grindPass]} />
+                      </div>
                     </div>
-                  </div>
+
+                    <div className="p-5 rounded-2xl bg-card border border-border space-y-3">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-display text-lg font-semibold text-foreground">
+                            Equipamento de cocao
+                          </h3>
+                          <InfoTooltip label="Afeta alertas de gordura e sugestoes de preparo." />
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          Afeta alertas e recomendacoes de gordura.
+                        </p>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {prepOptions.map((option) => (
+                          <Button
+                            key={option.value}
+                            variant={prepStyle === option.value ? "default" : "secondary"}
+                            size="sm"
+                            onClick={() => setPrepStyle(option.value)}
+                            className="rounded-full"
+                          >
+                            {option.label}
+                          </Button>
+                        ))}
+                      </div>
+                      <SelectionTipCard label="Dica do equipamento" tip={getPrepStyleTip(prepStyle)} />
+                    </div>
 
                   <div className="flex items-center justify-end gap-2">
                     <Button variant="default" onClick={handleNextCustomizeStep}>
