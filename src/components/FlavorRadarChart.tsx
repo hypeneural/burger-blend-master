@@ -8,6 +8,7 @@ interface FlavorRadarChartProps {
   extras: BlendExtra[];
   burgerCount: number;
   burgerWeight: number;
+  animate?: boolean;
 }
 
 export function FlavorRadarChart({
@@ -15,6 +16,7 @@ export function FlavorRadarChart({
   extras,
   burgerCount,
   burgerWeight,
+  animate = true,
 }: FlavorRadarChartProps) {
   const data = calculateFlavorRadarData(ingredients, extras, burgerCount, burgerWeight);
 
@@ -29,6 +31,7 @@ export function FlavorRadarChart({
             dataKey="value"
             stroke="hsl(var(--primary))"
             fill="hsl(var(--primary) / 0.35)"
+            isAnimationActive={animate}
           />
         </RadarChart>
       </ResponsiveContainer>

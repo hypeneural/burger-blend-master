@@ -1,8 +1,10 @@
 import { Suspense, lazy, useEffect, useMemo } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, MotionConfig, motion } from "framer-motion";
 import { ArrowLeft, Bookmark, Plus, Sparkles } from "lucide-react";
 import { BlendCard } from "@/components/BlendCard";
+import { BlendSummary } from "@/components/BlendSummary";
 import { BottomNav } from "@/components/BottomNav";
+import { ConnectionBanner } from "@/components/ConnectionBanner";
 import { ExtraPicker } from "@/components/ExtraPicker";
 import { ExtrasSection } from "@/components/ExtrasSection";
 import { FatIndicator } from "@/components/FatIndicator";
@@ -33,6 +35,7 @@ import {
 } from "@/lib/blendStorage";
 import { loadCatalog, seedCatalogIfNeeded } from "@/lib/contentStorage";
 import { toast } from "@/hooks/use-toast";
+import { useNetworkStatus } from "@/hooks/use-network-status";
 import { useWakeLock } from "@/hooks/use-wake-lock";
 import { useBlendStore } from "@/store/useBlendStore";
 import type { SavedBlend } from "@/types/blend";
@@ -128,6 +131,8 @@ export default function Index() {
   } = useBlendStore();
 
   const wakeLockSupported = typeof navigator !== "undefined" && "wakeLock" in navigator;
+  const { isOnline, isLowData, effectiveType } = useNetworkStatus();
+  const shouldAnimate = !isLowData;
 
   const prepOptions = [
     { value: "Chapa", label: "Chapa" },
@@ -292,7 +297,9 @@ export default function Index() {
     setPreference("wakeLockEnabled", value);
   };
 
-  const chartFallback = <div className="h-48 rounded-2xl bg-muted/40 animate-pulse" />;
+  const chartFallback = (
+    <div className="h-48 rounded-2xl bg-muted/40 animate-pulse" />
+  );
   const stackFallback = (
     <div className="rounded-2xl border border-border bg-card p-4 text-sm text-muted-foreground">
       Montando o stack visual...
@@ -305,9 +312,15 @@ export default function Index() {
   );
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-md mx-auto px-4 pb-36">
-        <AnimatePresence mode="wait">
+    <MotionConfig reducedMotion={isLowData ? "always" : "user"}>
+      <div className="min-h-screen bg-background">
+        <div className="max-w-md mx-auto px-4 pb-36">
+          <ConnectionBanner
+            isOnline={isOnline}
+            isLowData={isLowData}
+            effectiveType={effectiveType}
+          />
+          <AnimatePresence mode="wait">
           {activeTab === "lab" && (
             <motion.section
               key="lab"
@@ -411,6 +424,16 @@ export default function Index() {
                       />
                     </div>
 
+                    <BlendSummary
+                      ingredients={ingredientsState}
+                      extras={extras}
+                      burgerCount={burgerCount}
+                      burgerWeight={burgerWeight}
+                      fatPercentage={fatPercentage}
+                      totalPercentage={totalPercentage}
+                      prepStyle={prepStyle}
+                    />
+
                     <div className="p-5 rounded-2xl bg-card border border-border space-y-4">
                       <div className="flex items-center justify-between">
                         <h3 className="font-display text-lg font-semibold text-foreground">
@@ -419,7 +442,7 @@ export default function Index() {
                         <span className="text-xs text-muted-foreground">Gordura x Magro</span>
                       </div>
                       <Suspense fallback={chartFallback}>
-                        <FatDonutChart fatPercentage={fatPercentage} />
+                        <FatDonutChart fatPercentage={fatPercentage} animate={shouldAnimate} />
                       </Suspense>
                       <TargetProgress current={fatPercentage} target={targetFat} />
                     </div>
@@ -523,7 +546,9 @@ export default function Index() {
                         <h3 className="font-display text-lg font-semibold text-foreground">
                           Roda de sabores
                         </h3>
-                        <span className="text-xs text-muted-foreground">Salgado ao picante</span>
+                        <span className="text-xs text-muted-foreground">
+                          Salgado ao picante
+                        </span>
                       </div>
                       <Suspense fallback={chartFallback}>
                         <FlavorRadarChart
@@ -531,6 +556,7 @@ export default function Index() {
                           extras={extras}
                           burgerCount={burgerCount}
                           burgerWeight={burgerWeight}
+                          animate={shouldAnimate}
                         />
                       </Suspense>
                     </div>
@@ -748,27 +774,28 @@ export default function Index() {
               </div>
             </motion.section>
           )}
-        </AnimatePresence>
-      </div>
+          </AnimatePresence>
+        </div>
 
-      {activeTab === "lab" && step === "customize" && (
-        <div className="fixed left-0 right-0 bottom-24 z-40">
-          <div className="max-w-md mx-auto px-4">
-            <div className="rounded-2xl bg-background/95 border border-border shadow-card p-2 backdrop-blur">
-              <Button
-                variant="warm"
-                size="xl"
-                className="w-full"
-                onClick={() => setStep("report")}
-              >
-                Gerar Receita Completa
-              </Button>
+        {activeTab === "lab" && step === "customize" && (
+          <div className="fixed left-0 right-0 bottom-24 z-40">
+            <div className="max-w-md mx-auto px-4">
+              <div className="rounded-2xl bg-background/95 border border-border shadow-card p-2 backdrop-blur">
+                <Button
+                  variant="warm"
+                  size="xl"
+                  className="w-full"
+                  onClick={() => setStep("report")}
+                >
+                  Gerar Receita Completa
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      <BottomNav activeTab={activeTab} onChange={setActiveTab} />
-    </div>
+        <BottomNav activeTab={activeTab} onChange={setActiveTab} />
+      </div>
+    </MotionConfig>
   );
 }

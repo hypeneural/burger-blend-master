@@ -2,6 +2,7 @@ import { Pie, PieChart, ResponsiveContainer, Cell } from "recharts";
 
 interface FatDonutChartProps {
   fatPercentage: number;
+  animate?: boolean;
 }
 
 const zoneData = [
@@ -25,7 +26,7 @@ const getStatusLabel = (fatPercentage: number) => {
   return "Excesso";
 };
 
-export function FatDonutChart({ fatPercentage }: FatDonutChartProps) {
+export function FatDonutChart({ fatPercentage, animate = true }: FatDonutChartProps) {
   const fat = Math.min(Math.max(fatPercentage, 0), 100);
   const data = [
     { name: "Gordura", value: fat },
@@ -43,6 +44,7 @@ export function FatDonutChart({ fatPercentage }: FatDonutChartProps) {
             outerRadius={78}
             innerRadius={66}
             stroke="transparent"
+            isAnimationActive={animate}
           >
             {zoneData.map((entry) => (
               <Cell key={entry.name} fill={entry.color} />
@@ -54,6 +56,7 @@ export function FatDonutChart({ fatPercentage }: FatDonutChartProps) {
             outerRadius={62}
             innerRadius={34}
             stroke="transparent"
+            isAnimationActive={animate}
           >
             <Cell fill={fatColor} />
             <Cell fill="hsl(var(--muted))" />
