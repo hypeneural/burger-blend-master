@@ -15,9 +15,9 @@ Checklist atualizado com foco em mobile-first, performance e offline.
 - [x] **Precache seletivo por categoria**: baixar conteudo mais acessado primeiro (bovinos/presets) e expandir sob demanda.
 
 ## P1 - UX mobile nativa (template)
-- [ ] **Agrupar blocos por etapas**: reduzir scroll e mostrar somente a proxima decisao do usuario.
-- [ ] **Resumo sticky inteligente**: card compacto fixo no topo com gordura, custo e total da receita.
-- [ ] **Feedback de acao instantaneo**: toasts curtos para salvar/compartilhar/exportar e erros de validacao.
+- [x] **Agrupar blocos por etapas**: reduzir scroll e mostrar somente a proxima decisao do usuario.
+- [x] **Resumo sticky inteligente**: card compacto fixo no topo com gordura, custo e total da receita.
+- [x] **Feedback de acao instantaneo**: toasts curtos para salvar/compartilhar/exportar e erros de validacao.
 
 ## P1 - Profissional (padronizacao e operacao)
 - [ ] **Substituicao inteligente de cortes**: sugerir troca (Acem -> Paleta) mantendo gordura e custo.

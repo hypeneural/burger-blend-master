@@ -15,6 +15,7 @@ import { QuantityCalculator } from "@/components/QuantityCalculator";
 import { ReverseBlendCalculator } from "@/components/ReverseBlendCalculator";
 import { SmartAlerts } from "@/components/SmartAlerts";
 import { Stepper } from "@/components/Stepper";
+import { StickySummaryBar } from "@/components/StickySummaryBar";
 import { TargetLock } from "@/components/TargetLock";
 import { TargetProgress } from "@/components/TargetProgress";
 import { InfoTooltip } from "@/components/InfoTooltip";
@@ -23,6 +24,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { BURGER_STYLES, GRIND_PASSES, GRIND_SIZES } from "@/data/constants";
 import { calculateBaseWeight, calculateFatPercentage, formatWeight } from "@/lib/blendMath";
+import { calculateBlendCost } from "@/lib/costing";
 import {
   addHistoryEntry,
   addSavedBlend,
@@ -167,6 +169,31 @@ export function LabTab({ shouldAnimate, showCharts }: LabTabProps) {
   }));
 
   const [inputMode, setInputMode] = useState<"percentage" | "grams">("percentage");
+  const customizeSteps = [
+    {
+      id: "setup",
+      label: "Base",
+      description: "Defina porcoes, estilo e moagem.",
+    },
+    {
+      id: "blend",
+      label: "Blend",
+      description: "Escolha cortes e ajuste percentuais.",
+    },
+    {
+      id: "extras",
+      label: "Extras",
+      description: "Finalize com adicionais e montagem.",
+    },
+    {
+      id: "insights",
+      label: "Analise",
+      description: "Gordura, custo e alertas finais.",
+    },
+  ] as const;
+
+  type CustomizeStep = (typeof customizeSteps)[number]["id"];
+  const [customizeStep, setCustomizeStep] = useState<CustomizeStep>("setup");
 
   const prepOptions = [
     { value: "Chapa", label: "Chapa" },
@@ -211,6 +238,11 @@ export function LabTab({ shouldAnimate, showCharts }: LabTabProps) {
   const currentBlendWeight = useMemo(
     () => (baseWeight * totalPercentage) / 100,
     [baseWeight, totalPercentage],
+  );
+
+  const costSummary = useMemo(
+    () => calculateBlendCost(ingredientsState, extras, burgerCount, burgerWeight, priceOverrides),
+    [ingredientsState, extras, burgerCount, burgerWeight, priceOverrides],
   );
 
   const extraIngredients = useMemo(
@@ -336,6 +368,57 @@ export function LabTab({ shouldAnimate, showCharts }: LabTabProps) {
     import("@/components/BlendReport");
   }, [step]);
 
+  useEffect(() => {
+    if (step !== "customize") return;
+    setCustomizeStep("setup");
+  }, [step]);
+
+  useEffect(() => {
+    if (step !== "customize") return;
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [customizeStep, step]);
+
+  const customizeStepIndex = customizeSteps.findIndex((item) => item.id === customizeStep);
+  const safeCustomizeStepIndex = Math.max(0, customizeStepIndex);
+  const lastCustomizeStep = customizeSteps[customizeSteps.length - 1]?.id;
+  const activeCustomizeStep = customizeSteps[safeCustomizeStepIndex];
+  const isLastCustomizeStep = customizeStep === lastCustomizeStep;
+
+  const handleNextCustomizeStep = () => {
+    const nextIndex = Math.min(customizeSteps.length - 1, safeCustomizeStepIndex + 1);
+    setCustomizeStep(customizeSteps[nextIndex].id);
+  };
+
+  const handlePrevCustomizeStep = () => {
+    const prevIndex = Math.max(0, safeCustomizeStepIndex - 1);
+    setCustomizeStep(customizeSteps[prevIndex].id);
+  };
+
+  const handleGoToReport = () => {
+    if (ingredientsState.length === 0) {
+      toast({
+        title: "Adicione ingredientes",
+        description: "Escolha pelo menos um corte para montar o blend.",
+      });
+      return;
+    }
+    if (burgerCount <= 0 || burgerWeight <= 0) {
+      toast({
+        title: "Ajuste as quantidades",
+        description: "Defina numero de burgers e gramatura validos.",
+      });
+      return;
+    }
+    if (Math.round(totalPercentage) !== 100) {
+      toast({
+        title: "Blend incompleto",
+        description: "O total precisa fechar 100% antes de gerar a receita.",
+      });
+      return;
+    }
+    setStep("report");
+  };
+
   return (
     <motion.section
       key="lab"
@@ -396,359 +479,471 @@ export function LabTab({ shouldAnimate, showCharts }: LabTabProps) {
                 <ArrowLeft className="w-5 h-5" />
               </Button>
               <div className="flex-1 space-y-3">
-                <div className="p-4 rounded-2xl bg-card border border-border space-y-3">
-                  <div className="space-y-1">
-                    <label className="text-xs uppercase tracking-wide text-muted-foreground">
-                      Nome do blend
-                    </label>
-                    <Input
-                      value={blendName}
-                      onChange={(event) => setBlendName(event.target.value)}
-                      className="text-lg font-semibold"
-                      placeholder="Nome do seu blend"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-xs uppercase tracking-wide text-muted-foreground">
-                      Descricao (opcional)
-                    </label>
-                    <Textarea
-                      value={blendDescription}
-                      onChange={(event) => setBlendDescription(event.target.value)}
-                      rows={2}
-                      className="resize-none"
-                      placeholder="Ex: Blend para chapa, sabor intenso"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-5 rounded-2xl bg-card border border-border space-y-3">
-              <FatIndicator percentage={fatPercentage} />
-              <FatExplanationDialog
-                ingredients={ingredientsState}
-                extras={extras}
-                burgerCount={burgerCount}
-                burgerWeight={burgerWeight}
-              />
-            </div>
-
-            <BlendSummary
-              ingredients={ingredientsState}
-              extras={extras}
-              burgerCount={burgerCount}
-              burgerWeight={burgerWeight}
-              fatPercentage={fatPercentage}
-              totalPercentage={totalPercentage}
-              prepStyle={prepStyle}
-            />
-
-            <div className="p-5 rounded-2xl bg-card border border-border space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <h3 className="font-display text-lg font-semibold text-foreground">
-                    Visualizacao de gordura
-                  </h3>
-                  <InfoTooltip label="Comparacao entre gordura e carne magra. Use para ajustar o alvo." />
-                </div>
-                <span className="text-xs text-muted-foreground">Gordura x Magro</span>
-              </div>
-              {showCharts ? (
-                <Suspense fallback={chartFallback}>
-                  <FatDonutChart fatPercentage={fatPercentage} animate={shouldAnimate} />
-                </Suspense>
-              ) : (
-                <div className="rounded-xl bg-muted/40 p-4 text-xs text-muted-foreground">
-                  Modo economia de dados ativo. Graficos ocultos.
-                </div>
-              )}
-              <TargetProgress current={fatPercentage} target={targetFat} />
-            </div>
-
-            <TargetLock
-              ingredients={ingredientsState}
-              extras={extras}
-              burgerCount={burgerCount}
-              burgerWeight={burgerWeight}
-              target={targetFat}
-              roundingStep={roundingStep}
-              fatSourceId={fatSourceId}
-              onTargetChange={handleTargetChange}
-              onRoundingStepChange={handleRoundingChange}
-              onFatSourceChange={handleFatSourceChange}
-              onApplySuggestion={handleApplyTargetSuggestion}
-            />
-
-            <ReverseBlendCalculator
-              ingredients={catalogIngredients}
-              baseWeight={baseWeight}
-              onApply={(next) => {
-                setIngredients(
-                  next.map((item) => ({
-                    ingredientId: item.ingredientId,
-                    percentage: item.percentage,
-                  })),
-                );
-              }}
-            />
-
-            <div className="p-5 rounded-2xl bg-card border border-border space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <h3 className="font-display text-lg font-semibold text-foreground">Estilo do burger</h3>
-                  <InfoTooltip label="Define textura final e influencia moagem e preparo." />
-                </div>
-                <span className="text-xs text-muted-foreground">Perfil de cocao</span>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {burgerStyleOptions.map((option) => (
-                  <Button
-                    key={option.value}
-                    variant={burgerStyle === option.value ? "default" : "secondary"}
-                    size="sm"
-                    onClick={() => setBurgerStyle(option.value)}
-                    className="rounded-full"
-                  >
-                    {option.label}
-                  </Button>
-                ))}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Escolha o estilo que melhor representa a experiencia desejada.
-              </p>
-            </div>
-
-            <div className="p-5 rounded-2xl bg-card border border-border space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <h3 className="font-display text-lg font-semibold text-foreground">Moagem</h3>
-                  <InfoTooltip label="Moagem define textura. Fina para smash, grossa para burger alto." />
-                </div>
-                <span className="text-xs text-muted-foreground">Granulometria</span>
-              </div>
-              <div className="space-y-2">
-                <p className="text-xs text-muted-foreground">Tamanho do disco</p>
-                <div className="flex flex-wrap gap-2">
-                  {grindSizeOptions.map((option) => (
-                    <Button
-                      key={option.value}
-                      variant={grindSize === option.value ? "default" : "secondary"}
-                      size="sm"
-                      onClick={() => setGrindSize(option.value)}
-                    >
-                      {option.label}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-              <div className="space-y-2">
-                <p className="text-xs text-muted-foreground">Passadas</p>
-                <div className="flex flex-wrap gap-2">
-                  {grindPassOptions.map((option) => (
-                    <Button
-                      key={option.value}
-                      variant={grindPass === option.value ? "default" : "secondary"}
-                      size="sm"
-                      onClick={() => setGrindPass(option.value)}
-                    >
-                      {option.label}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <div className="p-5 rounded-2xl bg-card border border-border space-y-3">
-              <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="font-display text-lg font-semibold text-foreground">Equipamento de cocao</h3>
-                  <InfoTooltip label="Afeta alertas de gordura e sugestoes de preparo." />
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Afeta alertas e recomendacoes de gordura.
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {prepOptions.map((option) => (
-                  <Button
-                    key={option.value}
-                    variant={prepStyle === option.value ? "default" : "secondary"}
-                    size="sm"
-                    onClick={() => setPrepStyle(option.value)}
-                    className="rounded-full"
-                  >
-                    {option.label}
-                  </Button>
-                ))}
-              </div>
-            </div>
-
-            <SmartAlerts
-              ingredients={ingredientsState}
-              fatPercentage={fatPercentage}
-              prepStyle={prepStyle}
-              burgerStyle={burgerStyle}
-              thresholds={alertThresholds}
-            />
-
-            <section className="space-y-3">
-              <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-muted/40 p-3 text-xs text-muted-foreground">
-                <div className="flex items-center gap-2">
-                  <span className="font-medium text-foreground">Modo de ajuste</span>
-                  <InfoTooltip label="Porcentagem mantem o total em 100%. Gramas ajusta pelo peso base do blend." />
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant={inputMode === "percentage" ? "default" : "secondary"}
-                    size="sm"
-                    onClick={() => {
-                      setInputMode("percentage");
-                      normalizeIngredients();
-                    }}
-                  >
-                    Percentual
-                  </Button>
-                  <Button
-                    variant={inputMode === "grams" ? "default" : "secondary"}
-                    size="sm"
-                    onClick={() => setInputMode("grams")}
-                  >
-                    Gramas
-                  </Button>
-                </div>
-                <div className="text-xs text-muted-foreground">
-                  Base: {baseWeight >= 1000 ? `${(baseWeight / 1000).toFixed(2)}kg` : `${baseWeight}g`}
-                </div>
-              </div>
-              {inputMode === "grams" && (
-                <div className="rounded-xl bg-background p-3 text-xs text-muted-foreground space-y-2">
+                <div className="rounded-2xl border border-border bg-card p-4 space-y-3">
                   <div className="flex items-center justify-between">
-                    <span>Total atual</span>
-                    <span
-                      className={
-                        totalPercentage === 100 ? "text-vegan-green" : "text-fat-warning"
-                      }
-                    >
-                      {formatWeight(currentBlendWeight)}{" "}
-                      {totalPercentage === 100
-                        ? "(ok)"
-                        : `(${totalPercentage > 100 ? "+" : "-"}${formatWeight(
-                            Math.abs(currentBlendWeight - baseWeight),
-                          )})`}
-                    </span>
+                    <div>
+                      <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                        Etapa {safeCustomizeStepIndex + 1} de {customizeSteps.length}
+                      </p>
+                      <p className="font-display text-lg font-semibold text-foreground">
+                        {activeCustomizeStep?.label}
+                      </p>
+                    </div>
+                    <span className="text-xs text-muted-foreground">Fluxo guiado</span>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    <Button variant="default" size="sm" onClick={normalizeIngredients}>
-                      Normalizar para 100%
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={handleAdjustTotal}
-                      disabled={currentBlendWeight <= 0}
-                    >
-                      Ajustar total base
-                    </Button>
+                    {customizeSteps.map((item, index) => (
+                      <Button
+                        key={item.id}
+                        variant={customizeStep === item.id ? "default" : "secondary"}
+                        size="sm"
+                        onClick={() => setCustomizeStep(item.id)}
+                        className="rounded-full"
+                      >
+                        {index + 1}. {item.label}
+                      </Button>
+                    ))}
                   </div>
-                  <p className="text-[11px] text-muted-foreground">
-                    Normalizar redistribui os percentuais. Ajustar total recalcula o peso por burger.
-                  </p>
+                  <p className="text-xs text-muted-foreground">{activeCustomizeStep?.description}</p>
                 </div>
-              )}
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-display text-lg font-semibold text-foreground">
-                      Blend da carne
-                    </h3>
-                    <InfoTooltip label="Aqui entra apenas a carne base. O total precisa fechar 100%." />
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Somente carnes e base do blend. Deve somar 100%.
-                  </p>
-                </div>
-                <span
-                  className={`text-sm ${totalPercentage === 100 ? "text-vegan-green" : "text-fat-warning"}`}
-                >
-                  {totalPercentage}%
-                </span>
               </div>
+            </div>
 
-              <AnimatePresence>
-                {ingredientsState.map((item) => (
-                  <IngredientSlider
-                    key={item.ingredientId}
-                    ingredientId={item.ingredientId}
-                    percentage={item.percentage}
-                    onPercentageChange={(value) => handleIngredientChange(item.ingredientId, value)}
-                    onRemove={() => handleRemoveIngredient(item.ingredientId)}
-                    showRemove={ingredientsState.length > 1}
-                    prepStyle={prepStyle}
-                    inputMode={inputMode}
-                    baseWeight={baseWeight}
-                  />
-                ))}
-              </AnimatePresence>
-
-              <Button variant="outline" className="w-full" onClick={() => setShowPicker(true)}>
-                <Plus className="w-4 h-4" />
-                Adicionar Ingrediente
-              </Button>
-            </section>
-
-            <ExtrasSection
-              extras={extras}
-              onAddClick={() => setShowExtrasPicker(true)}
-              onChange={updateExtra}
-              onRemove={removeExtra}
+            <StickySummaryBar
+              fatPercentage={fatPercentage}
+              costPerBurger={costSummary.costPerBurger}
+              totalWeight={costSummary.totalWeight}
             />
 
-            <Suspense fallback={stackFallback}>
-              <BurgerStack />
-            </Suspense>
+            <AnimatePresence mode="wait">
+              {customizeStep === "setup" && (
+                <motion.div
+                  key="customize-setup"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="space-y-6"
+                >
+                  <div className="p-4 rounded-2xl bg-card border border-border space-y-3">
+                    <div className="space-y-1">
+                      <label className="text-xs uppercase tracking-wide text-muted-foreground">
+                        Nome do blend
+                      </label>
+                      <Input
+                        value={blendName}
+                        onChange={(event) => setBlendName(event.target.value)}
+                        className="text-lg font-semibold"
+                        placeholder="Nome do seu blend"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs uppercase tracking-wide text-muted-foreground">
+                        Descricao (opcional)
+                      </label>
+                      <Textarea
+                        value={blendDescription}
+                        onChange={(event) => setBlendDescription(event.target.value)}
+                        rows={2}
+                        className="resize-none"
+                        placeholder="Ex: Blend para chapa, sabor intenso"
+                      />
+                    </div>
+                  </div>
 
-            <div className="p-5 rounded-2xl bg-card border border-border space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <h3 className="font-display text-lg font-semibold text-foreground">Roda de sabores</h3>
-                  <InfoTooltip label="Equilibrio de salgado, umami, doce e picante conforme ingredientes." />
-                </div>
-                <span className="text-xs text-muted-foreground">Salgado ao picante</span>
-              </div>
-              {showCharts ? (
-                <Suspense fallback={chartFallback}>
-                  <FlavorRadarChart
+                  <QuantityCalculator
+                    burgerCount={burgerCount}
+                    burgerWeight={burgerWeight}
+                    onBurgerCountChange={setBurgerCount}
+                    onBurgerWeightChange={setBurgerWeight}
+                  />
+
+                  <div className="p-5 rounded-2xl bg-card border border-border space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-display text-lg font-semibold text-foreground">
+                          Estilo do burger
+                        </h3>
+                        <InfoTooltip label="Define textura final e influencia moagem e preparo." />
+                      </div>
+                      <span className="text-xs text-muted-foreground">Perfil de cocao</span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {burgerStyleOptions.map((option) => (
+                        <Button
+                          key={option.value}
+                          variant={burgerStyle === option.value ? "default" : "secondary"}
+                          size="sm"
+                          onClick={() => setBurgerStyle(option.value)}
+                          className="rounded-full"
+                        >
+                          {option.label}
+                        </Button>
+                      ))}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Escolha o estilo que melhor representa a experiencia desejada.
+                    </p>
+                  </div>
+
+                  <div className="p-5 rounded-2xl bg-card border border-border space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-display text-lg font-semibold text-foreground">Moagem</h3>
+                        <InfoTooltip label="Moagem define textura. Fina para smash, grossa para burger alto." />
+                      </div>
+                      <span className="text-xs text-muted-foreground">Granulometria</span>
+                    </div>
+                    <div className="space-y-2">
+                      <p className="text-xs text-muted-foreground">Tamanho do disco</p>
+                      <div className="flex flex-wrap gap-2">
+                        {grindSizeOptions.map((option) => (
+                          <Button
+                            key={option.value}
+                            variant={grindSize === option.value ? "default" : "secondary"}
+                            size="sm"
+                            onClick={() => setGrindSize(option.value)}
+                          >
+                            {option.label}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <p className="text-xs text-muted-foreground">Passadas</p>
+                      <div className="flex flex-wrap gap-2">
+                        {grindPassOptions.map((option) => (
+                          <Button
+                            key={option.value}
+                            variant={grindPass === option.value ? "default" : "secondary"}
+                            size="sm"
+                            onClick={() => setGrindPass(option.value)}
+                          >
+                            {option.label}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-5 rounded-2xl bg-card border border-border space-y-3">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-display text-lg font-semibold text-foreground">
+                          Equipamento de cocao
+                        </h3>
+                        <InfoTooltip label="Afeta alertas de gordura e sugestoes de preparo." />
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        Afeta alertas e recomendacoes de gordura.
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {prepOptions.map((option) => (
+                        <Button
+                          key={option.value}
+                          variant={prepStyle === option.value ? "default" : "secondary"}
+                          size="sm"
+                          onClick={() => setPrepStyle(option.value)}
+                          className="rounded-full"
+                        >
+                          {option.label}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-end gap-2">
+                    <Button variant="default" onClick={handleNextCustomizeStep}>
+                      Continuar
+                    </Button>
+                  </div>
+                </motion.div>
+              )}
+
+              {customizeStep === "blend" && (
+                <motion.div
+                  key="customize-blend"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="space-y-6"
+                >
+                  <section className="space-y-3">
+                    <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-muted/40 p-3 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-foreground">Modo de ajuste</span>
+                        <InfoTooltip label="Porcentagem mantem o total em 100%. Gramas ajusta pelo peso base do blend." />
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant={inputMode === "percentage" ? "default" : "secondary"}
+                          size="sm"
+                          onClick={() => {
+                            setInputMode("percentage");
+                            normalizeIngredients();
+                          }}
+                        >
+                          Percentual
+                        </Button>
+                        <Button
+                          variant={inputMode === "grams" ? "default" : "secondary"}
+                          size="sm"
+                          onClick={() => setInputMode("grams")}
+                        >
+                          Gramas
+                        </Button>
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        Base: {baseWeight >= 1000 ? `${(baseWeight / 1000).toFixed(2)}kg` : `${baseWeight}g`}
+                      </div>
+                    </div>
+                    {inputMode === "grams" && (
+                      <div className="rounded-xl bg-background p-3 text-xs text-muted-foreground space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span>Total atual</span>
+                          <span
+                            className={
+                              totalPercentage === 100 ? "text-vegan-green" : "text-fat-warning"
+                            }
+                          >
+                            {formatWeight(currentBlendWeight)}{" "}
+                            {totalPercentage === 100
+                              ? "(ok)"
+                              : `(${totalPercentage > 100 ? "+" : "-"}${formatWeight(
+                                  Math.abs(currentBlendWeight - baseWeight),
+                                )})`}
+                          </span>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          <Button variant="default" size="sm" onClick={normalizeIngredients}>
+                            Normalizar para 100%
+                          </Button>
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={handleAdjustTotal}
+                            disabled={currentBlendWeight <= 0}
+                          >
+                            Ajustar total base
+                          </Button>
+                        </div>
+                        <p className="text-[11px] text-muted-foreground">
+                          Normalizar redistribui os percentuais. Ajustar total recalcula o peso por burger.
+                        </p>
+                      </div>
+                    )}
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-display text-lg font-semibold text-foreground">
+                            Blend da carne
+                          </h3>
+                          <InfoTooltip label="Aqui entra apenas a carne base. O total precisa fechar 100%." />
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          Somente carnes e base do blend. Deve somar 100%.
+                        </p>
+                      </div>
+                      <span
+                        className={`text-sm ${totalPercentage === 100 ? "text-vegan-green" : "text-fat-warning"}`}
+                      >
+                        {totalPercentage}%
+                      </span>
+                    </div>
+
+                    <AnimatePresence>
+                      {ingredientsState.map((item) => (
+                        <IngredientSlider
+                          key={item.ingredientId}
+                          ingredientId={item.ingredientId}
+                          percentage={item.percentage}
+                          onPercentageChange={(value) => handleIngredientChange(item.ingredientId, value)}
+                          onRemove={() => handleRemoveIngredient(item.ingredientId)}
+                          showRemove={ingredientsState.length > 1}
+                          prepStyle={prepStyle}
+                          inputMode={inputMode}
+                          baseWeight={baseWeight}
+                        />
+                      ))}
+                    </AnimatePresence>
+
+                    <Button variant="outline" className="w-full" onClick={() => setShowPicker(true)}>
+                      <Plus className="w-4 h-4" />
+                      Adicionar Ingrediente
+                    </Button>
+                  </section>
+
+                  <ReverseBlendCalculator
+                    ingredients={catalogIngredients}
+                    baseWeight={baseWeight}
+                    onApply={(next) => {
+                      setIngredients(
+                        next.map((item) => ({
+                          ingredientId: item.ingredientId,
+                          percentage: item.percentage,
+                        })),
+                      );
+                    }}
+                  />
+
+                  <div className="flex items-center justify-between gap-2">
+                    <Button variant="secondary" onClick={handlePrevCustomizeStep}>
+                      Voltar
+                    </Button>
+                    <Button variant="default" onClick={handleNextCustomizeStep}>
+                      Continuar
+                    </Button>
+                  </div>
+                </motion.div>
+              )}
+
+              {customizeStep === "extras" && (
+                <motion.div
+                  key="customize-extras"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="space-y-6"
+                >
+                  <ExtrasSection
+                    extras={extras}
+                    onAddClick={() => setShowExtrasPicker(true)}
+                    onChange={updateExtra}
+                    onRemove={removeExtra}
+                  />
+
+                  <Suspense fallback={stackFallback}>
+                    <BurgerStack />
+                  </Suspense>
+
+                  <div className="flex items-center justify-between gap-2">
+                    <Button variant="secondary" onClick={handlePrevCustomizeStep}>
+                      Voltar
+                    </Button>
+                    <Button variant="default" onClick={handleNextCustomizeStep}>
+                      Continuar
+                    </Button>
+                  </div>
+                </motion.div>
+              )}
+
+              {customizeStep === "insights" && (
+                <motion.div
+                  key="customize-insights"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="space-y-6"
+                >
+                  <div className="p-5 rounded-2xl bg-card border border-border space-y-3">
+                    <FatIndicator percentage={fatPercentage} />
+                    <FatExplanationDialog
+                      ingredients={ingredientsState}
+                      extras={extras}
+                      burgerCount={burgerCount}
+                      burgerWeight={burgerWeight}
+                    />
+                  </div>
+
+                  <BlendSummary
                     ingredients={ingredientsState}
                     extras={extras}
                     burgerCount={burgerCount}
                     burgerWeight={burgerWeight}
-                    animate={shouldAnimate}
+                    fatPercentage={fatPercentage}
+                    totalPercentage={totalPercentage}
+                    prepStyle={prepStyle}
                   />
-                </Suspense>
-              ) : (
-                <div className="rounded-xl bg-muted/40 p-4 text-xs text-muted-foreground">
-                  Modo economia de dados ativo. Graficos ocultos.
-                </div>
+
+                  <SmartAlerts
+                    ingredients={ingredientsState}
+                    fatPercentage={fatPercentage}
+                    prepStyle={prepStyle}
+                    burgerStyle={burgerStyle}
+                    thresholds={alertThresholds}
+                  />
+
+                  <TargetLock
+                    ingredients={ingredientsState}
+                    extras={extras}
+                    burgerCount={burgerCount}
+                    burgerWeight={burgerWeight}
+                    target={targetFat}
+                    roundingStep={roundingStep}
+                    fatSourceId={fatSourceId}
+                    onTargetChange={handleTargetChange}
+                    onRoundingStepChange={handleRoundingChange}
+                    onFatSourceChange={handleFatSourceChange}
+                    onApplySuggestion={handleApplyTargetSuggestion}
+                  />
+
+                  <div className="p-5 rounded-2xl bg-card border border-border space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-display text-lg font-semibold text-foreground">
+                          Visualizacao de gordura
+                        </h3>
+                        <InfoTooltip label="Comparacao entre gordura e carne magra. Use para ajustar o alvo." />
+                      </div>
+                      <span className="text-xs text-muted-foreground">Gordura x Magro</span>
+                    </div>
+                    {showCharts ? (
+                      <Suspense fallback={chartFallback}>
+                        <FatDonutChart fatPercentage={fatPercentage} animate={shouldAnimate} />
+                      </Suspense>
+                    ) : (
+                      <div className="rounded-xl bg-muted/40 p-4 text-xs text-muted-foreground">
+                        Modo economia de dados ativo. Graficos ocultos.
+                      </div>
+                    )}
+                    <TargetProgress current={fatPercentage} target={targetFat} />
+                  </div>
+
+                  <div className="p-5 rounded-2xl bg-card border border-border space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-display text-lg font-semibold text-foreground">
+                          Roda de sabores
+                        </h3>
+                        <InfoTooltip label="Equilibrio de salgado, umami, doce e picante conforme ingredientes." />
+                      </div>
+                      <span className="text-xs text-muted-foreground">Salgado ao picante</span>
+                    </div>
+                    {showCharts ? (
+                      <Suspense fallback={chartFallback}>
+                        <FlavorRadarChart
+                          ingredients={ingredientsState}
+                          extras={extras}
+                          burgerCount={burgerCount}
+                          burgerWeight={burgerWeight}
+                          animate={shouldAnimate}
+                        />
+                      </Suspense>
+                    ) : (
+                      <div className="rounded-xl bg-muted/40 p-4 text-xs text-muted-foreground">
+                        Modo economia de dados ativo. Graficos ocultos.
+                      </div>
+                    )}
+                  </div>
+
+                  <CostSimulator
+                    ingredients={ingredientsState}
+                    extras={extras}
+                    burgerCount={burgerCount}
+                    burgerWeight={burgerWeight}
+                    cmvTarget={cmvTarget}
+                    priceOverrides={priceOverrides}
+                    onCmvTargetChange={handleCmvTargetChange}
+                  />
+
+                  <div className="flex items-center justify-end gap-2">
+                    <Button variant="secondary" onClick={handlePrevCustomizeStep}>
+                      Voltar
+                    </Button>
+                  </div>
+                </motion.div>
               )}
-            </div>
-
-            <QuantityCalculator
-              burgerCount={burgerCount}
-              burgerWeight={burgerWeight}
-              onBurgerCountChange={setBurgerCount}
-              onBurgerWeightChange={setBurgerWeight}
-            />
-
-            <CostSimulator
-              ingredients={ingredientsState}
-              extras={extras}
-              burgerCount={burgerCount}
-              burgerWeight={burgerWeight}
-              cmvTarget={cmvTarget}
-              priceOverrides={priceOverrides}
-              onCmvTargetChange={handleCmvTargetChange}
-            />
+            </AnimatePresence>
 
             <AnimatePresence>
               {showPicker && (
@@ -774,7 +969,6 @@ export function LabTab({ shouldAnimate, showCharts }: LabTabProps) {
             </AnimatePresence>
           </motion.div>
         )}
-
         {step === "report" && (
           <motion.div
             key="lab-report"
@@ -806,11 +1000,11 @@ export function LabTab({ shouldAnimate, showCharts }: LabTabProps) {
         )}
       </AnimatePresence>
 
-      {step === "customize" && (
+      {step === "customize" && isLastCustomizeStep && (
         <div className="fixed left-0 right-0 bottom-24 z-40">
           <div className="max-w-md mx-auto px-4">
             <div className="rounded-2xl bg-background/95 border border-border shadow-card p-2 backdrop-blur">
-              <Button variant="warm" size="xl" className="w-full" onClick={() => setStep("report")}>
+              <Button variant="warm" size="xl" className="w-full" onClick={handleGoToReport}>
                 Gerar Receita Completa
               </Button>
             </div>

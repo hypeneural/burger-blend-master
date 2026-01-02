@@ -33,10 +33,11 @@ export function CacheStatusCard({
   remainingCategories,
   hasServiceWorker,
 }: CacheStatusCardProps) {
-  const readyLabel = isReady && hasServiceWorker ? "Offline pronto" : "Sincronizando cache";
-  const Icon = isReady && hasServiceWorker ? CheckCircle2 : Loader2;
+  if (isReady) return null;
+  const readyLabel = isReady ? "Cache pronto" : "Sincronizando cache";
+  const Icon = isReady ? CheckCircle2 : Loader2;
   const badgeStyle =
-    isReady && hasServiceWorker
+    isReady
       ? "bg-vegan-green/10 text-vegan-green border-vegan-green/30"
       : "bg-amber-50 text-amber-900 border-amber-200";
 
@@ -61,7 +62,7 @@ export function CacheStatusCard({
           </div>
           <div className="flex flex-wrap gap-2 text-[11px] text-muted-foreground">
             <span className="rounded-full border border-border px-2 py-0.5">
-              {hasServiceWorker ? "PWA ativo" : "Cache local"}
+              {hasServiceWorker ? "PWA ativo" : "Cache local ativo"}
             </span>
             {categories.length > 0 && (
               <span className="rounded-full border border-border px-2 py-0.5">
@@ -76,7 +77,9 @@ export function CacheStatusCard({
             )}
           </div>
           <p className="text-xs text-muted-foreground">
-            Quando estiver pronto, Wiki, Presets e Relatorio ficam disponiveis mesmo sem rede.
+            {hasServiceWorker
+              ? "Wiki, Presets e Relatorio ficam disponiveis mesmo sem rede."
+              : "Cache local ativo. Para offline total, instale o PWA."}
           </p>
         </div>
       </div>

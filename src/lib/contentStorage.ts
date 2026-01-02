@@ -133,13 +133,21 @@ export const getCatalogStatus = async () => {
     db.ingredients.count(),
   ]);
   const scope = parseScope(scopeEntry?.value);
-  const categories = scope?.categories ?? [];
+  let categories = scope?.categories ?? [];
+  if (categories.length === 0 && ingredientsCount > 0) {
+    const ingredientCategories = Array.from(
+      new Set((await db.ingredients.toArray()).map((item) => item.category)),
+    ) as IngredientCategory[];
+    if (ingredientCategories.length > 0) {
+      categories = ingredientCategories;
+      await saveScope(categories);
+    }
+  }
   const isReady = Boolean(
     versionEntry?.value === CONTENT_VERSION &&
       cutsCount > 0 &&
       presetsCount > 0 &&
-      ingredientsCount > 0 &&
-      categories.length > 0,
+      ingredientsCount > 0,
   );
 
   return {
