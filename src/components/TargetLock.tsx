@@ -1,4 +1,5 @@
 import { AlertTriangle, Lock } from "lucide-react";
+import { InfoTooltip } from "@/components/InfoTooltip";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
@@ -15,6 +16,7 @@ interface TargetLockProps {
   target: number;
   roundingStep: number;
   fatSourceId: string;
+  presetTargets?: number[];
   onTargetChange: (value: number) => void;
   onRoundingStepChange: (value: number) => void;
   onFatSourceChange: (value: string) => void;
@@ -31,6 +33,7 @@ export function TargetLock({
   target,
   roundingStep,
   fatSourceId,
+  presetTargets = [20, 22, 25, 30],
   onTargetChange,
   onRoundingStepChange,
   onFatSourceChange,
@@ -55,6 +58,23 @@ export function TargetLock({
         <div>
           <h3 className="font-display text-lg font-semibold text-foreground">Target Lock</h3>
           <p className="text-sm text-muted-foreground">Defina o alvo de gordura e ajuste automatico.</p>
+        </div>
+        <InfoTooltip label="Escolha um alvo de gordura. O app sugere quanto de gordura adicionar para bater a meta." />
+      </div>
+
+      <div className="space-y-2">
+        <span className="text-sm text-muted-foreground">Presets rapidos</span>
+        <div className="flex flex-wrap gap-2">
+          {presetTargets.map((preset) => (
+            <Button
+              key={preset}
+              variant={target === preset ? "default" : "secondary"}
+              size="sm"
+              onClick={() => onTargetChange(preset)}
+            >
+              {preset}%
+            </Button>
+          ))}
         </div>
       </div>
 

@@ -1,4 +1,5 @@
 import type { BlendIngredient } from "@/data/presets";
+import type { BurgerStyle, GrindPass, GrindSize } from "@/data/constants";
 
 export interface BlendExtra {
   ingredientId: string;
@@ -13,6 +14,9 @@ export interface SavedBlend {
   extras: BlendExtra[];
   burgerCount: number;
   burgerWeight: number;
+  burgerStyle: BurgerStyle;
+  grindSize: GrindSize;
+  grindPass: GrindPass;
   prepStyle: string;
   prepTips: string[];
   seasonings: string[];

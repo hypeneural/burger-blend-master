@@ -1,6 +1,7 @@
 ﻿import { motion } from 'framer-motion';
 import { Minus, Plus, Scale } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { InfoTooltip } from '@/components/InfoTooltip';
 import { cn } from '@/lib/utils';
 
 interface QuantityCalculatorProps {
@@ -27,7 +28,10 @@ export function QuantityCalculator({
           <Scale className="w-5 h-5 text-primary" />
         </div>
         <div>
-          <h3 className="font-display text-lg font-semibold text-foreground">Calculadora</h3>
+          <div className="flex items-center gap-2">
+            <h3 className="font-display text-lg font-semibold text-foreground">Calculadora</h3>
+            <InfoTooltip label="Define o peso base do blend. Esse total vira 100% do seu mix." />
+          </div>
           <p className="text-sm text-muted-foreground">Defina a quantidade desejada</p>
         </div>
       </div>

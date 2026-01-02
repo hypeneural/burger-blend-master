@@ -10,16 +10,38 @@ import {
 } from "@/lib/cutHelpers";
 import type { BlendIngredient } from "@/data/presets";
 import type { BlendExtra } from "@/types/blend";
+import type { BurgerStyle, GrindPass, GrindSize } from "@/data/constants";
 
 interface ButcherGuideProps {
   ingredients: BlendIngredient[];
   extras: BlendExtra[];
   baseWeight: number;
+  burgerStyle: BurgerStyle;
+  grindSize: GrindSize;
+  grindPass: GrindPass;
 }
 
 const butcherExtraIds = new Set(["bacon", "tutano"]);
 
-export function ButcherGuide({ ingredients, extras, baseWeight }: ButcherGuideProps) {
+const grindSizeLabels: Record<GrindSize, string> = {
+  FINE: "Fina (3mm)",
+  MEDIUM: "Media (5mm)",
+  COARSE: "Grossa (8mm)",
+};
+
+const grindPassLabels: Record<GrindPass, string> = {
+  SINGLE: "Simples",
+  DOUBLE: "Dupla",
+};
+
+export function ButcherGuide({
+  ingredients,
+  extras,
+  baseWeight,
+  burgerStyle,
+  grindSize,
+  grindPass,
+}: ButcherGuideProps) {
   const blendItems = ingredients
     .map((item) => {
       const ingredient = getIngredientById(item.ingredientId);
@@ -69,9 +91,14 @@ export function ButcherGuide({ ingredients, extras, baseWeight }: ButcherGuidePr
         </div>
       ) : (
         <>
-          <div className="rounded-xl border border-border bg-background p-3 text-sm text-foreground">
-            Peca para moer tudo junto, sem sal e sem tempero. Quantidade base:{" "}
-            <span className="font-semibold">{formatWeight(baseWeight)}</span>.
+          <div className="rounded-xl border border-border bg-background p-3 text-sm text-foreground space-y-1">
+            <p>
+              Peca para moer tudo junto, sem sal e sem tempero. Quantidade base:{" "}
+              <span className="font-semibold">{formatWeight(baseWeight)}</span>.
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Estilo: {burgerStyle} · Moagem: {grindSizeLabels[grindSize]} ({grindPassLabels[grindPass]})
+            </p>
           </div>
 
           <div className="rounded-xl bg-muted/40 p-3 text-xs text-muted-foreground">

@@ -3,7 +3,9 @@ import { Trash2 } from 'lucide-react';
 import { IngredientIcon } from '@/components/IngredientIcon';
 import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { getCutForIngredient, getIngredientById } from '@/data/ingredients';
+import { formatWeight } from '@/lib/blendMath';
 import { cn } from '@/lib/utils';
 import {
   formatCollagenLevel,
@@ -20,6 +22,8 @@ interface IngredientSliderProps {
   onRemove: () => void;
   showRemove?: boolean;
   prepStyle?: string;
+  inputMode?: 'percentage' | 'grams';
+  baseWeight?: number;
 }
 
 export function IngredientSlider({
@@ -29,6 +33,8 @@ export function IngredientSlider({
   onRemove,
   showRemove = true,
   prepStyle,
+  inputMode = 'percentage',
+  baseWeight,
 }: IngredientSliderProps) {
   const ingredient = getIngredientById(ingredientId);
   const cut = getCutForIngredient(ingredientId);
@@ -40,6 +46,14 @@ export function IngredientSlider({
     pork: 'meat' as const,
     vegan: 'vegan' as const,
     extra: 'warning' as const,
+  };
+
+  const grams = baseWeight ? Math.round((percentage / 100) * baseWeight) : 0;
+  const handleGramsChange = (value: number) => {
+    if (!baseWeight) return;
+    const clamped = Math.min(baseWeight, Math.max(0, value));
+    const nextPercent = Math.round((clamped / baseWeight) * 100);
+    onPercentageChange(nextPercent);
   };
 
   return (
@@ -63,17 +77,22 @@ export function IngredientSlider({
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <motion.span
-            key={percentage}
-            initial={{ scale: 1.2 }}
-            animate={{ scale: 1 }}
-            className={cn(
-              'text-xl font-bold min-w-[4rem] text-right',
-              percentage > 50 ? 'text-primary' : 'text-muted-foreground',
+          <div className="flex flex-col items-end leading-tight">
+            <motion.span
+              key={inputMode === 'grams' ? grams : percentage}
+              initial={{ scale: 1.2 }}
+              animate={{ scale: 1 }}
+              className={cn(
+                'text-xl font-bold min-w-[4rem] text-right',
+                percentage > 50 ? 'text-primary' : 'text-muted-foreground',
+              )}
+            >
+              {inputMode === 'grams' && baseWeight ? `${grams}g` : `${percentage}%`}
+            </motion.span>
+            {inputMode === 'grams' && baseWeight && (
+              <span className="text-[10px] text-muted-foreground">{percentage}%</span>
             )}
-          >
-            {percentage}%
-          </motion.span>
+          </div>
           {showRemove && (
             <Button
               variant="ghost"
@@ -115,14 +134,30 @@ export function IngredientSlider({
         </div>
       )}
 
-      <Slider
-        value={[percentage]}
-        onValueChange={([value]) => onPercentageChange(value)}
-        max={100}
-        step={5}
-        variant={categoryColors[ingredient.category]}
-        className="mt-2"
-      />
+      {inputMode === 'grams' && baseWeight ? (
+        <div className="mt-3 flex items-center gap-2">
+          <Input
+            type="number"
+            min={0}
+            max={baseWeight}
+            value={grams}
+            onChange={(event) => handleGramsChange(Number(event.target.value))}
+            className="h-9 w-24 text-center"
+          />
+          <span className="text-xs text-muted-foreground">
+            g (base {formatWeight(baseWeight)})
+          </span>
+        </div>
+      ) : (
+        <Slider
+          value={[percentage]}
+          onValueChange={([value]) => onPercentageChange(value)}
+          max={100}
+          step={5}
+          variant={categoryColors[ingredient.category]}
+          className="mt-2"
+        />
+      )}
     </motion.div>
   );
 }

@@ -25,6 +25,9 @@ export type GrindSize = (typeof GRIND_SIZES)[number];
 export const GRIND_PASSES = ['SINGLE', 'DOUBLE'] as const;
 export type GrindPass = (typeof GRIND_PASSES)[number];
 
+export const BURGER_STYLES = ['Smash', 'Alto', 'Gourmet', 'Fit', 'Veg', 'Diner'] as const;
+export type BurgerStyle = (typeof BURGER_STYLES)[number];
+
 export const RECOMMENDED_ROLES = ['base', 'booster', 'fat-source', 'luxury'] as const;
 export type RecommendedRole = (typeof RECOMMENDED_ROLES)[number];
 

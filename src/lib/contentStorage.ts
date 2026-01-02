@@ -9,9 +9,9 @@ const META_KEY = "catalogVersion";
 
 const nowIso = () => new Date().toISOString();
 
-export const seedCatalogIfNeeded = async () => {
+export const seedCatalogIfNeeded = async (): Promise<boolean> => {
   const meta = await db.contentMeta.get(META_KEY);
-  if (meta?.value === CONTENT_VERSION) return;
+  if (meta?.value === CONTENT_VERSION) return false;
 
   await db.transaction("rw", db.cuts, db.ingredients, db.presets, db.contentMeta, async () => {
     await Promise.all([db.cuts.clear(), db.ingredients.clear(), db.presets.clear()]);
@@ -21,6 +21,8 @@ export const seedCatalogIfNeeded = async () => {
     const entry: ContentMetaEntry = { key: META_KEY, value: CONTENT_VERSION, updatedAt: nowIso() };
     await db.contentMeta.put(entry);
   });
+
+  return true;
 };
 
 const fallbackCatalog: CatalogContent = {

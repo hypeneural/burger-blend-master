@@ -1,5 +1,6 @@
 import { Minus, Plus, Sparkles, Trash2 } from "lucide-react";
 import { IngredientIcon } from "@/components/IngredientIcon";
+import { InfoTooltip } from "@/components/InfoTooltip";
 import { Button } from "@/components/ui/button";
 import { getIngredientById } from "@/data/ingredients";
 import { formatWeight } from "@/lib/blendMath";
@@ -33,6 +34,7 @@ export function ExtrasSection({ extras, onAddClick, onChange, onRemove }: Extras
             </p>
           </div>
         </div>
+        <InfoTooltip label="Extras entram em gramas separadas. Eles alteram o sabor da carne, nao a montagem do lanche." />
         {extras.length > 0 && (
           <span className="text-sm text-muted-foreground">{formatWeight(totalExtras)}</span>
         )}

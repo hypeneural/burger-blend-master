@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import type { BottomTab } from "@/components/BottomNav";
 import { presets, type Preset, type BlendIngredient } from "@/data/presets";
+import { type BurgerStyle, type GrindPass, type GrindSize } from "@/data/constants";
 import { cuts, type Cut } from "@/data/cuts";
 import { ingredients, type Ingredient } from "@/data/ingredients";
 import type { BlendExtra, BlendHistoryEntry, SavedBlend } from "@/types/blend";
@@ -15,6 +16,9 @@ const DEFAULT_PREP_TIPS = [
   "Deixe descansar antes de servir",
 ];
 const DEFAULT_SEASONINGS = ["sal-fino", "pimenta-do-reino"];
+const DEFAULT_GRIND_SIZE: GrindSize = "MEDIUM";
+const DEFAULT_GRIND_PASS: GrindPass = "SINGLE";
+const DEFAULT_BURGER_STYLE: BurgerStyle = "Gourmet";
 
 interface BlendStore {
   catalogCuts: Cut[];
@@ -28,6 +32,9 @@ interface BlendStore {
   burgerWeight: number;
   blendName: string;
   blendDescription: string;
+  burgerStyle: BurgerStyle;
+  grindSize: GrindSize;
+  grindPass: GrindPass;
   prepStyle: string;
   prepTips: string[];
   seasonings: string[];
@@ -48,6 +55,9 @@ interface BlendStore {
   setBurgerWeight: (value: number) => void;
   setBlendName: (value: string) => void;
   setBlendDescription: (value: string) => void;
+  setBurgerStyle: (value: BurgerStyle) => void;
+  setGrindSize: (value: GrindSize) => void;
+  setGrindPass: (value: GrindPass) => void;
   setPrepStyle: (value: string) => void;
   setPrepTips: (value: string[]) => void;
   setSeasonings: (value: string[]) => void;
@@ -63,12 +73,16 @@ interface BlendStore {
   startCustomBlend: () => void;
   loadSavedBlend: (blend: SavedBlend) => void;
   updateIngredientPercentage: (ingredientId: string, percentage: number) => void;
+  updateIngredientPercentageRaw: (ingredientId: string, percentage: number) => void;
   removeIngredient: (ingredientId: string) => void;
+  removeIngredientRaw: (ingredientId: string) => void;
   addIngredient: (ingredientId: string) => void;
+  addIngredientRaw: (ingredientId: string) => void;
   addExtra: (ingredientId: string) => void;
   updateExtra: (ingredientId: string, grams: number) => void;
   removeExtra: (ingredientId: string) => void;
   applyTargetSuggestion: (ingredientId: string, grams: number) => void;
+  normalizeIngredients: () => void;
 }
 
 export const useBlendStore = create<BlendStore>((set) => ({
@@ -83,6 +97,9 @@ export const useBlendStore = create<BlendStore>((set) => ({
   burgerWeight: 150,
   blendName: "Meu Blend",
   blendDescription: "Blend personalizado",
+  burgerStyle: DEFAULT_BURGER_STYLE,
+  grindSize: DEFAULT_GRIND_SIZE,
+  grindPass: DEFAULT_GRIND_PASS,
   prepStyle: DEFAULT_PREP_STYLE,
   prepTips: DEFAULT_PREP_TIPS,
   seasonings: DEFAULT_SEASONINGS,
@@ -103,6 +120,9 @@ export const useBlendStore = create<BlendStore>((set) => ({
   setBurgerWeight: (value) => set({ burgerWeight: value }),
   setBlendName: (value) => set({ blendName: value }),
   setBlendDescription: (value) => set({ blendDescription: value }),
+  setBurgerStyle: (value) => set({ burgerStyle: value }),
+  setGrindSize: (value) => set({ grindSize: value }),
+  setGrindPass: (value) => set({ grindPass: value }),
   setPrepStyle: (value) => set({ prepStyle: value }),
   setPrepTips: (value) => set({ prepTips: value }),
   setSeasonings: (value) => set({ seasonings: value }),
@@ -115,16 +135,29 @@ export const useBlendStore = create<BlendStore>((set) => ({
   setSavedBlends: (value) => set({ savedBlends: value }),
   setHistoryEntries: (value) => set({ historyEntries: value }),
   applyPreset: (preset) =>
-    set({
+    set(() => {
+      const presetStyle: BurgerStyle =
+        preset.category === "smash"
+          ? "Smash"
+          : preset.category === "vegan"
+            ? "Veg"
+            : preset.category === "classic"
+              ? "Diner"
+              : "Gourmet";
+      return {
       ingredients: [...preset.ingredients],
       extras: [],
       blendName: preset.name,
       blendDescription: preset.description,
+      burgerStyle: presetStyle,
+      grindSize: DEFAULT_GRIND_SIZE,
+      grindPass: DEFAULT_GRIND_PASS,
       prepStyle: preset.prepStyle,
       prepTips: preset.prepTips,
       seasonings: preset.seasonings,
       step: "customize",
       activeTab: "lab",
+      };
     }),
   startCustomBlend: () =>
     set({
@@ -135,6 +168,9 @@ export const useBlendStore = create<BlendStore>((set) => ({
       extras: [],
       blendName: "Blend Personalizado",
       blendDescription: "Criacao exclusiva",
+      burgerStyle: DEFAULT_BURGER_STYLE,
+      grindSize: DEFAULT_GRIND_SIZE,
+      grindPass: DEFAULT_GRIND_PASS,
       prepStyle: DEFAULT_PREP_STYLE,
       prepTips: DEFAULT_PREP_TIPS,
       seasonings: DEFAULT_SEASONINGS,
@@ -149,6 +185,9 @@ export const useBlendStore = create<BlendStore>((set) => ({
       burgerWeight: blend.burgerWeight,
       blendName: blend.name,
       blendDescription: blend.description,
+      burgerStyle: blend.burgerStyle ?? DEFAULT_BURGER_STYLE,
+      grindSize: blend.grindSize ?? DEFAULT_GRIND_SIZE,
+      grindPass: blend.grindPass ?? DEFAULT_GRIND_PASS,
       prepStyle: blend.prepStyle || DEFAULT_PREP_STYLE,
       prepTips: blend.prepTips?.length ? blend.prepTips : DEFAULT_PREP_TIPS,
       seasonings: blend.seasonings?.length ? blend.seasonings : DEFAULT_SEASONINGS,
@@ -157,8 +196,9 @@ export const useBlendStore = create<BlendStore>((set) => ({
     }),
   updateIngredientPercentage: (ingredientId, newPercentage) =>
     set((state) => {
+      const clamped = Math.min(100, Math.max(0, newPercentage));
       const updated = state.ingredients.map((item) =>
-        item.ingredientId === ingredientId ? { ...item, percentage: newPercentage } : item,
+        item.ingredientId === ingredientId ? { ...item, percentage: clamped } : item,
       );
       const total = updated.reduce((sum, item) => sum + item.percentage, 0);
       if (total !== 100 && total > 0) {
@@ -171,6 +211,15 @@ export const useBlendStore = create<BlendStore>((set) => ({
         };
       }
       return { ingredients: updated };
+    }),
+  updateIngredientPercentageRaw: (ingredientId, newPercentage) =>
+    set((state) => {
+      const clamped = Math.min(100, Math.max(0, newPercentage));
+      return {
+        ingredients: state.ingredients.map((item) =>
+          item.ingredientId === ingredientId ? { ...item, percentage: clamped } : item,
+        ),
+      };
     }),
   removeIngredient: (ingredientId) =>
     set((state) => {
@@ -188,6 +237,13 @@ export const useBlendStore = create<BlendStore>((set) => ({
       }
       return { ingredients: remaining };
     }),
+  removeIngredientRaw: (ingredientId) =>
+    set((state) => {
+      if (state.ingredients.length <= 1) return state;
+      return {
+        ingredients: state.ingredients.filter((item) => item.ingredientId !== ingredientId),
+      };
+    }),
   addIngredient: (ingredientId) =>
     set((state) => {
       const newPercentage = 10;
@@ -201,6 +257,13 @@ export const useBlendStore = create<BlendStore>((set) => ({
           })),
           { ingredientId, percentage: newPercentage },
         ],
+      };
+    }),
+  addIngredientRaw: (ingredientId) =>
+    set((state) => {
+      if (state.ingredients.some((item) => item.ingredientId === ingredientId)) return state;
+      return {
+        ingredients: [...state.ingredients, { ingredientId, percentage: 0 }],
       };
     }),
   addExtra: (ingredientId) =>
@@ -232,5 +295,30 @@ export const useBlendStore = create<BlendStore>((set) => ({
         };
       }
       return { extras: [...state.extras, { ingredientId, grams }] };
+    }),
+  normalizeIngredients: () =>
+    set((state) => {
+      const total = state.ingredients.reduce((sum, item) => sum + item.percentage, 0);
+      if (total <= 0) return state;
+      const factor = 100 / total;
+      if (state.ingredients.length === 1) {
+        return {
+          ingredients: [{ ...state.ingredients[0], percentage: 100 }],
+        };
+      }
+      const lastIndex = state.ingredients.length - 1;
+      const normalized = state.ingredients.map((item, index) => ({
+        ...item,
+        percentage: index === lastIndex ? item.percentage * factor : item.percentage * factor,
+      }));
+      const sumOthers = normalized
+        .slice(0, lastIndex)
+        .reduce((sum, item) => sum + item.percentage, 0);
+      const lastValue = Math.max(0, 100 - sumOthers);
+      return {
+        ingredients: normalized.map((item, index) =>
+          index === lastIndex ? { ...item, percentage: lastValue } : item,
+        ),
+      };
     }),
 }));

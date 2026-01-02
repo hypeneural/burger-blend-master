@@ -90,6 +90,7 @@ export const getSmartAlerts = (
   ingredients: BlendIngredient[],
   fatPercentage: number,
   prepStyle: string,
+  burgerStyle: string,
 ): SmartAlert[] => {
   const alerts: SmartAlert[] = [];
 
@@ -122,12 +123,57 @@ export const getSmartAlerts = (
   }
 
   const prepLower = prepStyle.toLowerCase();
-  if ((prepLower.includes('grelha') || prepLower.includes('churrasqueira')) && fatPercentage > 28) {
+  const styleLower = burgerStyle.toLowerCase();
+  const isSmash = prepLower.includes('smash') || styleLower.includes('smash');
+  const isAirfryer = prepLower.includes('airfryer');
+  const isFit = styleLower.includes('fit');
+  const isTall = styleLower.includes('alto');
+
+  if (
+    (prepLower.includes('grelha') || prepLower.includes('churrasqueira') || prepLower.includes('carvao')) &&
+    fatPercentage > 28
+  ) {
     alerts.push({
       id: 'flare-ups',
       title: 'Risco de flare-ups',
       detail: 'Gordura alta na grelha pode pingar e queimar.',
       reason: 'Use zona indireta para evitar labaredas e gosto amargo.',
+    });
+  }
+
+  if (isSmash && fatPercentage < 20) {
+    alerts.push({
+      id: 'smash-low-fat',
+      title: 'Smash pede mais gordura',
+      detail: 'Disco fino perde umidade rapido.',
+      reason: 'No smash a gordura acima de 20% ajuda a manter crosta e suculencia.',
+    });
+  }
+
+  if (isAirfryer && fatPercentage > 25) {
+    alerts.push({
+      id: 'airfryer-high-fat',
+      title: 'Airfryer com gordura alta',
+      detail: 'Pode gerar fumaca e respingos.',
+      reason: 'Gordura pinga no cesto e queima rapido. Mire 18-22% ou use bandeja.',
+    });
+  }
+
+  if (isFit && fatPercentage > 18) {
+    alerts.push({
+      id: 'fit-high-fat',
+      title: 'Fit com gordura acima do ideal',
+      detail: 'Para o estilo Fit, reduza a gordura.',
+      reason: 'Blends Fit priorizam leveza e menor oleosidade para digestao mais leve.',
+    });
+  }
+
+  if (isTall && fatPercentage < 18) {
+    alerts.push({
+      id: 'tall-low-fat',
+      title: 'Burger alto pede mais gordura',
+      detail: 'Discos espessos ficam secos se magros.',
+      reason: 'Para burgers altos, 18-25% ajuda a manter o miolo suculento.',
     });
   }
 

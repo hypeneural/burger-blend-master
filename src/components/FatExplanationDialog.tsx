@@ -1,7 +1,8 @@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { getIngredientById } from "@/data/ingredients";
+import { getCutForIngredient, getIngredientById } from "@/data/ingredients";
 import { calculateFatTotals, formatWeight } from "@/lib/blendMath";
+import { formatCutFatRange } from "@/lib/cutHelpers";
 import type { BlendIngredient } from "@/data/presets";
 import type { BlendExtra } from "@/types/blend";
 
@@ -58,6 +59,7 @@ export function FatExplanationDialog({
             <p className="font-medium text-foreground">Ingredientes</p>
             {ingredients.map((item) => {
               const ingredient = getIngredientById(item.ingredientId);
+              const cut = getCutForIngredient(item.ingredientId);
               if (!ingredient) return null;
               const weight = (item.percentage / 100) * baseWeight;
               const fatGrams = (ingredient.fatPercentage / 100) * weight;
@@ -71,6 +73,11 @@ export function FatExplanationDialog({
                     <p className="text-xs text-muted-foreground">
                       {item.percentage}% - {formatWeight(weight)} - {ingredient.fatPercentage}% gordura
                     </p>
+                    {cut && (
+                      <p className="text-[11px] text-muted-foreground">
+                        Faixa tecnica: {formatCutFatRange(cut)}
+                      </p>
+                    )}
                   </div>
                   <span className="text-xs text-muted-foreground">{formatGrams(fatGrams)}</span>
                 </div>
@@ -83,6 +90,7 @@ export function FatExplanationDialog({
               <p className="font-medium text-foreground">Extras</p>
               {extras.map((extra) => {
                 const ingredient = getIngredientById(extra.ingredientId);
+                const cut = getCutForIngredient(extra.ingredientId);
                 if (!ingredient) return null;
                 const fatGrams = (ingredient.fatPercentage / 100) * extra.grams;
                 return (
@@ -95,6 +103,11 @@ export function FatExplanationDialog({
                       <p className="text-xs text-muted-foreground">
                         {formatWeight(extra.grams)} - {ingredient.fatPercentage}% gordura
                       </p>
+                      {cut && (
+                        <p className="text-[11px] text-muted-foreground">
+                          Faixa tecnica: {formatCutFatRange(cut)}
+                        </p>
+                      )}
                     </div>
                     <span className="text-xs text-muted-foreground">{formatGrams(fatGrams)}</span>
                   </div>
@@ -102,6 +115,12 @@ export function FatExplanationDialog({
               })}
             </div>
           )}
+
+          <div className="rounded-xl bg-muted/40 p-3 text-xs text-muted-foreground space-y-1">
+            <p className="font-medium text-foreground">Formula usada</p>
+            <p>Gordura total = soma(peso de cada ingrediente x % gordura).</p>
+            <p>% final = gordura total / peso total.</p>
+          </div>
 
           <div className="p-3 rounded-xl bg-primary/10 border border-primary/20">
             <p className="font-medium text-foreground">Calculo final</p>

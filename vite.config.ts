@@ -48,6 +48,13 @@ export default defineConfig(({ mode }) => ({
             options: {
               cacheName: "pages",
               networkTimeoutSeconds: 3,
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
+              expiration: {
+                maxEntries: 20,
+                maxAgeSeconds: 60 * 60 * 24 * 7,
+              },
             },
           },
           {

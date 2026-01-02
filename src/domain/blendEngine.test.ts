@@ -53,6 +53,7 @@ describe("blendEngine", () => {
       [{ ingredientId: "coxao-duro", percentage: 50 }],
       18,
       "Churrasqueira",
+      "Gourmet",
     );
     const ids = alerts.map((alert) => alert.id);
     expect(ids).toContain("coxao-dominant");
@@ -63,10 +64,31 @@ describe("blendEngine", () => {
       [{ ingredientId: "acem", percentage: 100 }],
       31,
       "Grelha",
+      "Gourmet",
     );
     const ids = alerts.map((alert) => alert.id);
     expect(ids).toContain("high-fat");
     expect(ids).toContain("flare-ups");
+  });
+
+  it("adds alerts for smash and airfryer profiles", () => {
+    const smashAlerts = getSmartAlerts(
+      [{ ingredientId: "acem", percentage: 100 }],
+      18,
+      "Airfryer",
+      "Smash",
+    );
+    const smashIds = smashAlerts.map((alert) => alert.id);
+    expect(smashIds).toContain("smash-low-fat");
+
+    const airfryerAlerts = getSmartAlerts(
+      [{ ingredientId: "acem", percentage: 100 }],
+      28,
+      "Airfryer",
+      "Gourmet",
+    );
+    const airfryerIds = airfryerAlerts.map((alert) => alert.id);
+    expect(airfryerIds).toContain("airfryer-high-fat");
   });
 
   it("builds flavor radar data within 1-5 range", () => {

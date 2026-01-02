@@ -6,10 +6,16 @@ interface SmartAlertsProps {
   ingredients: BlendIngredient[];
   fatPercentage: number;
   prepStyle: string;
+  burgerStyle: string;
 }
 
-export function SmartAlerts({ ingredients, fatPercentage, prepStyle }: SmartAlertsProps) {
-  const alerts = getSmartAlerts(ingredients, fatPercentage, prepStyle);
+export function SmartAlerts({
+  ingredients,
+  fatPercentage,
+  prepStyle,
+  burgerStyle,
+}: SmartAlertsProps) {
+  const alerts = getSmartAlerts(ingredients, fatPercentage, prepStyle, burgerStyle);
 
   if (alerts.length === 0) {
     return (

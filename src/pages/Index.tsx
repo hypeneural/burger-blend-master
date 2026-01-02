@@ -1,4 +1,4 @@
-import { Suspense, lazy, useEffect, useMemo } from "react";
+import { Suspense, lazy, useEffect, useMemo, useState } from "react";
 import { AnimatePresence, MotionConfig, motion } from "framer-motion";
 import { ArrowLeft, Bookmark, Plus, Sparkles } from "lucide-react";
 import { BlendCard } from "@/components/BlendCard";
@@ -19,11 +19,13 @@ import { SmartAlerts } from "@/components/SmartAlerts";
 import { Stepper } from "@/components/Stepper";
 import { TargetLock } from "@/components/TargetLock";
 import { TargetProgress } from "@/components/TargetProgress";
+import { InfoTooltip } from "@/components/InfoTooltip";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { calculateFatPercentage } from "@/lib/blendMath";
+import { BURGER_STYLES, GRIND_PASSES, GRIND_SIZES } from "@/data/constants";
+import { calculateBaseWeight, calculateFatPercentage, formatWeight } from "@/lib/blendMath";
 import {
   addHistoryEntry,
   addSavedBlend,
@@ -90,6 +92,9 @@ export default function Index() {
     burgerWeight,
     blendName,
     blendDescription,
+    burgerStyle,
+    grindSize,
+    grindPass,
     prepStyle,
     prepTips,
     seasonings,
@@ -107,6 +112,9 @@ export default function Index() {
     setBlendDescription,
     setBurgerCount,
     setBurgerWeight,
+    setBurgerStyle,
+    setGrindSize,
+    setGrindPass,
     setSeasonings,
     setPrepStyle,
     setShowPicker,
@@ -122,17 +130,23 @@ export default function Index() {
     startCustomBlend,
     loadSavedBlend,
     updateIngredientPercentage,
+    updateIngredientPercentageRaw,
     removeIngredient,
+    removeIngredientRaw,
     addIngredient,
+    addIngredientRaw,
     addExtra,
     updateExtra,
     removeExtra,
     applyTargetSuggestion,
+    normalizeIngredients,
   } = useBlendStore();
 
+  const [inputMode, setInputMode] = useState<"percentage" | "grams">("percentage");
   const wakeLockSupported = typeof navigator !== "undefined" && "wakeLock" in navigator;
   const { isOnline, isLowData, effectiveType } = useNetworkStatus();
   const shouldAnimate = !isLowData;
+  const showCharts = !isLowData;
 
   const prepOptions = [
     { value: "Chapa", label: "Chapa" },
@@ -140,6 +154,23 @@ export default function Index() {
     { value: "Grelha", label: "Grelha" },
     { value: "Churrasqueira", label: "Churrasqueira" },
     { value: "Smash", label: "Smash" },
+    { value: "Airfryer", label: "Airfryer" },
+  ];
+
+  const burgerStyleOptions = BURGER_STYLES.map((style) => ({
+    value: style,
+    label: style,
+  }));
+
+  const grindSizeOptions = [
+    { value: GRIND_SIZES[0], label: "Fina (3mm)" },
+    { value: GRIND_SIZES[1], label: "Media (5mm)" },
+    { value: GRIND_SIZES[2], label: "Grossa (8mm)" },
+  ];
+
+  const grindPassOptions = [
+    { value: GRIND_PASSES[0], label: "Simples" },
+    { value: GRIND_PASSES[1], label: "Dupla" },
   ];
 
   useWakeLock(wakeLockEnabled);
@@ -179,13 +210,21 @@ export default function Index() {
   useEffect(() => {
     let isActive = true;
     const loadCatalogData = async () => {
-      await seedCatalogIfNeeded();
-      const catalog = await loadCatalog();
+      const cached = await loadCatalog();
       if (!isActive) return;
       setCatalog({
-        catalogCuts: catalog.cuts,
-        catalogIngredients: catalog.ingredients,
-        catalogPresets: catalog.presets,
+        catalogCuts: cached.cuts,
+        catalogIngredients: cached.ingredients,
+        catalogPresets: cached.presets,
+      });
+      const didSeed = await seedCatalogIfNeeded();
+      if (!didSeed || !isActive) return;
+      const refreshed = await loadCatalog();
+      if (!isActive) return;
+      setCatalog({
+        catalogCuts: refreshed.cuts,
+        catalogIngredients: refreshed.ingredients,
+        catalogPresets: refreshed.presets,
       });
     };
     loadCatalogData();
@@ -193,6 +232,11 @@ export default function Index() {
       isActive = false;
     };
   }, [setCatalog]);
+
+  const baseWeight = useMemo(
+    () => calculateBaseWeight(burgerCount, burgerWeight),
+    [burgerCount, burgerWeight],
+  );
 
   const fatPercentage = useMemo(
     () => calculateFatPercentage(ingredientsState, extras, burgerCount, burgerWeight),
@@ -203,6 +247,17 @@ export default function Index() {
     () => ingredientsState.reduce((sum, item) => sum + item.percentage, 0),
     [ingredientsState],
   );
+
+  const currentBlendWeight = useMemo(
+    () => (baseWeight * totalPercentage) / 100,
+    [baseWeight, totalPercentage],
+  );
+
+  const handleAdjustTotal = () => {
+    if (burgerCount <= 0) return;
+    const nextWeight = Math.max(1, Math.round(currentBlendWeight / burgerCount / 5) * 5);
+    setBurgerWeight(nextWeight);
+  };
 
   const groupedIngredients = useMemo(() => {
     return wikiSections.map((section) => ({
@@ -236,6 +291,9 @@ export default function Index() {
       extras,
       burgerCount,
       burgerWeight,
+      burgerStyle,
+      grindSize,
+      grindPass,
       prepStyle,
       prepTips,
       seasonings,
@@ -290,6 +348,30 @@ export default function Index() {
 
   const handleApplyTargetSuggestion = (ingredientId: string, grams: number) => {
     applyTargetSuggestion(ingredientId, grams);
+  };
+
+  const handleIngredientChange = (ingredientId: string, value: number) => {
+    if (inputMode === "grams") {
+      updateIngredientPercentageRaw(ingredientId, value);
+      return;
+    }
+    updateIngredientPercentage(ingredientId, value);
+  };
+
+  const handleRemoveIngredient = (ingredientId: string) => {
+    if (inputMode === "grams") {
+      removeIngredientRaw(ingredientId);
+      return;
+    }
+    removeIngredient(ingredientId);
+  };
+
+  const handleAddIngredient = (ingredientId: string) => {
+    if (inputMode === "grams") {
+      addIngredientRaw(ingredientId);
+      return;
+    }
+    addIngredient(ingredientId);
   };
 
   const handleWakeLockToggle = (value: boolean) => {
@@ -436,14 +518,23 @@ export default function Index() {
 
                     <div className="p-5 rounded-2xl bg-card border border-border space-y-4">
                       <div className="flex items-center justify-between">
-                        <h3 className="font-display text-lg font-semibold text-foreground">
-                          Visualizacao de gordura
-                        </h3>
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-display text-lg font-semibold text-foreground">
+                            Visualizacao de gordura
+                          </h3>
+                          <InfoTooltip label="Comparacao entre gordura e carne magra. Use para ajustar o alvo." />
+                        </div>
                         <span className="text-xs text-muted-foreground">Gordura x Magro</span>
                       </div>
-                      <Suspense fallback={chartFallback}>
-                        <FatDonutChart fatPercentage={fatPercentage} animate={shouldAnimate} />
-                      </Suspense>
+                      {showCharts ? (
+                        <Suspense fallback={chartFallback}>
+                          <FatDonutChart fatPercentage={fatPercentage} animate={shouldAnimate} />
+                        </Suspense>
+                      ) : (
+                        <div className="rounded-xl bg-muted/40 p-4 text-xs text-muted-foreground">
+                          Modo economia de dados ativo. Graficos ocultos.
+                        </div>
+                      )}
                       <TargetProgress current={fatPercentage} target={targetFat} />
                     </div>
 
@@ -462,10 +553,83 @@ export default function Index() {
                     />
 
                     <div className="p-5 rounded-2xl bg-card border border-border space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-display text-lg font-semibold text-foreground">
+                            Estilo do burger
+                          </h3>
+                          <InfoTooltip label="Define textura final e influencia moagem e preparo." />
+                        </div>
+                        <span className="text-xs text-muted-foreground">Perfil de cocao</span>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {burgerStyleOptions.map((option) => (
+                          <Button
+                            key={option.value}
+                            variant={burgerStyle === option.value ? "default" : "secondary"}
+                            size="sm"
+                            onClick={() => setBurgerStyle(option.value)}
+                            className="rounded-full"
+                          >
+                            {option.label}
+                          </Button>
+                        ))}
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Escolha o estilo que melhor representa a experiencia desejada.
+                      </p>
+                    </div>
+
+                    <div className="p-5 rounded-2xl bg-card border border-border space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-display text-lg font-semibold text-foreground">
+                            Moagem
+                          </h3>
+                          <InfoTooltip label="Moagem define textura. Fina para smash, grossa para burger alto." />
+                        </div>
+                        <span className="text-xs text-muted-foreground">Granulometria</span>
+                      </div>
+                      <div className="space-y-2">
+                        <p className="text-xs text-muted-foreground">Tamanho do disco</p>
+                        <div className="flex flex-wrap gap-2">
+                          {grindSizeOptions.map((option) => (
+                            <Button
+                              key={option.value}
+                              variant={grindSize === option.value ? "default" : "secondary"}
+                              size="sm"
+                              onClick={() => setGrindSize(option.value)}
+                            >
+                              {option.label}
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <p className="text-xs text-muted-foreground">Passadas</p>
+                        <div className="flex flex-wrap gap-2">
+                          {grindPassOptions.map((option) => (
+                            <Button
+                              key={option.value}
+                              variant={grindPass === option.value ? "default" : "secondary"}
+                              size="sm"
+                              onClick={() => setGrindPass(option.value)}
+                            >
+                              {option.label}
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="p-5 rounded-2xl bg-card border border-border space-y-3">
                       <div>
-                        <h3 className="font-display text-lg font-semibold text-foreground">
-                          Equipamento de cocao
-                        </h3>
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-display text-lg font-semibold text-foreground">
+                            Equipamento de cocao
+                          </h3>
+                          <InfoTooltip label="Afeta alertas de gordura e sugestoes de preparo." />
+                        </div>
                         <p className="text-sm text-muted-foreground">
                           Afeta alertas e recomendacoes de gordura.
                         </p>
@@ -489,14 +653,81 @@ export default function Index() {
                       ingredients={ingredientsState}
                       fatPercentage={fatPercentage}
                       prepStyle={prepStyle}
+                      burgerStyle={burgerStyle}
                     />
 
                     <section className="space-y-3">
+                      <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-muted/40 p-3 text-xs text-muted-foreground">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-foreground">Modo de ajuste</span>
+                          <InfoTooltip label="Porcentagem mantem o total em 100%. Gramas ajusta pelo peso base do blend." />
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant={inputMode === "percentage" ? "default" : "secondary"}
+                            size="sm"
+                            onClick={() => {
+                              setInputMode("percentage");
+                              normalizeIngredients();
+                            }}
+                          >
+                            Percentual
+                          </Button>
+                          <Button
+                            variant={inputMode === "grams" ? "default" : "secondary"}
+                            size="sm"
+                            onClick={() => setInputMode("grams")}
+                          >
+                            Gramas
+                          </Button>
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          Base: {baseWeight >= 1000 ? `${(baseWeight / 1000).toFixed(2)}kg` : `${baseWeight}g`}
+                        </div>
+                      </div>
+                      {inputMode === "grams" && (
+                        <div className="rounded-xl bg-background p-3 text-xs text-muted-foreground space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span>Total atual</span>
+                            <span
+                              className={
+                                totalPercentage === 100 ? "text-vegan-green" : "text-fat-warning"
+                              }
+                            >
+                              {formatWeight(currentBlendWeight)}{" "}
+                              {totalPercentage === 100
+                                ? "(ok)"
+                                : `(${totalPercentage > 100 ? "+" : "-"}${formatWeight(
+                                    Math.abs(currentBlendWeight - baseWeight),
+                                  )})`}
+                            </span>
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                            <Button variant="default" size="sm" onClick={normalizeIngredients}>
+                              Normalizar para 100%
+                            </Button>
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              onClick={handleAdjustTotal}
+                              disabled={currentBlendWeight <= 0}
+                            >
+                              Ajustar total base
+                            </Button>
+                          </div>
+                          <p className="text-[11px] text-muted-foreground">
+                            Normalizar redistribui os percentuais. Ajustar total recalcula o peso por burger.
+                          </p>
+                        </div>
+                      )}
                       <div className="flex items-center justify-between">
                         <div>
-                          <h3 className="font-display text-lg font-semibold text-foreground">
-                            Blend da carne
-                          </h3>
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-display text-lg font-semibold text-foreground">
+                              Blend da carne
+                            </h3>
+                            <InfoTooltip label="Aqui entra apenas a carne base. O total precisa fechar 100%." />
+                          </div>
                           <p className="text-xs text-muted-foreground">
                             Somente carnes e base do blend. Deve somar 100%.
                           </p>
@@ -515,11 +746,13 @@ export default function Index() {
                           ingredientId={item.ingredientId}
                           percentage={item.percentage}
                           onPercentageChange={(value) =>
-                            updateIngredientPercentage(item.ingredientId, value)
+                            handleIngredientChange(item.ingredientId, value)
                           }
-                          onRemove={() => removeIngredient(item.ingredientId)}
+                          onRemove={() => handleRemoveIngredient(item.ingredientId)}
                           showRemove={ingredientsState.length > 1}
                           prepStyle={prepStyle}
+                          inputMode={inputMode}
+                          baseWeight={baseWeight}
                         />
                       ))}
                       </AnimatePresence>
@@ -543,22 +776,31 @@ export default function Index() {
 
                     <div className="p-5 rounded-2xl bg-card border border-border space-y-4">
                       <div className="flex items-center justify-between">
-                        <h3 className="font-display text-lg font-semibold text-foreground">
-                          Roda de sabores
-                        </h3>
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-display text-lg font-semibold text-foreground">
+                            Roda de sabores
+                          </h3>
+                          <InfoTooltip label="Equilibrio de salgado, umami, doce e picante conforme ingredientes." />
+                        </div>
                         <span className="text-xs text-muted-foreground">
                           Salgado ao picante
                         </span>
                       </div>
-                      <Suspense fallback={chartFallback}>
-                        <FlavorRadarChart
-                          ingredients={ingredientsState}
-                          extras={extras}
-                          burgerCount={burgerCount}
-                          burgerWeight={burgerWeight}
-                          animate={shouldAnimate}
-                        />
-                      </Suspense>
+                      {showCharts ? (
+                        <Suspense fallback={chartFallback}>
+                          <FlavorRadarChart
+                            ingredients={ingredientsState}
+                            extras={extras}
+                            burgerCount={burgerCount}
+                            burgerWeight={burgerWeight}
+                            animate={shouldAnimate}
+                          />
+                        </Suspense>
+                      ) : (
+                        <div className="rounded-xl bg-muted/40 p-4 text-xs text-muted-foreground">
+                          Modo economia de dados ativo. Graficos ocultos.
+                        </div>
+                      )}
                     </div>
 
                     <QuantityCalculator
@@ -573,7 +815,7 @@ export default function Index() {
                         <IngredientPicker
                           ingredients={catalogIngredients}
                           selectedIds={ingredientsState.map((item) => item.ingredientId)}
-                          onSelect={addIngredient}
+                          onSelect={handleAddIngredient}
                           onClose={() => setShowPicker(false)}
                           prepStyle={prepStyle}
                         />
@@ -609,6 +851,9 @@ export default function Index() {
                         extras={extras}
                         burgerCount={burgerCount}
                         burgerWeight={burgerWeight}
+                        burgerStyle={burgerStyle}
+                        grindSize={grindSize}
+                        grindPass={grindPass}
                         prepStyle={prepStyle}
                         prepTips={prepTips}
                         seasonings={seasonings}

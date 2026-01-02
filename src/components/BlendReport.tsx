@@ -21,6 +21,7 @@ import { ButcherGuide } from '@/components/ButcherGuide';
 import { IngredientBreakdown } from '@/components/IngredientBreakdown';
 import { NutritionSummary } from '@/components/NutritionSummary';
 import { getIngredientById } from '@/data/ingredients';
+import type { GrindPass, GrindSize, BurgerStyle } from '@/data/constants';
 import {
   buildSeasoningSuggestions,
   getSeasoningLabel,
@@ -45,6 +46,9 @@ interface BlendReportProps {
   extras: BlendExtra[];
   burgerCount: number;
   burgerWeight: number;
+  burgerStyle: BurgerStyle;
+  grindSize: GrindSize;
+  grindPass: GrindPass;
   prepStyle: string;
   prepTips: string[];
   seasonings: string[];
@@ -60,6 +64,9 @@ export function BlendReport({
   extras,
   burgerCount,
   burgerWeight,
+  burgerStyle,
+  grindSize,
+  grindPass,
   prepStyle,
   prepTips,
   seasonings,
@@ -77,6 +84,17 @@ export function BlendReport({
   const totalWeight = baseWeight + extrasWeight;
   const fatPercentage = calculateFatPercentage(ingredients, extras, burgerCount, burgerWeight);
   const nutrition = calculateNutritionPerBurger(ingredients, extras, burgerCount, burgerWeight);
+
+  const grindSizeLabels: Record<GrindSize, string> = {
+    FINE: "Fina (3mm)",
+    MEDIUM: "Media (5mm)",
+    COARSE: "Grossa (8mm)",
+  };
+
+  const grindPassLabels: Record<GrindPass, string> = {
+    SINGLE: "Simples",
+    DOUBLE: "Dupla",
+  };
 
   const seasoningSuggestions = useMemo(
     () =>
@@ -281,7 +299,14 @@ export function BlendReport({
 
         <IngredientBreakdown ingredients={ingredients} baseWeight={baseWeight} extras={extras} />
 
-        <ButcherGuide ingredients={ingredients} extras={extras} baseWeight={baseWeight} />
+        <ButcherGuide
+          ingredients={ingredients}
+          extras={extras}
+          baseWeight={baseWeight}
+          burgerStyle={burgerStyle}
+          grindSize={grindSize}
+          grindPass={grindPass}
+        />
 
         <NutritionSummary
           calories={nutrition.calories}
@@ -298,6 +323,9 @@ export function BlendReport({
             <div>
               <h3 className="font-display text-lg font-semibold text-foreground">Modo de Preparo</h3>
               <p className="text-sm text-muted-foreground">{prepStyle}</p>
+              <p className="text-xs text-muted-foreground">
+                Estilo: {burgerStyle} · Moagem: {grindSizeLabels[grindSize]} ({grindPassLabels[grindPass]})
+              </p>
             </div>
           </div>
 
