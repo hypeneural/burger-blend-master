@@ -1,4 +1,5 @@
 import { Minus, Plus, Sparkles, Trash2 } from "lucide-react";
+import { IngredientIcon } from "@/components/IngredientIcon";
 import { Button } from "@/components/ui/button";
 import { getIngredientById } from "@/data/ingredients";
 import { formatWeight } from "@/lib/blendMath";
@@ -59,7 +60,9 @@ export function ExtrasSection({ extras, onAddClick, onChange, onRemove }: Extras
                 className="flex items-center justify-between gap-3 p-3 rounded-lg bg-background"
               >
                 <div className="flex items-center gap-3">
-                  <span className="text-xl">{ingredient.icon}</span>
+                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-muted">
+                    <IngredientIcon category={ingredient.category} className="h-5 w-5" />
+                  </div>
                   <div>
                     <span className="font-medium text-foreground">{ingredient.name}</span>
                     <p className="text-xs text-muted-foreground">{ingredient.description}</p>

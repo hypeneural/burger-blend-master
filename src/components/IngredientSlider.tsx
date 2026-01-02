@@ -1,5 +1,6 @@
 ﻿import { motion } from 'framer-motion';
 import { Trash2 } from 'lucide-react';
+import { IngredientIcon } from '@/components/IngredientIcon';
 import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
 import { getCutForIngredient, getIngredientById } from '@/data/ingredients';
@@ -51,7 +52,9 @@ export function IngredientSlider({
     >
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-3">
-          <span className="text-2xl">{ingredient.icon}</span>
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-muted">
+            <IngredientIcon category={ingredient.category} className="h-5 w-5" />
+          </div>
           <div>
             <h4 className="font-medium text-foreground">{ingredient.name}</h4>
             <p className="text-xs text-muted-foreground">

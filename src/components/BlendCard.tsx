@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { ChevronRight } from 'lucide-react';
+import { Beef, ChevronRight, Flame, Leaf, Sparkles } from 'lucide-react';
 import type { Preset } from '@/data/presets';
 import { cn } from '@/lib/utils';
 
@@ -23,7 +23,16 @@ const iconBgVariants = {
   green: 'bg-vegan-green/20',
 };
 
+const presetIcons: Record<Preset['category'], typeof Beef> = {
+  classic: Beef,
+  premium: Sparkles,
+  smash: Flame,
+  vegan: Leaf,
+  custom: Beef,
+};
+
 export function BlendCard({ preset, onClick, index }: BlendCardProps) {
+  const Icon = presetIcons[preset.category] ?? Beef;
   return (
     <motion.button
       initial={{ opacity: 0, y: 20 }}
@@ -38,11 +47,13 @@ export function BlendCard({ preset, onClick, index }: BlendCardProps) {
       )}
     >
       <div className="flex items-start gap-4">
-        <div className={cn(
-          'w-14 h-14 rounded-xl flex items-center justify-center text-3xl',
-          iconBgVariants[preset.color]
-        )}>
-          {preset.icon}
+        <div
+          className={cn(
+            'w-14 h-14 rounded-xl flex items-center justify-center',
+            iconBgVariants[preset.color]
+          )}
+        >
+          <Icon className="w-7 h-7 text-foreground" />
         </div>
         
         <div className="flex-1 min-w-0">

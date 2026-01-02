@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { ShoppingCart } from 'lucide-react';
+import { IngredientIcon } from '@/components/IngredientIcon';
 import { getIngredientById } from '@/data/ingredients';
 import { calculateExtrasWeight, formatWeight } from '@/lib/blendMath';
 import type { BlendIngredient } from '@/data/presets';
@@ -47,7 +48,9 @@ export function IngredientBreakdown({ ingredients, baseWeight, extras = [] }: In
               className="flex items-center justify-between p-3 rounded-lg bg-background"
             >
               <div className="flex items-center gap-3">
-                <span className="text-xl">{ingredient.icon}</span>
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-muted">
+                  <IngredientIcon category={ingredient.category} className="h-5 w-5" />
+                </div>
                 <div>
                   <span className="font-medium text-foreground">{ingredient.name}</span>
                   <span className="text-muted-foreground text-sm ml-2">({item.percentage}%)</span>
@@ -77,7 +80,9 @@ export function IngredientBreakdown({ ingredients, baseWeight, extras = [] }: In
                 className="flex items-center justify-between p-3 rounded-lg bg-background"
               >
                 <div className="flex items-center gap-3">
-                  <span className="text-xl">{ingredient.icon}</span>
+                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-muted">
+                    <IngredientIcon category={ingredient.category} className="h-5 w-5" />
+                  </div>
                   <div>
                     <span className="font-medium text-foreground">{ingredient.name}</span>
                     <span className="text-muted-foreground text-sm ml-2">extra</span>

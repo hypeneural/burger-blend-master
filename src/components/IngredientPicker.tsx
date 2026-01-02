@@ -1,13 +1,15 @@
-﻿import { motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { Plus, X } from 'lucide-react';
+import { useState } from 'react';
+import { IngredientIcon } from '@/components/IngredientIcon';
 import { Button } from '@/components/ui/button';
 import { INGREDIENT_CATEGORIES, type IngredientCategory } from '@/data/constants';
 import { getCutForIngredient, type Ingredient } from '@/data/ingredients';
 import { getSeasoningById } from '@/data/seasonings';
 import {
   formatCalories,
-  formatCostTier,
   formatCollagenLevel,
+  formatCostTier,
   formatCutFatRange,
   formatCutFunction,
   formatCutRoles,
@@ -20,7 +22,6 @@ import {
   getPrepStyleWarnings,
 } from '@/lib/cutHelpers';
 import { cn } from '@/lib/utils';
-import { useState } from 'react';
 
 interface IngredientPickerProps {
   ingredients: Ingredient[];
@@ -32,11 +33,11 @@ interface IngredientPickerProps {
 
 const categories = INGREDIENT_CATEGORIES.filter((category) => category !== 'extra') as IngredientCategory[];
 
-const categoryLabels: Record<IngredientCategory, { name: string; icon: string }> = {
-  bovine: { name: 'Bovinos', icon: '🐄' },
-  pork: { name: 'Suinos', icon: '🐖' },
-  vegan: { name: 'Veganos', icon: '🌱' },
-  extra: { name: 'Extras', icon: '??' },
+const categoryLabels: Record<IngredientCategory, { name: string }> = {
+  bovine: { name: 'Bovinos' },
+  pork: { name: 'Suinos' },
+  vegan: { name: 'Veganos' },
+  extra: { name: 'Extras' },
 };
 
 export function IngredientPicker({
@@ -47,6 +48,7 @@ export function IngredientPicker({
   prepStyle,
 }: IngredientPickerProps) {
   const [activeCategory, setActiveCategory] = useState<IngredientCategory>('bovine');
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const filteredIngredients = ingredients.filter((ingredient) => ingredient.category === activeCategory);
   const formatSeasonings = (values?: string[]) => {
@@ -59,6 +61,10 @@ export function IngredientPicker({
   const formatSimpleList = (values?: string[]) => {
     if (!values || values.length === 0) return undefined;
     return values.slice(0, 3).join(', ');
+  };
+
+  const toggleExpanded = (id: string) => {
+    setExpandedId((current) => (current === id ? null : id));
   };
 
   return (
@@ -91,9 +97,10 @@ export function IngredientPicker({
               variant={activeCategory === category ? 'default' : 'secondary'}
               size="sm"
               onClick={() => setActiveCategory(category)}
-              className="whitespace-nowrap"
+              className="whitespace-nowrap gap-2"
             >
-              {categoryLabels[category].icon} {categoryLabels[category].name}
+              <IngredientIcon category={category} className="h-4 w-4" />
+              {categoryLabels[category].name}
             </Button>
           ))}
         </div>
@@ -102,133 +109,182 @@ export function IngredientPicker({
           {filteredIngredients.map((ingredient) => {
             const isSelected = selectedIds.includes(ingredient.id);
             const cut = getCutForIngredient(ingredient.id);
+            const isExpanded = expandedId === ingredient.id;
             return (
-              <motion.button
+              <motion.div
                 key={ingredient.id}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => {
-                  if (!isSelected) {
-                    onSelect(ingredient.id);
-                    onClose();
-                  }
-                }}
-                disabled={isSelected}
                 className={cn(
-                  'w-full p-4 rounded-xl border-2 flex items-center gap-4 text-left transition-all',
+                  'w-full p-4 rounded-xl border-2 flex flex-col gap-3 text-left transition-all',
                   isSelected
                     ? 'bg-muted border-muted opacity-50 cursor-not-allowed'
                     : 'bg-card border-border hover:border-primary hover:shadow-warm',
                 )}
               >
-                <span className="text-3xl">{ingredient.icon}</span>
-                <div className="flex-1">
-                  <h4 className="font-medium text-foreground">{ingredient.name}</h4>
-                  <p className="text-sm text-muted-foreground">{ingredient.description}</p>
-                  <span className="text-xs text-muted-foreground">{ingredient.fatPercentage}% gordura</span>
-                  {cut?.bestUseBadge && (
-                    <span className="ml-2 inline-flex rounded-full bg-primary/10 px-2 py-0.5 text-[11px] text-primary">
-                      {cut.bestUseBadge}
-                    </span>
-                  )}
-                  {cut && (
-                    <div className="mt-2 space-y-1 text-xs text-muted-foreground">
-                      <div className="flex flex-wrap gap-2 text-[11px]">
-                        <span className="rounded-full bg-muted px-2 py-1">
-                          Colageno {formatCollagenLevel(cut)}
-                        </span>
-                        <span className="rounded-full bg-muted px-2 py-1">
-                          Oxidacao {formatOxidationRate(cut)}
-                        </span>
-                        <span className="rounded-full bg-muted px-2 py-1">
-                          Maillard {formatMaillardPotential(cut)}
-                        </span>
+                <div className="flex items-start gap-3">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-muted">
+                    <IngredientIcon category={ingredient.category} className="h-6 w-6" />
+                  </div>
+                  <div className="flex-1 space-y-2">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <h4 className="font-medium text-foreground">{ingredient.name}</h4>
+                        <p className="text-sm text-muted-foreground">{ingredient.description}</p>
                       </div>
-                      <p>
-                        Funcao: <span className="text-foreground">{formatCutFunction(cut)}</span>
-                      </p>
-                      <p>
-                        Gordura estimada: <span className="text-foreground">{formatCutFatRange(cut)}</span>
-                      </p>
-                      <p>
-                        Calorias: <span className="text-foreground">{formatCalories(cut)}</span>
-                      </p>
-                      <p>
-                        Gordura:{" "}
-                        <span className="text-foreground">
-                          {formatFatType(cut)} ({formatMeltingProfile(cut)})
+                      {isSelected ? (
+                        <span className="text-xs text-muted-foreground px-2 py-1 rounded bg-muted">
+                          Ja adicionado
                         </span>
-                      </p>
-                      <p>
-                        Por que entra: <span className="text-foreground">{cut.shortDescription}</span>
-                      </p>
-                      <p>
-                        Dicas: <span className="text-foreground">{cut.tips}</span>
-                      </p>
-                      <p>
-                        Nome EN: <span className="text-foreground">{cut.nameEn}</span>
-                      </p>
-                      <p>
-                        Custo: <span className="text-foreground">{formatCostTier(cut)}</span>
-                      </p>
-                      <p>
-                        Recomendado: <span className="text-foreground">{formatCutRoles(cut)}</span>
-                      </p>
-                      {cut.flavorTags.length > 0 && (
-                        <p>
-                          Sabor: <span className="text-foreground">{formatSimpleList(cut.flavorTags)}</span>
-                        </p>
-                      )}
-                      {cut.bestSpices && (
-                        <p>
-                          Temperos: <span className="text-foreground">{formatSeasonings(cut.bestSpices)}</span>
-                        </p>
-                      )}
-                      {cut.bestCheeses && (
-                        <p>
-                          Queijo: <span className="text-foreground">{formatSimpleList(cut.bestCheeses)}</span>
-                        </p>
-                      )}
-                      {cut.bestBuns && (
-                        <p>
-                          Pao: <span className="text-foreground">{formatSimpleList(cut.bestBuns)}</span>
-                        </p>
-                      )}
-                      {cut.bestUseBadge && (
-                        <p>
-                          Melhor uso: <span className="text-foreground">{cut.bestUseBadge}</span>
-                        </p>
-                      )}
-                      {formatGrindRecommendation(cut) && (
-                        <p className="text-muted-foreground">{formatGrindRecommendation(cut)}</p>
-                      )}
-                      {getCutDynamicTips(cut)
-                        .slice(0, 2)
-                        .map((tip) => (
-                          <p key={tip} className="text-foreground">
-                            {tip}
-                          </p>
-                        ))}
-                      {getPrepStyleWarnings(cut, prepStyle)
-                        .slice(0, 1)
-                        .map((tip) => (
-                          <p key={tip} className="text-fat-warning">
-                            {tip}
-                          </p>
-                        ))}
-                      {cut.warnings.length > 0 && (
-                        <p className="text-fat-warning">Alerta: {cut.warnings.join(' / ')}</p>
+                      ) : (
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          onClick={() => {
+                            onSelect(ingredient.id);
+                            onClose();
+                          }}
+                        >
+                          <Plus className="w-4 h-4" />
+                          Adicionar
+                        </Button>
                       )}
                     </div>
-                  )}
+                    <div className="flex flex-wrap gap-2 text-[11px] text-muted-foreground">
+                      <span className="rounded-full bg-muted px-2 py-1">
+                        {ingredient.fatPercentage}% gordura
+                      </span>
+                      {cut?.bestUseBadge && (
+                        <span className="rounded-full bg-primary/10 px-2 py-1 text-primary">
+                          {cut.bestUseBadge}
+                        </span>
+                      )}
+                      {cut && (
+                        <>
+                          <span className="rounded-full bg-muted px-2 py-1">
+                            Colageno {formatCollagenLevel(cut)}
+                          </span>
+                          <span className="rounded-full bg-muted px-2 py-1">
+                            Oxidacao {formatOxidationRate(cut)}
+                          </span>
+                          <span className="rounded-full bg-muted px-2 py-1">
+                            Maillard {formatMaillardPotential(cut)}
+                          </span>
+                        </>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => toggleExpanded(ingredient.id)}
+                        className="px-0 text-xs text-primary hover:text-primary"
+                      >
+                        {isExpanded ? 'Mostrar menos' : 'Ler mais'}
+                      </Button>
+                      {cut && getPrepStyleWarnings(cut, prepStyle).length > 0 && (
+                        <span className="text-xs text-fat-warning">
+                          {getPrepStyleWarnings(cut, prepStyle)[0]}
+                        </span>
+                      )}
+                    </div>
+                    <AnimatePresence initial={false}>
+                      {isExpanded && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="space-y-1 text-xs text-muted-foreground overflow-hidden"
+                        >
+                          {cut ? (
+                            <>
+                              <p>
+                                Funcao: <span className="text-foreground">{formatCutFunction(cut)}</span>
+                              </p>
+                              <p>
+                                Gordura estimada:{' '}
+                                <span className="text-foreground">{formatCutFatRange(cut)}</span>
+                              </p>
+                              <p>
+                                Calorias: <span className="text-foreground">{formatCalories(cut)}</span>
+                              </p>
+                              <p>
+                                Gordura:{' '}
+                                <span className="text-foreground">
+                                  {formatFatType(cut)} ({formatMeltingProfile(cut)})
+                                </span>
+                              </p>
+                              <p>
+                                Por que entra: <span className="text-foreground">{cut.shortDescription}</span>
+                              </p>
+                              <p>
+                                Dicas: <span className="text-foreground">{cut.tips}</span>
+                              </p>
+                              <p>
+                                Nome EN: <span className="text-foreground">{cut.nameEn}</span>
+                              </p>
+                              <p>
+                                Custo: <span className="text-foreground">{formatCostTier(cut)}</span>
+                              </p>
+                              <p>
+                                Recomendado: <span className="text-foreground">{formatCutRoles(cut)}</span>
+                              </p>
+                              {cut.flavorTags.length > 0 && (
+                                <p>
+                                  Sabor:{' '}
+                                  <span className="text-foreground">{formatSimpleList(cut.flavorTags)}</span>
+                                </p>
+                              )}
+                              {cut.bestSpices && (
+                                <p>
+                                  Temperos:{' '}
+                                  <span className="text-foreground">{formatSeasonings(cut.bestSpices)}</span>
+                                </p>
+                              )}
+                              {cut.bestCheeses && (
+                                <p>
+                                  Queijo:{' '}
+                                  <span className="text-foreground">{formatSimpleList(cut.bestCheeses)}</span>
+                                </p>
+                              )}
+                              {cut.bestBuns && (
+                                <p>
+                                  Pao: <span className="text-foreground">{formatSimpleList(cut.bestBuns)}</span>
+                                </p>
+                              )}
+                              {formatGrindRecommendation(cut) && (
+                                <p className="text-muted-foreground">{formatGrindRecommendation(cut)}</p>
+                              )}
+                              {getCutDynamicTips(cut)
+                                .slice(0, 2)
+                                .map((tip) => (
+                                  <p key={tip} className="text-foreground">
+                                    {tip}
+                                  </p>
+                                ))}
+                              {cut.warnings.length > 0 && (
+                                <p className="text-fat-warning">Alerta: {cut.warnings.join(' / ')}</p>
+                              )}
+                            </>
+                          ) : (
+                            <>
+                              <p>
+                                Proteina: <span className="text-foreground">{ingredient.nutrition.protein}g</span>
+                              </p>
+                              <p>
+                                Gordura: <span className="text-foreground">{ingredient.nutrition.fat}g</span>
+                              </p>
+                              {ingredient.nutrition.carbs !== undefined && (
+                                <p>
+                                  Carbo: <span className="text-foreground">{ingredient.nutrition.carbs}g</span>
+                                </p>
+                              )}
+                            </>
+                          )}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
                 </div>
-                {isSelected ? (
-                  <span className="text-xs text-muted-foreground px-2 py-1 rounded bg-muted">
-                    Ja adicionado
-                  </span>
-                ) : (
-                  <Plus className="w-5 h-5 text-primary" />
-                )}
-              </motion.button>
+              </motion.div>
             );
           })}
         </div>

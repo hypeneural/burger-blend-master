@@ -306,7 +306,7 @@ export default function Index() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-md mx-auto px-4 pb-24">
+      <div className="max-w-md mx-auto px-4 pb-36">
         <AnimatePresence mode="wait">
           {activeTab === "lab" && (
             <motion.section
@@ -542,15 +542,6 @@ export default function Index() {
                       onBurgerWeightChange={setBurgerWeight}
                     />
 
-                    <Button
-                      variant="warm"
-                      size="xl"
-                      className="w-full"
-                      onClick={() => setStep("report")}
-                    >
-                      Gerar Receita Completa
-                    </Button>
-
                     <AnimatePresence>
                       {showPicker && (
                         <IngredientPicker
@@ -759,6 +750,23 @@ export default function Index() {
           )}
         </AnimatePresence>
       </div>
+
+      {activeTab === "lab" && step === "customize" && (
+        <div className="fixed left-0 right-0 bottom-24 z-40">
+          <div className="max-w-md mx-auto px-4">
+            <div className="rounded-2xl bg-background/95 border border-border shadow-card p-2 backdrop-blur">
+              <Button
+                variant="warm"
+                size="xl"
+                className="w-full"
+                onClick={() => setStep("report")}
+              >
+                Gerar Receita Completa
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <BottomNav activeTab={activeTab} onChange={setActiveTab} />
     </div>

@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Plus, X } from "lucide-react";
+import { IngredientIcon } from "@/components/IngredientIcon";
 import { Button } from "@/components/ui/button";
 import type { Ingredient } from "@/data/ingredients";
 import { cn } from "@/lib/utils";
@@ -59,7 +60,9 @@ export function ExtraPicker({ ingredients, selectedIds, onSelect, onClose }: Ext
                     : "bg-card border-border hover:border-primary hover:shadow-warm",
                 )}
               >
-                <span className="text-3xl">{ingredient.icon}</span>
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-muted">
+                  <IngredientIcon category={ingredient.category} className="h-6 w-6" />
+                </div>
                 <div className="flex-1">
                   <h4 className="font-medium text-foreground">{ingredient.name}</h4>
                   <p className="text-sm text-muted-foreground">{ingredient.description}</p>

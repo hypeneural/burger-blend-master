@@ -179,9 +179,19 @@ export function BlendReport({
     if (!reportRef.current || exporting) return;
     setExporting(true);
     try {
-      const canvas = await html2canvas(reportRef.current, {
-        scale: 2,
+      if (document.fonts?.ready) {
+        await document.fonts.ready;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 120));
+      const reportNode = reportRef.current;
+      const canvas = await html2canvas(reportNode, {
+        scale: Math.min(2, window.devicePixelRatio || 2),
         backgroundColor: '#F7F2E9',
+        useCORS: true,
+        allowTaint: true,
+        scrollY: -window.scrollY,
+        windowWidth: reportNode.scrollWidth,
+        windowHeight: reportNode.scrollHeight,
       });
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF({ orientation: 'p', unit: 'pt', format: 'a4' });
