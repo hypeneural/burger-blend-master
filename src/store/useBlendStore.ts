@@ -1,4 +1,5 @@
-import { create } from "zustand";
+import { shallow } from "zustand/shallow";
+import { createWithEqualityFn } from "zustand/traditional";
 import type { BottomTab } from "@/components/BottomNav";
 import { presets, type Preset, type BlendIngredient } from "@/data/presets";
 import {
@@ -95,7 +96,7 @@ interface BlendStore {
   normalizeIngredients: () => void;
 }
 
-export const useBlendStore = create<BlendStore>((set) => ({
+export const useBlendStore = createWithEqualityFn<BlendStore>((set) => ({
   catalogCuts: cuts,
   catalogIngredients: ingredients,
   catalogPresets: presets,
@@ -340,4 +341,4 @@ export const useBlendStore = create<BlendStore>((set) => ({
         ),
       };
     }),
-}));
+}), shallow);

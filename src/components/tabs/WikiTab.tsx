@@ -1,6 +1,5 @@
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { shallow } from "zustand/shallow";
 import { IngredientWikiCard } from "@/components/IngredientWikiCard";
 import { Button } from "@/components/ui/button";
 import { useBlendStore } from "@/store/useBlendStore";
@@ -29,10 +28,9 @@ const wikiSections = [
 ] as const;
 
 export function WikiTab() {
-  const { catalogIngredients } = useBlendStore(
-    (state) => ({ catalogIngredients: state.catalogIngredients }),
-    shallow,
-  );
+  const { catalogIngredients } = useBlendStore((state) => ({
+    catalogIngredients: state.catalogIngredients,
+  }));
 
   const groupedIngredients = useMemo(() => {
     return wikiSections.map((section) => ({

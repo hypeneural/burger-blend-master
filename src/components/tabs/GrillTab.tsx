@@ -1,6 +1,5 @@
 import { motion } from "framer-motion";
 import { Bookmark } from "lucide-react";
-import { shallow } from "zustand/shallow";
 import { Button } from "@/components/ui/button";
 import { SavedBlendCard } from "@/components/SavedBlendCard";
 import { toast } from "@/hooks/use-toast";
@@ -17,16 +16,13 @@ export function GrillTab() {
     startCustomBlend,
     loadSavedBlend,
     setSavedBlends,
-  } = useBlendStore(
-    (state) => ({
-      savedBlends: state.savedBlends,
-      historyEntries: state.historyEntries,
-      startCustomBlend: state.startCustomBlend,
-      loadSavedBlend: state.loadSavedBlend,
-      setSavedBlends: state.setSavedBlends,
-    }),
-    shallow,
-  );
+  } = useBlendStore((state) => ({
+    savedBlends: state.savedBlends,
+    historyEntries: state.historyEntries,
+    startCustomBlend: state.startCustomBlend,
+    loadSavedBlend: state.loadSavedBlend,
+    setSavedBlends: state.setSavedBlends,
+  }));
 
   const handleCustomBlend = () => {
     startCustomBlend();

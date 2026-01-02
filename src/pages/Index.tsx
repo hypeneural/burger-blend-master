@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 import { AnimatePresence, MotionConfig } from "framer-motion";
-import { shallow } from "zustand/shallow";
 import { BottomNav } from "@/components/BottomNav";
 import { ConnectionBanner } from "@/components/ConnectionBanner";
 import { GrillTab } from "@/components/tabs/GrillTab";
@@ -32,24 +31,21 @@ export default function Index() {
     setCmvTarget,
     setPriceOverrides,
     setCatalog,
-  } = useBlendStore(
-    (state) => ({
-      activeTab: state.activeTab,
-      wakeLockEnabled: state.wakeLockEnabled,
-      setActiveTab: state.setActiveTab,
-      setSavedBlends: state.setSavedBlends,
-      setHistoryEntries: state.setHistoryEntries,
-      setTargetFat: state.setTargetFat,
-      setRoundingStep: state.setRoundingStep,
-      setFatSourceId: state.setFatSourceId,
-      setWakeLockEnabled: state.setWakeLockEnabled,
-      setAlertThresholds: state.setAlertThresholds,
-      setCmvTarget: state.setCmvTarget,
-      setPriceOverrides: state.setPriceOverrides,
-      setCatalog: state.setCatalog,
-    }),
-    shallow,
-  );
+  } = useBlendStore((state) => ({
+    activeTab: state.activeTab,
+    wakeLockEnabled: state.wakeLockEnabled,
+    setActiveTab: state.setActiveTab,
+    setSavedBlends: state.setSavedBlends,
+    setHistoryEntries: state.setHistoryEntries,
+    setTargetFat: state.setTargetFat,
+    setRoundingStep: state.setRoundingStep,
+    setFatSourceId: state.setFatSourceId,
+    setWakeLockEnabled: state.setWakeLockEnabled,
+    setAlertThresholds: state.setAlertThresholds,
+    setCmvTarget: state.setCmvTarget,
+    setPriceOverrides: state.setPriceOverrides,
+    setCatalog: state.setCatalog,
+  }));
 
   const { isOnline, isLowData, effectiveType } = useNetworkStatus();
   const shouldAnimate = !isLowData;

@@ -1,5 +1,4 @@
 import { motion } from "framer-motion";
-import { shallow } from "zustand/shallow";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -18,18 +17,15 @@ export function ToolsTab() {
     setWakeLockEnabled,
     setAlertThresholds,
     setPriceOverrides,
-  } = useBlendStore(
-    (state) => ({
-      wakeLockEnabled: state.wakeLockEnabled,
-      alertThresholds: state.alertThresholds,
-      priceOverrides: state.priceOverrides,
-      catalogIngredients: state.catalogIngredients,
-      setWakeLockEnabled: state.setWakeLockEnabled,
-      setAlertThresholds: state.setAlertThresholds,
-      setPriceOverrides: state.setPriceOverrides,
-    }),
-    shallow,
-  );
+  } = useBlendStore((state) => ({
+    wakeLockEnabled: state.wakeLockEnabled,
+    alertThresholds: state.alertThresholds,
+    priceOverrides: state.priceOverrides,
+    catalogIngredients: state.catalogIngredients,
+    setWakeLockEnabled: state.setWakeLockEnabled,
+    setAlertThresholds: state.setAlertThresholds,
+    setPriceOverrides: state.setPriceOverrides,
+  }));
 
   const handleWakeLockToggle = (value: boolean) => {
     setWakeLockEnabled(value);
