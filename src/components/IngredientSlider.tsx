@@ -64,19 +64,19 @@ export function IngredientSlider({
       exit={{ opacity: 0, x: 20 }}
       className="p-4 rounded-xl bg-card border border-border"
     >
-      <div className="flex items-start justify-between mb-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between mb-3">
         <div className="flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-muted">
             <IngredientIcon category={ingredient.category} className="h-5 w-5" />
           </div>
           <div>
             <h4 className="font-medium text-foreground">{ingredient.name}</h4>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground leading-snug">
               {ingredient.description} - {ingredient.fatPercentage}% gordura
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 self-end sm:self-auto">
           <div className="flex flex-col items-end leading-tight">
             <motion.span
               key={inputMode === 'grams' ? grams : percentage}

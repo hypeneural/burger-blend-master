@@ -34,7 +34,7 @@ export function SmartAlerts({
             <AlertTriangle className="w-4 h-4 text-fat-danger" />
             <p className="font-medium text-foreground">{alert.title}</p>
           </div>
-          <p className="text-sm text-muted-foreground">{alert.detail}</p>
+          <p className="text-sm text-muted-foreground leading-relaxed">{alert.detail}</p>
           <details className="text-xs text-muted-foreground">
             <summary className="cursor-pointer">Entenda por que</summary>
             <p className="mt-1">{alert.reason}</p>

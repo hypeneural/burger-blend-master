@@ -86,6 +86,17 @@ export interface SmartAlert {
   reason: string;
 }
 
+const ALERT_THRESHOLDS = {
+  baseLowFat: 15,
+  baseHighFat: 30,
+  grillFlareFat: 28,
+  smashMinFat: 22,
+  airfryerMaxFat: 22,
+  fitMaxFat: 16,
+  tallMinFat: 20,
+  coxaoMinFat: 20,
+};
+
 export const getSmartAlerts = (
   ingredients: BlendIngredient[],
   fatPercentage: number,
@@ -94,26 +105,26 @@ export const getSmartAlerts = (
 ): SmartAlert[] => {
   const alerts: SmartAlert[] = [];
 
-  if (fatPercentage < 15) {
+  if (fatPercentage < ALERT_THRESHOLDS.baseLowFat) {
     alerts.push({
       id: 'low-fat',
       title: 'Risco de ressecamento',
       detail: 'Blend com pouca gordura tende a ficar seco.',
-      reason: 'A gordura retenciona umidade e ajuda na textura. Abaixo de 15% o burger perde suculencia.',
+      reason: `A gordura retenciona umidade e ajuda na textura. Abaixo de ${ALERT_THRESHOLDS.baseLowFat}% o burger perde suculencia.`,
     });
   }
 
-  if (fatPercentage > 30) {
+  if (fatPercentage > ALERT_THRESHOLDS.baseHighFat) {
     alerts.push({
       id: 'high-fat',
       title: 'Risco de encolhimento',
       detail: 'Gordura alta pode derreter demais.',
-      reason: 'Acima de 30% ha grande perda de gordura na chapa e o disco encolhe com facilidade.',
+      reason: `Acima de ${ALERT_THRESHOLDS.baseHighFat}% ha grande perda de gordura na chapa e o disco encolhe com facilidade.`,
     });
   }
 
   const coxao = ingredients.find((item) => item.ingredientId === 'coxao-duro');
-  if (coxao && coxao.percentage > 40 && fatPercentage < 20) {
+  if (coxao && coxao.percentage > 40 && fatPercentage < ALERT_THRESHOLDS.coxaoMinFat) {
     alerts.push({
       id: 'coxao-dominant',
       title: 'Coxao duro dominante',
@@ -131,7 +142,7 @@ export const getSmartAlerts = (
 
   if (
     (prepLower.includes('grelha') || prepLower.includes('churrasqueira') || prepLower.includes('carvao')) &&
-    fatPercentage > 28
+    fatPercentage > ALERT_THRESHOLDS.grillFlareFat
   ) {
     alerts.push({
       id: 'flare-ups',
@@ -141,25 +152,25 @@ export const getSmartAlerts = (
     });
   }
 
-  if (isSmash && fatPercentage < 20) {
+  if (isSmash && fatPercentage < ALERT_THRESHOLDS.smashMinFat) {
     alerts.push({
       id: 'smash-low-fat',
       title: 'Smash pede mais gordura',
       detail: 'Disco fino perde umidade rapido.',
-      reason: 'No smash a gordura acima de 20% ajuda a manter crosta e suculencia.',
+      reason: `No smash a gordura acima de ${ALERT_THRESHOLDS.smashMinFat}% ajuda a manter crosta e suculencia.`,
     });
   }
 
-  if (isAirfryer && fatPercentage > 25) {
+  if (isAirfryer && fatPercentage > ALERT_THRESHOLDS.airfryerMaxFat) {
     alerts.push({
       id: 'airfryer-high-fat',
       title: 'Airfryer com gordura alta',
       detail: 'Pode gerar fumaca e respingos.',
-      reason: 'Gordura pinga no cesto e queima rapido. Mire 18-22% ou use bandeja.',
+      reason: `Gordura pinga no cesto e queima rapido. Mire ate ${ALERT_THRESHOLDS.airfryerMaxFat}% ou use bandeja.`,
     });
   }
 
-  if (isFit && fatPercentage > 18) {
+  if (isFit && fatPercentage > ALERT_THRESHOLDS.fitMaxFat) {
     alerts.push({
       id: 'fit-high-fat',
       title: 'Fit com gordura acima do ideal',
@@ -168,12 +179,12 @@ export const getSmartAlerts = (
     });
   }
 
-  if (isTall && fatPercentage < 18) {
+  if (isTall && fatPercentage < ALERT_THRESHOLDS.tallMinFat) {
     alerts.push({
       id: 'tall-low-fat',
       title: 'Burger alto pede mais gordura',
       detail: 'Discos espessos ficam secos se magros.',
-      reason: 'Para burgers altos, 18-25% ajuda a manter o miolo suculento.',
+      reason: `Para burgers altos, ${ALERT_THRESHOLDS.tallMinFat}-25% ajuda a manter o miolo suculento.`,
     });
   }
 

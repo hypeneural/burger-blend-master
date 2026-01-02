@@ -6,7 +6,8 @@ Checklist atualizado conforme o estado atual do app.
 - [x] **Resumo dinamico do blend no Builder** com status de gordura e dicas curtas.
 - [x] **Tooltips padronizados** e micro-explicacoes por secao (blend, alvo, moagem, estilo).
 - [x] **Modo economia de dados** com reducao de animacoes e graficos ocultos.
-- [ ] **Ajustes finos de layout** (espacamento e consistencia visual em telas pequenas).
+- [x] **Ajustes finos de layout** (espacamento e consistencia visual em telas pequenas).
+- [x] **Thresholds ajustados** (Smash/Airfryer/Fit/Alto) com base em feedback.
 
 ## P0 - Offline e baixa conexao (prioridade maxima)
 - [x] **Banner offline/baixa conexao** avisando o usuario.

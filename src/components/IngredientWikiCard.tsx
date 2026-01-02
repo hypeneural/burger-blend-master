@@ -39,17 +39,19 @@ export function IngredientWikiCard({ ingredient }: IngredientWikiCardProps) {
 
   return (
     <motion.div layout className="p-4 rounded-xl bg-card border border-border space-y-2">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-muted">
             <IngredientIcon category={ingredient.category} className="h-5 w-5" />
           </div>
           <div>
             <h3 className="font-medium text-foreground">{ingredient.name}</h3>
-            <p className="text-xs text-muted-foreground">{ingredient.description}</p>
+            <p className="text-xs text-muted-foreground leading-snug">{ingredient.description}</p>
           </div>
         </div>
-        <span className="text-sm font-semibold text-primary">{ingredient.fatPercentage}%</span>
+        <span className="text-sm font-semibold text-primary self-start sm:self-auto">
+          {ingredient.fatPercentage}%
+        </span>
       </div>
       {cut?.bestUseBadge && (
         <span className="inline-flex rounded-full bg-primary/10 px-2 py-1 text-[11px] text-primary">
