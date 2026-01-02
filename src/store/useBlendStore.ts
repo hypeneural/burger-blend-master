@@ -1,6 +1,10 @@
 import { create } from "zustand";
 import type { BottomTab } from "@/components/BottomNav";
 import { presets, type Preset, type BlendIngredient } from "@/data/presets";
+import {
+  DEFAULT_ALERT_THRESHOLDS,
+  type AlertThresholds,
+} from "@/domain/blendEngine";
 import { type BurgerStyle, type GrindPass, type GrindSize } from "@/data/constants";
 import { cuts, type Cut } from "@/data/cuts";
 import { ingredients, type Ingredient } from "@/data/ingredients";
@@ -44,6 +48,7 @@ interface BlendStore {
   roundingStep: number;
   fatSourceId: string;
   wakeLockEnabled: boolean;
+  alertThresholds: AlertThresholds;
   savedBlends: SavedBlend[];
   historyEntries: BlendHistoryEntry[];
   setCatalog: (catalog: Partial<Pick<BlendStore, "catalogCuts" | "catalogIngredients" | "catalogPresets">>) => void;
@@ -67,6 +72,7 @@ interface BlendStore {
   setRoundingStep: (value: number) => void;
   setFatSourceId: (value: string) => void;
   setWakeLockEnabled: (value: boolean) => void;
+  setAlertThresholds: (value: Partial<AlertThresholds>) => void;
   setSavedBlends: (value: SavedBlend[]) => void;
   setHistoryEntries: (value: BlendHistoryEntry[]) => void;
   applyPreset: (preset: Preset) => void;
@@ -109,6 +115,7 @@ export const useBlendStore = create<BlendStore>((set) => ({
   roundingStep: 10,
   fatSourceId: "gordura-bovina",
   wakeLockEnabled: false,
+  alertThresholds: DEFAULT_ALERT_THRESHOLDS,
   savedBlends: [],
   historyEntries: [],
   setCatalog: (catalog) => set(catalog),
@@ -132,6 +139,10 @@ export const useBlendStore = create<BlendStore>((set) => ({
   setRoundingStep: (value) => set({ roundingStep: value }),
   setFatSourceId: (value) => set({ fatSourceId: value }),
   setWakeLockEnabled: (value) => set({ wakeLockEnabled: value }),
+  setAlertThresholds: (value) =>
+    set((state) => ({
+      alertThresholds: { ...state.alertThresholds, ...value },
+    })),
   setSavedBlends: (value) => set({ savedBlends: value }),
   setHistoryEntries: (value) => set({ historyEntries: value }),
   applyPreset: (preset) =>

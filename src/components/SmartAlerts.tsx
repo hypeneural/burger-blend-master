@@ -1,5 +1,6 @@
 import { AlertTriangle, Info } from "lucide-react";
 import type { BlendIngredient } from "@/data/presets";
+import type { AlertThresholds } from "@/domain/blendEngine";
 import { getSmartAlerts } from "@/domain/blendEngine";
 
 interface SmartAlertsProps {
@@ -7,6 +8,7 @@ interface SmartAlertsProps {
   fatPercentage: number;
   prepStyle: string;
   burgerStyle: string;
+  thresholds?: Partial<AlertThresholds>;
 }
 
 export function SmartAlerts({
@@ -14,8 +16,9 @@ export function SmartAlerts({
   fatPercentage,
   prepStyle,
   burgerStyle,
+  thresholds,
 }: SmartAlertsProps) {
-  const alerts = getSmartAlerts(ingredients, fatPercentage, prepStyle, burgerStyle);
+  const alerts = getSmartAlerts(ingredients, fatPercentage, prepStyle, burgerStyle, thresholds);
 
   if (alerts.length === 0) {
     return (

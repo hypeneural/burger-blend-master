@@ -8,6 +8,7 @@ Checklist atualizado conforme o estado atual do app.
 - [x] **Modo economia de dados** com reducao de animacoes e graficos ocultos.
 - [x] **Ajustes finos de layout** (espacamento e consistencia visual em telas pequenas).
 - [x] **Thresholds ajustados** (Smash/Airfryer/Fit/Alto) com base em feedback.
+- [x] **Painel de calibracao de alertas** (ajuste manual por feedback real).
 
 ## P0 - Offline e baixa conexao (prioridade maxima)
 - [x] **Banner offline/baixa conexao** avisando o usuario.
@@ -28,10 +29,20 @@ Checklist atualizado conforme o estado atual do app.
 - [ ] **Cooking Mode completo** (voz, vibracao, botao gigante).
 - [ ] **Fluxo em 3 toques** para chegar em blend, historico e ferramentas.
 
+## P1 - Profissional (CMV, escala e padronizacao)
+- [ ] **Simulador de custo/CMV em tempo real** (custo por burger + preco sugerido).
+- [ ] **Calculadora de proporcao reversa** (meta de gordura com 2 cortes).
+- [ ] **Ficha tecnica operacional** (gramas por lote, moagem, preparo, rendimento).
+- [ ] **Conversor de escala (batch)** 4 -> 50 burgers com 1 toque.
+- [ ] **Estimativa de yield/encolhimento** por metodo de cocao.
+- [ ] **Substituicao inteligente de cortes** (ex: acem -> paleta) com impacto.
+
 ## P1 - Viralidade e onboarding
 - [ ] **Onboarding rapido (3 telas)** com CTA direto para o laboratorio.
 - [ ] **Templates de compartilhamento** (cards para WhatsApp/Instagram).
 - [ ] **Score do blend** (equilibrio, suculencia, textura) com dicas.
+- [ ] **Gerador de copy e nomes** para blends de assinatura.
+- [ ] **Rastreabilidade/historia do corte** (origem da carne e storytelling).
 
 ## P1 - Presets e WikiMeat
 - [ ] **Presets assinados** com alvo de gordura, moagem e por que funciona.
@@ -47,6 +58,7 @@ Checklist atualizado conforme o estado atual do app.
 - [ ] **Historico com feedback do usuario** (ajuste automatico).
 - [ ] **Badges leves** (primeiro smash, alvo 22% perfeito).
 - [ ] **Export/import e backup local.**
+- [ ] **Feedback real para calibrar alertas** (smash/airfryer/fit/alto).
 
 ## P2 - Qualidade e confianca
 - [ ] **Acessibilidade** (contraste, targets >= 72px, labels).

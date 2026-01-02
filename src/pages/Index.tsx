@@ -106,6 +106,7 @@ export default function Index() {
     roundingStep,
     fatSourceId,
     wakeLockEnabled,
+    alertThresholds,
     setActiveTab,
     setStep,
     setBlendName,
@@ -123,6 +124,7 @@ export default function Index() {
     setRoundingStep,
     setFatSourceId,
     setWakeLockEnabled,
+    setAlertThresholds,
     setSavedBlends,
     setHistoryEntries,
     setCatalog,
@@ -178,13 +180,14 @@ export default function Index() {
   useEffect(() => {
     let isActive = true;
     const loadData = async () => {
-      const [blends, history, prefTarget, prefStep, prefSource, prefWake] = await Promise.all([
+      const [blends, history, prefTarget, prefStep, prefSource, prefWake, prefAlerts] = await Promise.all([
         loadSavedBlends(),
         loadHistory(10),
         getPreference("targetFat"),
         getPreference("roundingStep"),
         getPreference("fatSourceId"),
         getPreference("wakeLockEnabled"),
+        getPreference("alertThresholds"),
       ]);
       if (!isActive) return;
       setSavedBlends(blends);
@@ -193,6 +196,9 @@ export default function Index() {
       if (typeof prefStep === "number") setRoundingStep(prefStep);
       if (typeof prefSource === "string") setFatSourceId(prefSource);
       if (typeof prefWake === "boolean") setWakeLockEnabled(prefWake);
+      if (prefAlerts && typeof prefAlerts === "object") {
+        setAlertThresholds(prefAlerts as Record<string, number>);
+      }
     };
     loadData();
     return () => {
@@ -205,6 +211,7 @@ export default function Index() {
     setSavedBlends,
     setTargetFat,
     setWakeLockEnabled,
+    setAlertThresholds,
   ]);
 
   useEffect(() => {
@@ -377,6 +384,18 @@ export default function Index() {
   const handleWakeLockToggle = (value: boolean) => {
     setWakeLockEnabled(value);
     setPreference("wakeLockEnabled", value);
+  };
+
+  const handleAlertThresholdChange = (
+    key: keyof typeof alertThresholds,
+    value: number,
+    min: number,
+    max: number,
+  ) => {
+    const clamped = Math.min(max, Math.max(min, value));
+    const next = { ...alertThresholds, [key]: clamped };
+    setAlertThresholds(next);
+    setPreference("alertThresholds", next);
   };
 
   const chartFallback = (
@@ -654,6 +673,7 @@ export default function Index() {
                       fatPercentage={fatPercentage}
                       prepStyle={prepStyle}
                       burgerStyle={burgerStyle}
+                      thresholds={alertThresholds}
                     />
 
                     <section className="space-y-3">
@@ -1015,6 +1035,118 @@ export default function Index() {
                     onCheckedChange={handleWakeLockToggle}
                     disabled={!wakeLockSupported}
                   />
+                </div>
+              </div>
+
+              <div className="p-5 rounded-2xl bg-card border border-border space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="font-display text-lg font-semibold text-foreground">
+                      Calibrar alertas
+                    </h2>
+                    <p className="text-sm text-muted-foreground">
+                      Ajuste os limites conforme seu resultado real.
+                    </p>
+                  </div>
+                  <InfoTooltip label="Se o burger ficou seco, aumente o minimo. Se ficou oleoso, reduza o maximo." />
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between gap-3 rounded-xl bg-muted/40 p-3">
+                    <div>
+                      <p className="text-sm font-medium text-foreground">Smash minimo (%)</p>
+                      <p className="text-xs text-muted-foreground">
+                        Aumente se o smash ficou seco.
+                      </p>
+                    </div>
+                    <Input
+                      type="number"
+                      min={18}
+                      max={28}
+                      value={alertThresholds.smashMinFat}
+                      onChange={(event) =>
+                        handleAlertThresholdChange(
+                          "smashMinFat",
+                          Number(event.target.value),
+                          18,
+                          28,
+                        )
+                      }
+                      className="w-20 text-center"
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between gap-3 rounded-xl bg-muted/40 p-3">
+                    <div>
+                      <p className="text-sm font-medium text-foreground">Airfryer maximo (%)</p>
+                      <p className="text-xs text-muted-foreground">
+                        Reduza se houver muita fumaca.
+                      </p>
+                    </div>
+                    <Input
+                      type="number"
+                      min={16}
+                      max={26}
+                      value={alertThresholds.airfryerMaxFat}
+                      onChange={(event) =>
+                        handleAlertThresholdChange(
+                          "airfryerMaxFat",
+                          Number(event.target.value),
+                          16,
+                          26,
+                        )
+                      }
+                      className="w-20 text-center"
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between gap-3 rounded-xl bg-muted/40 p-3">
+                    <div>
+                      <p className="text-sm font-medium text-foreground">Fit maximo (%)</p>
+                      <p className="text-xs text-muted-foreground">
+                        Ajuste para manter leveza.
+                      </p>
+                    </div>
+                    <Input
+                      type="number"
+                      min={12}
+                      max={20}
+                      value={alertThresholds.fitMaxFat}
+                      onChange={(event) =>
+                        handleAlertThresholdChange(
+                          "fitMaxFat",
+                          Number(event.target.value),
+                          12,
+                          20,
+                        )
+                      }
+                      className="w-20 text-center"
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between gap-3 rounded-xl bg-muted/40 p-3">
+                    <div>
+                      <p className="text-sm font-medium text-foreground">Alto minimo (%)</p>
+                      <p className="text-xs text-muted-foreground">
+                        Aumente se o miolo ficou seco.
+                      </p>
+                    </div>
+                    <Input
+                      type="number"
+                      min={16}
+                      max={24}
+                      value={alertThresholds.tallMinFat}
+                      onChange={(event) =>
+                        handleAlertThresholdChange(
+                          "tallMinFat",
+                          Number(event.target.value),
+                          16,
+                          24,
+                        )
+                      }
+                      className="w-20 text-center"
+                    />
+                  </div>
                 </div>
               </div>
             </motion.section>
