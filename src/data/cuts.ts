@@ -1,20 +1,24 @@
 import {
   COST_TIERS,
+  COLLAGEN_LEVELS,
   CUT_AREAS,
   CUT_FUNCTIONS,
   FAT_TYPES,
   GRIND_PASSES,
   GRIND_SIZES,
   MELTING_PROFILES,
+  OXIDATION_RATES,
   RECOMMENDED_ROLES,
   REGION_TAGS,
   type CostTier,
+  type CollagenLevel,
   type CutArea,
   type CutFunction,
   type FatType,
   type GrindPass,
   type GrindSize,
   type MeltingProfile,
+  type OxidationRate,
   type RecommendedRole,
   type RegionTag,
 } from "@/data/constants";
@@ -33,6 +37,14 @@ export interface Cut {
   caloriesPer100g: number;
   fatType: FatType;
   meltingProfile: MeltingProfile;
+  collagenLevel: CollagenLevel;
+  oxidationRate: OxidationRate;
+  maillardPotential: number;
+  flavorTags: string[];
+  bestSpices?: string[];
+  bestCheeses?: string[];
+  bestBuns?: string[];
+  bestUseBadge?: string;
   shortDescription: string;
   tips: string;
   tags: string[];
@@ -61,6 +73,15 @@ const { LOW, MEDIUM, HIGH } = Object.fromEntries(COST_TIERS.map((value) => [valu
   CostTier
 >;
 
+const {
+  LOW: COLLAGEN_LOW,
+  MEDIUM: COLLAGEN_MEDIUM,
+  HIGH: COLLAGEN_HIGH,
+} = Object.fromEntries(COLLAGEN_LEVELS.map((value) => [value, value])) as Record<
+  CollagenLevel,
+  CollagenLevel
+>;
+
 const { FOREQUARTER, RIB, HINDQUARTER, FAT } = Object.fromEntries(
   CUT_AREAS.map((value) => [value, value]),
 ) as Record<CutArea, CutArea>;
@@ -76,6 +97,15 @@ const { HARD, SOFT, MIXED, PURE } = Object.fromEntries(
 const { FAST, MEDIUM: MEDIUM_MELT, SLOW } = Object.fromEntries(
   MELTING_PROFILES.map((value) => [value, value]),
 ) as Record<MeltingProfile, MeltingProfile>;
+
+const {
+  LOW: OXIDATION_LOW,
+  MEDIUM: OXIDATION_MEDIUM,
+  HIGH: OXIDATION_HIGH,
+} = Object.fromEntries(OXIDATION_RATES.map((value) => [value, value])) as Record<
+  OxidationRate,
+  OxidationRate
+>;
 
 const { SINGLE, DOUBLE } = Object.fromEntries(
   GRIND_PASSES.map((value) => [value, value]),
@@ -102,6 +132,14 @@ export const cuts: Cut[] = [
     caloriesPer100g: 220,
     fatType: MIXED,
     meltingProfile: MEDIUM_MELT,
+    collagenLevel: COLLAGEN_HIGH,
+    oxidationRate: OXIDATION_LOW,
+    maillardPotential: 8,
+    flavorTags: ["carnudo", "terroso", "equilibrado"],
+    bestSpices: ["sal-fino", "pimenta-do-reino", "cebola-em-po", "alho-em-po", "mostarda-em-po"],
+    bestCheeses: ["cheddar", "prato", "monterey jack"],
+    bestBuns: ["brioche", "pao classico"],
+    bestUseBadge: "base do dia a dia",
     shortDescription: "Equilibrio natural entre carne e gordura. A base mais comum de blends.",
     tips: "Use de 50% a 100% no blend como base. Ideal para iniciantes.",
     tags: ["estrutura", "equilibrado", "versatil"],
@@ -127,6 +165,14 @@ export const cuts: Cut[] = [
     caloriesPer100g: 180,
     fatType: MIXED,
     meltingProfile: MEDIUM_MELT,
+    collagenLevel: COLLAGEN_MEDIUM,
+    oxidationRate: OXIDATION_MEDIUM,
+    maillardPotential: 7,
+    flavorTags: ["ferroso", "limpo"],
+    bestSpices: ["sal-fino", "pimenta-do-reino", "cebola-em-po", "alho-em-po"],
+    bestCheeses: ["cheddar", "prato"],
+    bestBuns: ["pao classico"],
+    bestUseBadge: "economico para base",
     shortDescription:
       "Corte dianteiro com sabor moderado e textura firme. Base economica para blends.",
     tips: "Pode compor 30% a 70% do blend como base. Ideal para reduzir custo mantendo boa estrutura.",
@@ -153,6 +199,14 @@ export const cuts: Cut[] = [
     caloriesPer100g: 140,
     fatType: MIXED,
     meltingProfile: MEDIUM_MELT,
+    collagenLevel: COLLAGEN_MEDIUM,
+    oxidationRate: OXIDATION_LOW,
+    maillardPotential: 6,
+    flavorTags: ["neutro", "limpo", "leve"],
+    bestSpices: ["sal-fino", "pimenta-do-reino", "alho-em-po"],
+    bestCheeses: ["cheddar", "brie"],
+    bestBuns: ["pao integral", "pao gergelim"],
+    bestUseBadge: "base magra",
     shortDescription: "Corte traseiro magro e suave. Equilibra blends gordurosos com textura firme.",
     tips:
       "Use ~20% a 50% no blend para reduzir gordura sem perder consistencia. Evite usar 100% patinho para o hamburguer nao ficar seco.",
@@ -180,6 +234,14 @@ export const cuts: Cut[] = [
     caloriesPer100g: 170,
     fatType: MIXED,
     meltingProfile: MEDIUM_MELT,
+    collagenLevel: COLLAGEN_MEDIUM,
+    oxidationRate: OXIDATION_MEDIUM,
+    maillardPotential: 6,
+    flavorTags: ["suave", "limpo"],
+    bestSpices: ["sal-fino", "pimenta-do-reino"],
+    bestCheeses: ["prato", "cheddar"],
+    bestBuns: ["pao classico", "pao integral"],
+    bestUseBadge: "magro para equilibrar",
     shortDescription:
       "Corte traseiro magro e relativamente macio. Acrescenta estrutura sem muita gordura.",
     tips: "Substitui o patinho como parte magra. Utilize ~20% a 40% no blend.",
@@ -207,6 +269,14 @@ export const cuts: Cut[] = [
     caloriesPer100g: 160,
     fatType: MIXED,
     meltingProfile: MEDIUM_MELT,
+    collagenLevel: COLLAGEN_HIGH,
+    oxidationRate: OXIDATION_MEDIUM,
+    maillardPotential: 6,
+    flavorTags: ["marcado", "magro"],
+    bestSpices: ["sal-fino", "pimenta-do-reino", "alho-em-po"],
+    bestCheeses: ["prato", "cheddar"],
+    bestBuns: ["pao classico"],
+    bestUseBadge: "economico para smash",
     shortDescription:
       "Corte traseiro muito magro e de fibra longa. Tende a secar se usado sozinho.",
     tips: "Use ate ~30% no blend combinado a cortes gordurosos. Adicione gordura extra.",
@@ -233,6 +303,14 @@ export const cuts: Cut[] = [
     caloriesPer100g: 160,
     fatType: MIXED,
     meltingProfile: MEDIUM_MELT,
+    collagenLevel: COLLAGEN_LOW,
+    oxidationRate: OXIDATION_LOW,
+    maillardPotential: 7,
+    flavorTags: ["suave", "macio"],
+    bestSpices: ["sal-marinho", "pimenta-do-reino"],
+    bestCheeses: ["cheddar ingles", "brie"],
+    bestBuns: ["brioche", "pao classico"],
+    bestUseBadge: "maciez gourmet",
     shortDescription:
       "Corte nobre e macio com gordura moderada. Melhora a maciez do blend.",
     tips: "Use 50% a 80% no blend como base macia. Combine com cortes mais gordurosos.",
@@ -259,6 +337,14 @@ export const cuts: Cut[] = [
     caloriesPer100g: 170,
     fatType: SOFT,
     meltingProfile: FAST,
+    collagenLevel: COLLAGEN_LOW,
+    oxidationRate: OXIDATION_HIGH,
+    maillardPotential: 9,
+    flavorTags: ["ferroso", "sanguineo", "intenso"],
+    bestSpices: ["sal-marinho", "pimenta-do-reino", "cafe-em-po", "tomilho"],
+    bestCheeses: ["gorgonzola", "provolone"],
+    bestBuns: ["pao australiano", "ciabatta"],
+    bestUseBadge: "sabor intenso",
     shortDescription:
       "Corte do vazio macio e de sabor marcante. Gordura moderada equilibra sabor.",
     tips: "Use 20% a 50% do blend para adicionar sabor marcante. Combine com cortes mais magros.",
@@ -286,6 +372,14 @@ export const cuts: Cut[] = [
     caloriesPer100g: 180,
     fatType: MIXED,
     meltingProfile: MEDIUM_MELT,
+    collagenLevel: COLLAGEN_LOW,
+    oxidationRate: OXIDATION_MEDIUM,
+    maillardPotential: 7,
+    flavorTags: ["suave", "aveludado"],
+    bestSpices: ["sal-marinho", "pimenta-do-reino", "paprica-doce"],
+    bestCheeses: ["provolone", "cheddar"],
+    bestBuns: ["brioche", "pao classico"],
+    bestUseBadge: "textura aveludada",
     shortDescription:
       "Corte macio com capa de gordura moderada e sabor suave. Adiciona maciez ao blend.",
     tips: "Use 20% a 40% no blend para dar maciez sem sabor excessivo.",
@@ -313,6 +407,14 @@ export const cuts: Cut[] = [
     caloriesPer100g: 200,
     fatType: MIXED,
     meltingProfile: MEDIUM_MELT,
+    collagenLevel: COLLAGEN_MEDIUM,
+    oxidationRate: OXIDATION_MEDIUM,
+    maillardPotential: 8,
+    flavorTags: ["nobre", "marcado"],
+    bestSpices: ["sal-marinho", "pimenta-do-reino", "alho-em-po"],
+    bestCheeses: ["gorgonzola", "provolone"],
+    bestBuns: ["pao australiano", "brioche"],
+    bestUseBadge: "sabor premium",
     shortDescription:
       "Corte longo do lombo com marmoreio moderado e capa de gordura. Muito saboroso.",
     tips: "Por ser caro, use ~20% a 30% no blend para dar sabor de carne nobre.",
@@ -339,6 +441,14 @@ export const cuts: Cut[] = [
     caloriesPer100g: 250,
     fatType: MIXED,
     meltingProfile: MEDIUM_MELT,
+    collagenLevel: COLLAGEN_LOW,
+    oxidationRate: OXIDATION_MEDIUM,
+    maillardPotential: 8,
+    flavorTags: ["nobre", "adocicado"],
+    bestSpices: ["sal-parrilla", "chimichurri-seco"],
+    bestCheeses: ["prato", "meia cura"],
+    bestBuns: ["pao classico", "pao de sal"],
+    bestUseBadge: "purista",
     shortDescription:
       "Corte nobre famoso pela capa de gordura. Fornece sabor intenso e suculencia elevada.",
     tips: "Use moderadamente (~20% a 30%). Combine com cortes magros na base.",
@@ -366,6 +476,14 @@ export const cuts: Cut[] = [
     caloriesPer100g: 130,
     fatType: MIXED,
     meltingProfile: MEDIUM_MELT,
+    collagenLevel: COLLAGEN_LOW,
+    oxidationRate: OXIDATION_LOW,
+    maillardPotential: 5,
+    flavorTags: ["leve", "suave"],
+    bestSpices: ["sal-fino", "pimenta-do-reino", "alho-em-po"],
+    bestCheeses: ["brie", "cheddar"],
+    bestBuns: ["brioche", "pao integral"],
+    bestUseBadge: "maciez extrema",
     shortDescription:
       "Corte extremamente macio e magro, de sabor suave. Requer gordura de outros cortes.",
     tips: "Combine com cortes gordurosos. Use ate ~30% no blend.",
@@ -392,6 +510,14 @@ export const cuts: Cut[] = [
     caloriesPer100g: 250,
     fatType: SOFT,
     meltingProfile: FAST,
+    collagenLevel: COLLAGEN_MEDIUM,
+    oxidationRate: OXIDATION_MEDIUM,
+    maillardPotential: 9,
+    flavorTags: ["doce", "umami", "untuoso"],
+    bestSpices: ["sal-parrilla", "paprica-defumada", "cominho", "acucar-mascavo", "pimenta-caiena"],
+    bestCheeses: ["provolone", "gorgonzola", "queijo coalho"],
+    bestBuns: ["pao australiano", "ciabatta"],
+    bestUseBadge: "rei do smash",
     shortDescription:
       "Carne de costela com muito sabor e gordura entremeada. Deixa o burger suculento.",
     tips: "Use 20% a 50% no blend. Moa bem a costela para obter textura uniforme.",
@@ -418,6 +544,14 @@ export const cuts: Cut[] = [
     caloriesPer100g: 270,
     fatType: HARD,
     meltingProfile: SLOW,
+    collagenLevel: COLLAGEN_HIGH,
+    oxidationRate: OXIDATION_LOW,
+    maillardPotential: 8,
+    flavorTags: ["lacteo", "intenso", "mineral"],
+    bestSpices: ["sal-parrilla", "pimenta-do-reino", "alho-granulado", "pimenta-chili"],
+    bestCheeses: ["pepper jack", "provolone"],
+    bestBuns: ["pao australiano", "pao classico"],
+    bestUseBadge: "melhor para grelha",
     shortDescription:
       "Corte do peito com alto teor de gordura intramuscular. Contribui muita suculencia.",
     tips: "Use 20% a 30% no blend para adicionar gordura. Combine com cortes magros.",
@@ -444,6 +578,14 @@ export const cuts: Cut[] = [
     caloriesPer100g: 300,
     fatType: MIXED,
     meltingProfile: MEDIUM_MELT,
+    collagenLevel: COLLAGEN_HIGH,
+    oxidationRate: OXIDATION_LOW,
+    maillardPotential: 7,
+    flavorTags: ["amanteigado", "intenso"],
+    bestSpices: ["sal-marinho", "lemon-pepper", "tomilho", "salvia"],
+    bestCheeses: ["provolone", "gorgonzola"],
+    bestBuns: ["pao mandioca", "pao milho"],
+    bestUseBadge: "sabor regional",
     shortDescription:
       "Corte com altissimo marmoreio. Sabor acentuado e gordura abundante.",
     tips: "Use em pequenas proporcoes (~10% a 20%) devido a gordura elevada.",
@@ -470,6 +612,12 @@ export const cuts: Cut[] = [
     caloriesPer100g: 800,
     fatType: PURE,
     meltingProfile: SLOW,
+    collagenLevel: COLLAGEN_LOW,
+    oxidationRate: OXIDATION_LOW,
+    maillardPotential: 2,
+    flavorTags: ["untuoso", "gorduroso"],
+    bestSpices: ["sal-fino", "pimenta-do-reino"],
+    bestUseBadge: "correcao de gordura",
     shortDescription:
       "Gordura bovina pura para aumentar o teor de gordura de blends magros.",
     tips: "Adicione 5% a 15% no blend para atingir cerca de 20% de gordura total.",
@@ -495,6 +643,14 @@ export const cuts: Cut[] = [
     caloriesPer100g: 130,
     fatType: MIXED,
     meltingProfile: MEDIUM_MELT,
+    collagenLevel: COLLAGEN_HIGH,
+    oxidationRate: OXIDATION_MEDIUM,
+    maillardPotential: 7,
+    flavorTags: ["intenso", "rico em colageno"],
+    bestSpices: ["sal-fino", "pimenta-do-reino", "paprica-doce"],
+    bestCheeses: ["prato"],
+    bestBuns: ["pao classico"],
+    bestUseBadge: "liga forte",
     shortDescription:
       "Carne da perna muito magra e rica em colageno. Sabor bovino intenso.",
     tips: "Use baixa proporcao (~10%) para intensificar sabor. Moa duas vezes para liberar colageno.",

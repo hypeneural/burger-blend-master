@@ -1,11 +1,17 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Reorder } from "framer-motion";
-import { getIngredientById } from "@/data/ingredients";
-import type { BlendExtra } from "@/types/blend";
 
-interface BurgerStackProps {
-  extras: BlendExtra[];
+interface StackLayer {
+  id: string;
+  label: string;
 }
+
+const defaultLayers: StackLayer[] = [
+  { id: "molho-base", label: "Molho base" },
+  { id: "queijo", label: "Queijo" },
+  { id: "topping-quente", label: "Topping quente" },
+  { id: "topping-frio", label: "Topping frio" },
+];
 
 const layerColors = [
   "bg-cheese-gold/60",
@@ -14,18 +20,19 @@ const layerColors = [
   "bg-vegan-green/50",
 ];
 
-export function BurgerStack({ extras }: BurgerStackProps) {
-  const [orderedExtras, setOrderedExtras] = useState(extras);
-
-  useEffect(() => {
-    setOrderedExtras(extras);
-  }, [extras]);
+export function BurgerStack() {
+  const [layers, setLayers] = useState(defaultLayers);
 
   return (
     <div className="p-5 rounded-2xl bg-card border border-border space-y-3">
       <div className="flex items-center justify-between">
-        <h3 className="font-display text-lg font-semibold text-foreground">Stack do Hamburguer</h3>
-        <span className="text-xs text-muted-foreground">Arraste os extras</span>
+        <div>
+          <h3 className="font-display text-lg font-semibold text-foreground">Montagem do lanche</h3>
+          <p className="text-xs text-muted-foreground">
+            Camadas do sanduiche. Nao altera o blend da carne.
+          </p>
+        </div>
+        <span className="text-xs text-muted-foreground">Arraste para reordenar</span>
       </div>
 
       <div className="space-y-1">
@@ -33,29 +40,21 @@ export function BurgerStack({ extras }: BurgerStackProps) {
           Pao superior
         </div>
 
-        {orderedExtras.length > 0 ? (
-          <Reorder.Group axis="y" values={orderedExtras} onReorder={setOrderedExtras} className="space-y-1">
-            {orderedExtras.map((extra, index) => {
-              const ingredient = getIngredientById(extra.ingredientId);
-              if (!ingredient) return null;
-              const color = layerColors[index % layerColors.length];
-              return (
-                <Reorder.Item
-                  key={extra.ingredientId}
-                  value={extra}
-                  className={`h-8 rounded-full ${color} text-xs text-foreground flex items-center justify-between px-3 shadow-sm`}
-                >
-                  <span>{ingredient.name}</span>
-                  <span>{extra.grams}g</span>
-                </Reorder.Item>
-              );
-            })}
-          </Reorder.Group>
-        ) : (
-          <div className="h-8 rounded-full bg-muted text-xs text-muted-foreground flex items-center justify-center">
-            Sem extras
-          </div>
-        )}
+        <Reorder.Group axis="y" values={layers} onReorder={setLayers} className="space-y-1">
+          {layers.map((layer, index) => {
+            const color = layerColors[index % layerColors.length];
+            return (
+              <Reorder.Item
+                key={layer.id}
+                value={layer}
+                className={`h-8 rounded-full ${color} text-xs text-foreground flex items-center justify-between px-3 shadow-sm`}
+              >
+                <span>{layer.label}</span>
+                <span className="text-[11px] text-muted-foreground">arraste</span>
+              </Reorder.Item>
+            );
+          })}
+        </Reorder.Group>
 
         <div className="h-10 rounded-full bg-[hsl(var(--meat-brown))] text-xs text-primary-foreground flex items-center justify-center">
           Blend base

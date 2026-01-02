@@ -26,13 +26,20 @@ export function ExtrasSection({ extras, onAddClick, onChange, onRemove }: Extras
             <Sparkles className="w-5 h-5 text-cheese-gold" />
           </div>
           <div>
-            <h3 className="font-display text-lg font-semibold text-foreground">Extras</h3>
-            <p className="text-sm text-muted-foreground">Nao entram no % principal</p>
+            <h3 className="font-display text-lg font-semibold text-foreground">Extras do blend</h3>
+            <p className="text-sm text-muted-foreground">
+              Misture na carne. Nao entram no % principal
+            </p>
           </div>
         </div>
         {extras.length > 0 && (
           <span className="text-sm text-muted-foreground">{formatWeight(totalExtras)}</span>
         )}
+      </div>
+
+      <div className="rounded-xl bg-background p-3 text-xs text-muted-foreground">
+        Exemplos: bacon moido, queijo em cubos, tutano. Isso altera o sabor da carne, nao a
+        montagem do lanche.
       </div>
 
       {extras.length === 0 ? (

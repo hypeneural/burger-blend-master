@@ -23,11 +23,14 @@ export function IngredientBreakdown({ ingredients, baseWeight, extras = [] }: In
           <ShoppingCart className="w-5 h-5 text-cheese-gold" />
         </div>
         <div>
-          <h3 className="font-display text-lg font-semibold text-foreground">Lista de Ingredientes</h3>
-          <p className="text-sm text-muted-foreground">Quantidades calculadas automaticamente</p>
+          <h3 className="font-display text-lg font-semibold text-foreground">Lista de compras exata</h3>
+          <p className="text-sm text-muted-foreground">Pesos prontos para comprar e moer</p>
         </div>
       </div>
 
+      <div className="text-xs uppercase tracking-wide text-muted-foreground">
+        Carne base (100% do blend)
+      </div>
       <div className="space-y-2">
         {ingredients.map((item, index) => {
           const ingredient = getIngredientById(item.ingredientId);
@@ -61,7 +64,7 @@ export function IngredientBreakdown({ ingredients, baseWeight, extras = [] }: In
       {hasExtras && (
         <div className="pt-4 border-t border-border space-y-2">
           <div className="flex items-center justify-between text-xs uppercase tracking-wide text-muted-foreground">
-            <span>Extras</span>
+            <span>Extras do blend</span>
             <span>Nao entram no %</span>
           </div>
           {extras.map((extra) => {

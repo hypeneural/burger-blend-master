@@ -27,3 +27,9 @@ export type GrindPass = (typeof GRIND_PASSES)[number];
 
 export const RECOMMENDED_ROLES = ['base', 'booster', 'fat-source', 'luxury'] as const;
 export type RecommendedRole = (typeof RECOMMENDED_ROLES)[number];
+
+export const COLLAGEN_LEVELS = ['LOW', 'MEDIUM', 'HIGH'] as const;
+export type CollagenLevel = (typeof COLLAGEN_LEVELS)[number];
+
+export const OXIDATION_RATES = ['LOW', 'MEDIUM', 'HIGH'] as const;
+export type OxidationRate = (typeof OXIDATION_RATES)[number];

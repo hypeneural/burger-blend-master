@@ -2,8 +2,15 @@
 import { Trash2 } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
-import { getIngredientById } from '@/data/ingredients';
+import { getCutForIngredient, getIngredientById } from '@/data/ingredients';
 import { cn } from '@/lib/utils';
+import {
+  formatCollagenLevel,
+  formatMaillardPotential,
+  formatOxidationRate,
+  getCutDynamicTips,
+  getPrepStyleWarnings,
+} from '@/lib/cutHelpers';
 
 interface IngredientSliderProps {
   ingredientId: string;
@@ -11,6 +18,7 @@ interface IngredientSliderProps {
   onPercentageChange: (value: number) => void;
   onRemove: () => void;
   showRemove?: boolean;
+  prepStyle?: string;
 }
 
 export function IngredientSlider({
@@ -19,8 +27,10 @@ export function IngredientSlider({
   onPercentageChange,
   onRemove,
   showRemove = true,
+  prepStyle,
 }: IngredientSliderProps) {
   const ingredient = getIngredientById(ingredientId);
+  const cut = getCutForIngredient(ingredientId);
 
   if (!ingredient) return null;
 
@@ -73,6 +83,34 @@ export function IngredientSlider({
           )}
         </div>
       </div>
+
+      {cut && (
+        <div className="mb-3 flex flex-wrap gap-2 text-[11px] text-muted-foreground">
+          <span className="rounded-full bg-muted px-2 py-1">Colageno {formatCollagenLevel(cut)}</span>
+          <span className="rounded-full bg-muted px-2 py-1">Oxidacao {formatOxidationRate(cut)}</span>
+          <span className="rounded-full bg-muted px-2 py-1">Maillard {formatMaillardPotential(cut)}</span>
+          {cut.bestUseBadge && (
+            <span className="rounded-full bg-primary/10 px-2 py-1 text-primary">
+              {cut.bestUseBadge}
+            </span>
+          )}
+        </div>
+      )}
+
+      {cut && (
+        <div className="mb-3 space-y-1 text-xs text-muted-foreground">
+          {Array.from(
+            new Set([
+              ...getPrepStyleWarnings(cut, prepStyle),
+              ...getCutDynamicTips(cut),
+            ]),
+          )
+            .slice(0, 2)
+            .map((tip) => (
+              <div key={tip}>{tip}</div>
+            ))}
+        </div>
+      )}
 
       <Slider
         value={[percentage]}

@@ -26,6 +26,7 @@ Checklist focado em viralidade, UX/UI explicativa e estrutura robusta, considera
 - [ ] **P1 - Pontuacao/score do blend:** score simples (equilibrio, suculencia, textura) com explicacao para motivar ajustes e compartilhamento.
 - [x] **P1 - Feedback imediato e micro interacoes:** reforcar mudancas em graficos e alertas com animacoes suaves e cores de estado; hoje existe, mas sem padrao global.
 - [x] **P1 - Temperos inteligentes no relatorio:** sugestoes dinamicas por corte + personalizacao com explicacoes e avisos.
+- [x] **P1 - Resumo final com pedido ao acougueiro + lista de compras exata:** detalhar moagem, gordura e pesos para compra.
 - [x] **P1 - Dark mode automatico:** importante para cozinha noturna e contraste alto; necessario para UX em ambiente hostil.
 
 ## P1 - Navegacao rasa e ferramentas

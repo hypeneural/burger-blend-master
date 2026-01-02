@@ -3,15 +3,21 @@ import { Plus, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { INGREDIENT_CATEGORIES, type IngredientCategory } from '@/data/constants';
 import { getCutForIngredient, type Ingredient } from '@/data/ingredients';
+import { getSeasoningById } from '@/data/seasonings';
 import {
   formatCalories,
   formatCostTier,
+  formatCollagenLevel,
   formatCutFatRange,
   formatCutFunction,
   formatCutRoles,
   formatFatType,
   formatGrindRecommendation,
+  formatMaillardPotential,
   formatMeltingProfile,
+  formatOxidationRate,
+  getCutDynamicTips,
+  getPrepStyleWarnings,
 } from '@/lib/cutHelpers';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
@@ -21,6 +27,7 @@ interface IngredientPickerProps {
   selectedIds: string[];
   onSelect: (ingredientId: string) => void;
   onClose: () => void;
+  prepStyle?: string;
 }
 
 const categories = INGREDIENT_CATEGORIES.filter((category) => category !== 'extra') as IngredientCategory[];
@@ -37,10 +44,22 @@ export function IngredientPicker({
   selectedIds,
   onSelect,
   onClose,
+  prepStyle,
 }: IngredientPickerProps) {
   const [activeCategory, setActiveCategory] = useState<IngredientCategory>('bovine');
 
   const filteredIngredients = ingredients.filter((ingredient) => ingredient.category === activeCategory);
+  const formatSeasonings = (values?: string[]) => {
+    if (!values || values.length === 0) return undefined;
+    return values
+      .slice(0, 4)
+      .map((value) => getSeasoningById(value)?.name ?? value)
+      .join(', ');
+  };
+  const formatSimpleList = (values?: string[]) => {
+    if (!values || values.length === 0) return undefined;
+    return values.slice(0, 3).join(', ');
+  };
 
   return (
     <motion.div
@@ -106,8 +125,24 @@ export function IngredientPicker({
                   <h4 className="font-medium text-foreground">{ingredient.name}</h4>
                   <p className="text-sm text-muted-foreground">{ingredient.description}</p>
                   <span className="text-xs text-muted-foreground">{ingredient.fatPercentage}% gordura</span>
+                  {cut?.bestUseBadge && (
+                    <span className="ml-2 inline-flex rounded-full bg-primary/10 px-2 py-0.5 text-[11px] text-primary">
+                      {cut.bestUseBadge}
+                    </span>
+                  )}
                   {cut && (
                     <div className="mt-2 space-y-1 text-xs text-muted-foreground">
+                      <div className="flex flex-wrap gap-2 text-[11px]">
+                        <span className="rounded-full bg-muted px-2 py-1">
+                          Colageno {formatCollagenLevel(cut)}
+                        </span>
+                        <span className="rounded-full bg-muted px-2 py-1">
+                          Oxidacao {formatOxidationRate(cut)}
+                        </span>
+                        <span className="rounded-full bg-muted px-2 py-1">
+                          Maillard {formatMaillardPotential(cut)}
+                        </span>
+                      </div>
                       <p>
                         Funcao: <span className="text-foreground">{formatCutFunction(cut)}</span>
                       </p>
@@ -138,9 +173,48 @@ export function IngredientPicker({
                       <p>
                         Recomendado: <span className="text-foreground">{formatCutRoles(cut)}</span>
                       </p>
+                      {cut.flavorTags.length > 0 && (
+                        <p>
+                          Sabor: <span className="text-foreground">{formatSimpleList(cut.flavorTags)}</span>
+                        </p>
+                      )}
+                      {cut.bestSpices && (
+                        <p>
+                          Temperos: <span className="text-foreground">{formatSeasonings(cut.bestSpices)}</span>
+                        </p>
+                      )}
+                      {cut.bestCheeses && (
+                        <p>
+                          Queijo: <span className="text-foreground">{formatSimpleList(cut.bestCheeses)}</span>
+                        </p>
+                      )}
+                      {cut.bestBuns && (
+                        <p>
+                          Pao: <span className="text-foreground">{formatSimpleList(cut.bestBuns)}</span>
+                        </p>
+                      )}
+                      {cut.bestUseBadge && (
+                        <p>
+                          Melhor uso: <span className="text-foreground">{cut.bestUseBadge}</span>
+                        </p>
+                      )}
                       {formatGrindRecommendation(cut) && (
                         <p className="text-muted-foreground">{formatGrindRecommendation(cut)}</p>
                       )}
+                      {getCutDynamicTips(cut)
+                        .slice(0, 2)
+                        .map((tip) => (
+                          <p key={tip} className="text-foreground">
+                            {tip}
+                          </p>
+                        ))}
+                      {getPrepStyleWarnings(cut, prepStyle)
+                        .slice(0, 1)
+                        .map((tip) => (
+                          <p key={tip} className="text-fat-warning">
+                            {tip}
+                          </p>
+                        ))}
                       {cut.warnings.length > 0 && (
                         <p className="text-fat-warning">Alerta: {cut.warnings.join(' / ')}</p>
                       )}

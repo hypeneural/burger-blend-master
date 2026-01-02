@@ -105,6 +105,7 @@ export default function Index() {
     setBurgerCount,
     setBurgerWeight,
     setSeasonings,
+    setPrepStyle,
     setShowPicker,
     setShowExtrasPicker,
     setTargetFat,
@@ -127,6 +128,14 @@ export default function Index() {
   } = useBlendStore();
 
   const wakeLockSupported = typeof navigator !== "undefined" && "wakeLock" in navigator;
+
+  const prepOptions = [
+    { value: "Chapa", label: "Chapa" },
+    { value: "Frigideira", label: "Frigideira" },
+    { value: "Grelha", label: "Grelha" },
+    { value: "Churrasqueira", label: "Churrasqueira" },
+    { value: "Smash", label: "Smash" },
+  ];
 
   useWakeLock(wakeLockEnabled);
 
@@ -429,6 +438,30 @@ export default function Index() {
                       onApplySuggestion={handleApplyTargetSuggestion}
                     />
 
+                    <div className="p-5 rounded-2xl bg-card border border-border space-y-3">
+                      <div>
+                        <h3 className="font-display text-lg font-semibold text-foreground">
+                          Equipamento de cocao
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          Afeta alertas e recomendacoes de gordura.
+                        </p>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {prepOptions.map((option) => (
+                          <Button
+                            key={option.value}
+                            variant={prepStyle === option.value ? "default" : "secondary"}
+                            size="sm"
+                            onClick={() => setPrepStyle(option.value)}
+                            className="rounded-full"
+                          >
+                            {option.label}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+
                     <SmartAlerts
                       ingredients={ingredientsState}
                       fatPercentage={fatPercentage}
@@ -437,7 +470,14 @@ export default function Index() {
 
                     <section className="space-y-3">
                       <div className="flex items-center justify-between">
-                        <h3 className="font-display text-lg font-semibold text-foreground">Ingredientes</h3>
+                        <div>
+                          <h3 className="font-display text-lg font-semibold text-foreground">
+                            Blend da carne
+                          </h3>
+                          <p className="text-xs text-muted-foreground">
+                            Somente carnes e base do blend. Deve somar 100%.
+                          </p>
+                        </div>
                         <span
                           className={`text-sm ${totalPercentage === 100 ? "text-vegan-green" : "text-fat-warning"}`}
                         >
@@ -447,17 +487,18 @@ export default function Index() {
 
                       <AnimatePresence>
                         {ingredientsState.map((item) => (
-                          <IngredientSlider
-                            key={item.ingredientId}
-                            ingredientId={item.ingredientId}
-                            percentage={item.percentage}
-                            onPercentageChange={(value) =>
-                              updateIngredientPercentage(item.ingredientId, value)
-                            }
-                            onRemove={() => removeIngredient(item.ingredientId)}
-                            showRemove={ingredientsState.length > 1}
-                          />
-                        ))}
+                        <IngredientSlider
+                          key={item.ingredientId}
+                          ingredientId={item.ingredientId}
+                          percentage={item.percentage}
+                          onPercentageChange={(value) =>
+                            updateIngredientPercentage(item.ingredientId, value)
+                          }
+                          onRemove={() => removeIngredient(item.ingredientId)}
+                          showRemove={ingredientsState.length > 1}
+                          prepStyle={prepStyle}
+                        />
+                      ))}
                       </AnimatePresence>
 
                       <Button variant="outline" className="w-full" onClick={() => setShowPicker(true)}>
@@ -474,7 +515,7 @@ export default function Index() {
                     />
 
                     <Suspense fallback={stackFallback}>
-                      <BurgerStack extras={extras} />
+                      <BurgerStack />
                     </Suspense>
 
                     <div className="p-5 rounded-2xl bg-card border border-border space-y-4">
@@ -517,6 +558,7 @@ export default function Index() {
                           selectedIds={ingredientsState.map((item) => item.ingredientId)}
                           onSelect={addIngredient}
                           onClose={() => setShowPicker(false)}
+                          prepStyle={prepStyle}
                         />
                       )}
                     </AnimatePresence>

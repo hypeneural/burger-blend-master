@@ -17,6 +17,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { FatIndicator } from '@/components/FatIndicator';
+import { ButcherGuide } from '@/components/ButcherGuide';
 import { IngredientBreakdown } from '@/components/IngredientBreakdown';
 import { NutritionSummary } from '@/components/NutritionSummary';
 import { getIngredientById } from '@/data/ingredients';
@@ -245,6 +246,8 @@ export function BlendReport({
         </div>
 
         <IngredientBreakdown ingredients={ingredients} baseWeight={baseWeight} extras={extras} />
+
+        <ButcherGuide ingredients={ingredients} extras={extras} baseWeight={baseWeight} />
 
         <NutritionSummary
           calories={nutrition.calories}
