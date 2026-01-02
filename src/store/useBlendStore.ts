@@ -12,6 +12,7 @@ import { ingredients, type Ingredient } from "@/data/ingredients";
 import type { BlendExtra, BlendHistoryEntry, SavedBlend } from "@/types/blend";
 
 export type AppStep = "home" | "customize" | "report";
+export type LowDataPreference = "auto" | "on" | "off";
 
 const DEFAULT_PREP_STYLE = "Chapa ou Grelha";
 const DEFAULT_PREP_TIPS = [
@@ -50,6 +51,7 @@ interface BlendStore {
   roundingStep: number;
   fatSourceId: string;
   wakeLockEnabled: boolean;
+  lowDataMode: LowDataPreference;
   alertThresholds: AlertThresholds;
   priceOverrides: Record<string, number>;
   savedBlends: SavedBlend[];
@@ -76,6 +78,7 @@ interface BlendStore {
   setRoundingStep: (value: number) => void;
   setFatSourceId: (value: string) => void;
   setWakeLockEnabled: (value: boolean) => void;
+  setLowDataMode: (value: LowDataPreference) => void;
   setAlertThresholds: (value: Partial<AlertThresholds>) => void;
   setPriceOverrides: (value: Record<string, number>) => void;
   setSavedBlends: (value: SavedBlend[]) => void;
@@ -121,6 +124,7 @@ export const useBlendStore = createWithEqualityFn<BlendStore>((set) => ({
   roundingStep: 10,
   fatSourceId: "gordura-bovina",
   wakeLockEnabled: false,
+  lowDataMode: "auto",
   alertThresholds: DEFAULT_ALERT_THRESHOLDS,
   priceOverrides: {},
   savedBlends: [],
@@ -147,6 +151,7 @@ export const useBlendStore = createWithEqualityFn<BlendStore>((set) => ({
   setRoundingStep: (value) => set({ roundingStep: value }),
   setFatSourceId: (value) => set({ fatSourceId: value }),
   setWakeLockEnabled: (value) => set({ wakeLockEnabled: value }),
+  setLowDataMode: (value) => set({ lowDataMode: value }),
   setAlertThresholds: (value) =>
     set((state) => ({
       alertThresholds: { ...state.alertThresholds, ...value },

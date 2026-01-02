@@ -7,20 +7,34 @@ interface ConnectionBannerProps {
   isOnline: boolean;
   isLowData: boolean;
   effectiveType?: string | null;
+  lowDataMode?: "auto" | "on" | "off";
 }
 
-export function ConnectionBanner({ isOnline, isLowData, effectiveType }: ConnectionBannerProps) {
+export function ConnectionBanner({
+  isOnline,
+  isLowData,
+  effectiveType,
+  lowDataMode = "auto",
+}: ConnectionBannerProps) {
   const [dismissed, setDismissed] = useState(false);
 
   if (isOnline && !isLowData) return null;
   if (dismissed && isOnline) return null;
 
   const isOffline = !isOnline;
+  const isSlow = effectiveType === "slow-2g" || effectiveType === "2g";
+  const isForced = lowDataMode === "on" && isOnline && !isSlow;
   const Icon = isOffline ? WifiOff : Signal;
-  const title = isOffline ? "Modo offline ativo" : "Conexao lenta detectada";
+  const title = isOffline
+    ? "Modo offline ativo"
+    : isForced
+      ? "Economia de dados ativada"
+      : "Conexao lenta detectada";
   const description = isOffline
     ? "Usando dados salvos no aparelho."
-    : `Animacoes reduzidas para economizar dados${effectiveType ? ` (${effectiveType})` : ""}.`;
+    : isForced
+      ? "Animacoes e graficos reduzidos por preferencia salva."
+      : `Animacoes reduzidas para economizar dados${effectiveType ? ` (${effectiveType})` : ""}.`;
 
   return (
     <div

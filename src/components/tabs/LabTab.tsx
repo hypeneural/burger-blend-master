@@ -1,4 +1,4 @@
-import { Suspense, lazy, useMemo, useState } from "react";
+import { Suspense, lazy, useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, Plus, Sparkles } from "lucide-react";
 import { BlendCard } from "@/components/BlendCard";
@@ -329,6 +329,12 @@ export function LabTab({ shouldAnimate, showCharts }: LabTabProps) {
       Gerando receita completa...
     </div>
   );
+
+  useEffect(() => {
+    if (step !== "customize") return;
+    if (typeof navigator === "undefined" || !navigator.onLine) return;
+    import("@/components/BlendReport");
+  }, [step]);
 
   return (
     <motion.section

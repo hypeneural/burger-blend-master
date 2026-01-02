@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { INGREDIENT_CATEGORIES, type IngredientCategory } from '@/data/constants';
 import { getCutForIngredient, type Ingredient } from '@/data/ingredients';
 import { getSeasoningById } from '@/data/seasonings';
+import { getCatalogStatus, loadCatalog, precacheCatalogCategories } from '@/lib/contentStorage';
 import {
   formatCalories,
   formatCollagenLevel,
@@ -22,6 +23,7 @@ import {
   getPrepStyleWarnings,
 } from '@/lib/cutHelpers';
 import { cn } from '@/lib/utils';
+import { useBlendStore } from '@/store/useBlendStore';
 
 interface IngredientPickerProps {
   ingredients: Ingredient[];
@@ -47,9 +49,13 @@ export function IngredientPicker({
   onClose,
   prepStyle,
 }: IngredientPickerProps) {
+  const { setCatalog } = useBlendStore((state) => ({
+    setCatalog: state.setCatalog,
+  }));
   const [activeCategory, setActiveCategory] = useState<IngredientCategory>('bovine');
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [visibleCount, setVisibleCount] = useState(8);
+  const [cachedCategories, setCachedCategories] = useState<string[]>([]);
 
   const filteredIngredients = ingredients.filter((ingredient) => ingredient.category === activeCategory);
   const visibleIngredients = filteredIngredients.slice(0, visibleCount);
@@ -73,6 +79,22 @@ export function IngredientPicker({
     setVisibleCount(8);
     setExpandedId(null);
   }, [activeCategory]);
+
+  useEffect(() => {
+    getCatalogStatus().then((status) => setCachedCategories(status.categories));
+  }, []);
+
+  const handlePrefetchCategory = async () => {
+    await precacheCatalogCategories([activeCategory]);
+    const refreshed = await loadCatalog();
+    setCatalog({
+      catalogCuts: refreshed.cuts,
+      catalogIngredients: refreshed.ingredients,
+      catalogPresets: refreshed.presets,
+    });
+    const status = await getCatalogStatus();
+    setCachedCategories(status.categories);
+  };
 
   return (
     <motion.div
@@ -113,6 +135,18 @@ export function IngredientPicker({
         </div>
 
         <div className="p-4 space-y-2 max-h-[50vh] overflow-y-auto">
+          <div className="flex items-center justify-between rounded-xl bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
+            <span>
+              {cachedCategories.includes(activeCategory)
+                ? 'Disponivel offline'
+                : 'Toque para baixar esta categoria'}
+            </span>
+            {!cachedCategories.includes(activeCategory) && (
+              <Button variant="secondary" size="sm" onClick={handlePrefetchCategory}>
+                Baixar agora
+              </Button>
+            )}
+          </div>
           {visibleIngredients.map((ingredient) => {
             const isSelected = selectedIds.includes(ingredient.id);
             const cut = getCutForIngredient(ingredient.id);

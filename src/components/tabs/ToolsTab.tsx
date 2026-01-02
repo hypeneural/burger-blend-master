@@ -11,18 +11,22 @@ export function ToolsTab() {
   const wakeLockSupported = typeof navigator !== "undefined" && "wakeLock" in navigator;
   const {
     wakeLockEnabled,
+    lowDataMode,
     alertThresholds,
     priceOverrides,
     catalogIngredients,
     setWakeLockEnabled,
+    setLowDataMode,
     setAlertThresholds,
     setPriceOverrides,
   } = useBlendStore((state) => ({
     wakeLockEnabled: state.wakeLockEnabled,
+    lowDataMode: state.lowDataMode,
     alertThresholds: state.alertThresholds,
     priceOverrides: state.priceOverrides,
     catalogIngredients: state.catalogIngredients,
     setWakeLockEnabled: state.setWakeLockEnabled,
+    setLowDataMode: state.setLowDataMode,
     setAlertThresholds: state.setAlertThresholds,
     setPriceOverrides: state.setPriceOverrides,
   }));
@@ -30,6 +34,11 @@ export function ToolsTab() {
   const handleWakeLockToggle = (value: boolean) => {
     setWakeLockEnabled(value);
     setPreference("wakeLockEnabled", value);
+  };
+
+  const handleLowDataModeChange = (value: typeof lowDataMode) => {
+    setLowDataMode(value);
+    setPreference("lowDataMode", value);
   };
 
   const handleAlertThresholdChange = (
@@ -82,6 +91,47 @@ export function ToolsTab() {
             disabled={!wakeLockSupported}
           />
         </div>
+      </div>
+
+      <div className="p-5 rounded-2xl bg-card border border-border space-y-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="font-display text-lg font-semibold text-foreground">Economia de dados</h2>
+            <p className="text-sm text-muted-foreground">
+              Desliga graficos e animacoes para carregar mais rapido.
+            </p>
+          </div>
+          <InfoTooltip label="Auto segue a conexao. Ative para manter leve mesmo em redes boas." />
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant={lowDataMode === "auto" ? "default" : "secondary"}
+            size="sm"
+            onClick={() => handleLowDataModeChange("auto")}
+            className="rounded-full"
+          >
+            Auto
+          </Button>
+          <Button
+            variant={lowDataMode === "on" ? "default" : "secondary"}
+            size="sm"
+            onClick={() => handleLowDataModeChange("on")}
+            className="rounded-full"
+          >
+            Sempre ligado
+          </Button>
+          <Button
+            variant={lowDataMode === "off" ? "default" : "secondary"}
+            size="sm"
+            onClick={() => handleLowDataModeChange("off")}
+            className="rounded-full"
+          >
+            Sempre desligado
+          </Button>
+        </div>
+        <p className="text-xs text-muted-foreground">
+          Preferencia salva para as proximas sessoes.
+        </p>
       </div>
 
       <div className="p-5 rounded-2xl bg-card border border-border space-y-4">

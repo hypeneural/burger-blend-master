@@ -1,7 +1,8 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { IngredientWikiCard } from "@/components/IngredientWikiCard";
 import { Button } from "@/components/ui/button";
+import { getCatalogStatus, loadCatalog, precacheCatalogCategories } from "@/lib/contentStorage";
 import { useBlendStore } from "@/store/useBlendStore";
 
 const wikiSections = [
@@ -28,9 +29,11 @@ const wikiSections = [
 ] as const;
 
 export function WikiTab() {
-  const { catalogIngredients } = useBlendStore((state) => ({
+  const { catalogIngredients, setCatalog } = useBlendStore((state) => ({
     catalogIngredients: state.catalogIngredients,
+    setCatalog: state.setCatalog,
   }));
+  const [cachedCategories, setCachedCategories] = useState<string[]>([]);
 
   const groupedIngredients = useMemo(() => {
     return wikiSections.map((section) => ({
@@ -52,6 +55,26 @@ export function WikiTab() {
       [sectionId]: (prev[sectionId] ?? 6) + 6,
     }));
   };
+
+  const refreshStatus = async () => {
+    const status = await getCatalogStatus();
+    setCachedCategories(status.categories);
+  };
+
+  const handlePrefetchCategory = async (sectionId: string) => {
+    await precacheCatalogCategories([sectionId as typeof wikiSections[number]["id"]]);
+    const refreshed = await loadCatalog();
+    setCatalog({
+      catalogCuts: refreshed.cuts,
+      catalogIngredients: refreshed.ingredients,
+      catalogPresets: refreshed.presets,
+    });
+    await refreshStatus();
+  };
+
+  useEffect(() => {
+    refreshStatus();
+  }, []);
 
   return (
     <motion.section
@@ -76,6 +99,22 @@ export function WikiTab() {
               <p className="text-sm text-muted-foreground">{section.description}</p>
             </div>
             <span className="text-xs text-muted-foreground">{section.items.length} itens</span>
+          </div>
+          <div className="flex items-center justify-between rounded-xl bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
+            <span>
+              {cachedCategories.includes(section.id)
+                ? "Disponivel offline"
+                : "Toque para salvar offline"}
+            </span>
+            {!cachedCategories.includes(section.id) && (
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => handlePrefetchCategory(section.id)}
+              >
+                Baixar categoria
+              </Button>
+            )}
           </div>
           <div className="space-y-2">
             {section.items.slice(0, visibleCounts[section.id] ?? 6).map((item) => (

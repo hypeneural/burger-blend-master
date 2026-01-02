@@ -6,13 +6,13 @@ Checklist atualizado com foco em mobile-first, performance e offline.
 - [x] **Refatorar Index.tsx em secoes menores**: separar Builder, Wiki, Grill e Tools em componentes memoizados para reduzir re-render e manter a UI fluida.
 - [x] **Lazy load agressivo de features pesadas**: exportacao PDF (html2canvas/jspdf) e graficos devem carregar apenas ao abrir a tela/acao.
 - [x] **Virtualizar listas grandes**: WikiMeat e listas de ingredientes com renderizacao incremental (load more) para evitar travadas em aparelhos fracos.
-- [ ] **Modo economia persistente**: salvar preferencia de conexao lenta e desligar animacoes/graficos automaticamente em futuras sessoes.
-- [ ] **Reducao de bundle e fontes**: carregar apenas subsets de fontes e ativar font-display swap para acelerar o first paint.
+- [x] **Modo economia persistente**: salvar preferencia de conexao lenta e desligar animacoes/graficos automaticamente em futuras sessoes.
+- [x] **Reducao de bundle e fontes**: carregar apenas subsets de fontes e ativar font-display swap para acelerar o first paint.
 
 ## P0 - Offline e resiliencia
-- [ ] **Indicador de cache e ultima sincronizacao**: mostrar quando o app esta 100% pronto offline.
-- [ ] **Fallback offline por rota**: garantir que Wiki, Presets e Relatorio tenham conteudo local mesmo sem rede.
-- [ ] **Precache seletivo por categoria**: baixar conteudo mais acessado primeiro (bovinos/presets) e expandir sob demanda.
+- [x] **Indicador de cache e ultima sincronizacao**: mostrar quando o app esta 100% pronto offline.
+- [x] **Fallback offline por rota**: garantir que Wiki, Presets e Relatorio tenham conteudo local mesmo sem rede.
+- [x] **Precache seletivo por categoria**: baixar conteudo mais acessado primeiro (bovinos/presets) e expandir sob demanda.
 
 ## P1 - UX mobile nativa (template)
 - [ ] **Agrupar blocos por etapas**: reduzir scroll e mostrar somente a proxima decisao do usuario.
