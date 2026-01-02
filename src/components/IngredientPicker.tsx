@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { Plus, X } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { IngredientIcon } from '@/components/IngredientIcon';
 import { Button } from '@/components/ui/button';
 import { INGREDIENT_CATEGORIES, type IngredientCategory } from '@/data/constants';
@@ -49,8 +49,10 @@ export function IngredientPicker({
 }: IngredientPickerProps) {
   const [activeCategory, setActiveCategory] = useState<IngredientCategory>('bovine');
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [visibleCount, setVisibleCount] = useState(8);
 
   const filteredIngredients = ingredients.filter((ingredient) => ingredient.category === activeCategory);
+  const visibleIngredients = filteredIngredients.slice(0, visibleCount);
   const formatSeasonings = (values?: string[]) => {
     if (!values || values.length === 0) return undefined;
     return values
@@ -66,6 +68,11 @@ export function IngredientPicker({
   const toggleExpanded = (id: string) => {
     setExpandedId((current) => (current === id ? null : id));
   };
+
+  useEffect(() => {
+    setVisibleCount(8);
+    setExpandedId(null);
+  }, [activeCategory]);
 
   return (
     <motion.div
@@ -106,7 +113,7 @@ export function IngredientPicker({
         </div>
 
         <div className="p-4 space-y-2 max-h-[50vh] overflow-y-auto">
-          {filteredIngredients.map((ingredient) => {
+          {visibleIngredients.map((ingredient) => {
             const isSelected = selectedIds.includes(ingredient.id);
             const cut = getCutForIngredient(ingredient.id);
             const isExpanded = expandedId === ingredient.id;
@@ -288,6 +295,16 @@ export function IngredientPicker({
               </motion.div>
             );
           })}
+          {filteredIngredients.length > visibleCount && (
+            <Button
+              variant="secondary"
+              size="sm"
+              className="w-full"
+              onClick={() => setVisibleCount((prev) => prev + 8)}
+            >
+              Carregar mais ingredientes
+            </Button>
+          )}
         </div>
       </motion.div>
     </motion.div>

@@ -1,6 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
 import { motion } from 'framer-motion';
 import {
   AlertTriangle,
@@ -57,6 +55,14 @@ interface BlendReportProps {
   onSave: () => void;
   onSeasoningsChange: (value: string[]) => void;
 }
+
+const loadPdfLibs = async () => {
+  const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
+    import('html2canvas'),
+    import('jspdf'),
+  ]);
+  return { html2canvas, jsPDF };
+};
 
 export function BlendReport({
   name,
@@ -199,6 +205,7 @@ export function BlendReport({
     setExporting(true);
     const reportNode = reportRef.current;
     try {
+      const { html2canvas, jsPDF } = await loadPdfLibs();
       if (document.fonts?.ready) {
         await document.fonts.ready;
       }
@@ -237,6 +244,7 @@ export function BlendReport({
       });
     } catch {
       try {
+        const { jsPDF } = await loadPdfLibs();
         const pdf = new jsPDF({ orientation: 'p', unit: 'pt', format: 'a4' });
         const margin = 24;
         const pageWidth = pdf.internal.pageSize.getWidth() - margin * 2;
