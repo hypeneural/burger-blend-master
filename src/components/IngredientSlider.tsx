@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+﻿import { motion } from 'framer-motion';
 import { Trash2 } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
@@ -21,7 +21,7 @@ export function IngredientSlider({
   showRemove = true,
 }: IngredientSliderProps) {
   const ingredient = getIngredientById(ingredientId);
-  
+
   if (!ingredient) return null;
 
   const categoryColors = {
@@ -45,7 +45,7 @@ export function IngredientSlider({
           <div>
             <h4 className="font-medium text-foreground">{ingredient.name}</h4>
             <p className="text-xs text-muted-foreground">
-              {ingredient.description} · {ingredient.fatPercentage}% gordura
+              {ingredient.description} - {ingredient.fatPercentage}% gordura
             </p>
           </div>
         </div>
@@ -56,7 +56,7 @@ export function IngredientSlider({
             animate={{ scale: 1 }}
             className={cn(
               'text-xl font-bold min-w-[4rem] text-right',
-              percentage > 50 ? 'text-primary' : 'text-muted-foreground'
+              percentage > 50 ? 'text-primary' : 'text-muted-foreground',
             )}
           >
             {percentage}%
@@ -73,7 +73,7 @@ export function IngredientSlider({
           )}
         </div>
       </div>
-      
+
       <Slider
         value={[percentage]}
         onValueChange={([value]) => onPercentageChange(value)}

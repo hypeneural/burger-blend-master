@@ -1,63 +1,71 @@
-import { motion } from 'framer-motion';
-import { ChefHat, Flame, Leaf, Save, Share2, Utensils } from 'lucide-react';
+﻿import { motion } from 'framer-motion';
+import { ArrowLeft, ChefHat, Flame, Leaf, Save, Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { FatIndicator } from '@/components/FatIndicator';
 import { IngredientBreakdown } from '@/components/IngredientBreakdown';
+import { NutritionSummary } from '@/components/NutritionSummary';
 import { getIngredientById } from '@/data/ingredients';
+import { calculateBaseWeight, calculateExtrasWeight, calculateFatPercentage, calculateNutritionPerBurger, formatWeight } from '@/lib/blendMath';
 import type { BlendIngredient } from '@/data/presets';
+import type { BlendExtra } from '@/types/blend';
 import { toast } from '@/hooks/use-toast';
 
 interface BlendReportProps {
   name: string;
   description: string;
   ingredients: BlendIngredient[];
+  extras: BlendExtra[];
   burgerCount: number;
   burgerWeight: number;
   prepStyle: string;
   prepTips: string[];
   seasonings: string[];
   onBack: () => void;
+  onSave: () => void;
 }
 
 export function BlendReport({
   name,
   description,
   ingredients,
+  extras,
   burgerCount,
   burgerWeight,
   prepStyle,
   prepTips,
   seasonings,
   onBack,
+  onSave,
 }: BlendReportProps) {
-  const totalWeight = burgerCount * burgerWeight;
-  
-  const calculateFat = () => {
-    let totalFat = 0;
-    ingredients.forEach((item) => {
-      const ingredient = getIngredientById(item.ingredientId);
-      if (ingredient) {
-        totalFat += (item.percentage / 100) * ingredient.fatPercentage;
-      }
-    });
-    return Math.round(totalFat);
-  };
-
-  const fatPercentage = calculateFat();
+  const baseWeight = calculateBaseWeight(burgerCount, burgerWeight);
+  const extrasWeight = calculateExtrasWeight(extras);
+  const totalWeight = baseWeight + extrasWeight;
+  const fatPercentage = calculateFatPercentage(ingredients, extras, burgerCount, burgerWeight);
+  const nutrition = calculateNutritionPerBurger(ingredients, extras, burgerCount, burgerWeight);
 
   const handleSave = () => {
-    toast({
-      title: "Blend salvo!",
-      description: "Seu blend foi adicionado aos favoritos.",
-    });
+    onSave();
   };
 
   const handleShare = () => {
-    const shareText = `${name}\n${description}\n\nIngredientes:\n${ingredients.map(i => {
-      const ing = getIngredientById(i.ingredientId);
-      return `• ${ing?.name}: ${i.percentage}%`;
-    }).join('\n')}\n\nGordura: ${fatPercentage}%`;
-    
+    const ingredientLines = ingredients
+      .map((item) => {
+        const ing = getIngredientById(item.ingredientId);
+        return `- ${ing?.name ?? 'Ingrediente'}: ${item.percentage}%`;
+      })
+      .join('\n');
+
+    const extrasLines = extras
+      .map((extra) => {
+        const ing = getIngredientById(extra.ingredientId);
+        return `- ${ing?.name ?? 'Extra'}: ${formatWeight(extra.grams)}`;
+      })
+      .join('\n');
+
+    const extrasBlock = extras.length > 0 ? `\n\nExtras:\n${extrasLines}` : '';
+
+    const shareText = `${name}\n${description}\n\nIngredientes:\n${ingredientLines}${extrasBlock}\n\nGordura: ${fatPercentage}%\nTotal: ${formatWeight(totalWeight)}`;
+
     if (navigator.share) {
       navigator.share({
         title: name,
@@ -66,8 +74,8 @@ export function BlendReport({
     } else {
       navigator.clipboard.writeText(shareText);
       toast({
-        title: "Copiado!",
-        description: "Receita copiada para a área de transferência.",
+        title: 'Copiado!',
+        description: 'Receita copiada para a area de transferencia.',
       });
     }
   };
@@ -86,7 +94,7 @@ export function BlendReport({
           transition={{ type: 'spring', stiffness: 200, delay: 0.2 }}
           className="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-grill-orange to-cheese-gold flex items-center justify-center shadow-warm"
         >
-          <span className="text-4xl">🍔</span>
+          <ChefHat className="w-9 h-9 text-primary-foreground" />
         </motion.div>
         <h1 className="font-display text-2xl font-bold text-foreground">{name}</h1>
         <p className="text-muted-foreground">{description}</p>
@@ -96,7 +104,7 @@ export function BlendReport({
       <div className="grid grid-cols-2 gap-3">
         <div className="p-4 rounded-xl bg-card border border-border text-center">
           <span className="text-3xl font-display font-bold text-foreground">{burgerCount}</span>
-          <p className="text-sm text-muted-foreground">hambúrgueres</p>
+          <p className="text-sm text-muted-foreground">hamburgueres</p>
         </div>
         <div className="p-4 rounded-xl bg-card border border-border text-center">
           <span className="text-3xl font-display font-bold text-foreground">{burgerWeight}g</span>
@@ -110,7 +118,14 @@ export function BlendReport({
       </div>
 
       {/* Ingredients */}
-      <IngredientBreakdown ingredients={ingredients} totalWeight={totalWeight} />
+      <IngredientBreakdown ingredients={ingredients} baseWeight={baseWeight} extras={extras} />
+
+      <NutritionSummary
+        calories={nutrition.calories}
+        protein={nutrition.protein}
+        fat={nutrition.fat}
+        perBurgerWeight={nutrition.perBurgerWeight}
+      />
 
       {/* Prep Instructions */}
       <div className="p-5 rounded-2xl bg-card border border-border space-y-4">
@@ -150,7 +165,7 @@ export function BlendReport({
           </div>
           <div>
             <h3 className="font-display text-lg font-semibold text-foreground">Temperos Sugeridos</h3>
-            <p className="text-sm text-muted-foreground">Para realçar o sabor</p>
+            <p className="text-sm text-muted-foreground">Para realcar o sabor</p>
           </div>
         </div>
         
@@ -163,7 +178,7 @@ export function BlendReport({
               transition={{ delay: 0.4 + index * 0.1 }}
               className="px-3 py-1.5 rounded-full bg-background text-sm text-foreground border border-border"
             >
-              🧂 {seasoning}
+              {seasoning}
             </motion.span>
           ))}
         </div>
@@ -182,7 +197,8 @@ export function BlendReport({
       </div>
 
       <Button variant="ghost" className="w-full" onClick={onBack}>
-        ← Voltar e ajustar
+        <ArrowLeft className="w-4 h-4" />
+        Voltar e ajustar
       </Button>
     </motion.div>
   );

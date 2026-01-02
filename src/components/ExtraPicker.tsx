@@ -1,30 +1,18 @@
-﻿import { motion } from 'framer-motion';
-import { Plus, X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { ingredients } from '@/data/ingredients';
-import { cn } from '@/lib/utils';
-import { useState } from 'react';
+import { motion } from "framer-motion";
+import { Plus, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ingredients } from "@/data/ingredients";
+import { cn } from "@/lib/utils";
 
-interface IngredientPickerProps {
+interface ExtraPickerProps {
   selectedIds: string[];
   onSelect: (ingredientId: string) => void;
   onClose: () => void;
 }
 
-const categories = ['bovine', 'pork', 'vegan'] as const;
-type IngredientCategory = (typeof categories)[number];
+const extraIngredients = ingredients.filter((ingredient) => ingredient.category === "extra");
 
-const categoryLabels: Record<IngredientCategory, { name: string; icon: string }> = {
-  bovine: { name: 'Bovinos', icon: '🐄' },
-  pork: { name: 'Suinos', icon: '🐖' },
-  vegan: { name: 'Veganos', icon: '🌱' },
-};
-
-export function IngredientPicker({ selectedIds, onSelect, onClose }: IngredientPickerProps) {
-  const [activeCategory, setActiveCategory] = useState<IngredientCategory>('bovine');
-
-  const filteredIngredients = ingredients.filter((ingredient) => ingredient.category === activeCategory);
-
+export function ExtraPicker({ selectedIds, onSelect, onClose }: ExtraPickerProps) {
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -34,36 +22,25 @@ export function IngredientPicker({ selectedIds, onSelect, onClose }: IngredientP
       onClick={onClose}
     >
       <motion.div
-        initial={{ y: '100%' }}
+        initial={{ y: "100%" }}
         animate={{ y: 0 }}
-        exit={{ y: '100%' }}
-        transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+        exit={{ y: "100%" }}
+        transition={{ type: "spring", damping: 25, stiffness: 300 }}
         className="w-full max-h-[80vh] bg-background rounded-t-3xl overflow-hidden"
         onClick={(event) => event.stopPropagation()}
       >
         <div className="p-4 border-b border-border flex items-center justify-between">
-          <h2 className="font-display text-xl font-semibold text-foreground">Adicionar Ingrediente</h2>
+          <div>
+            <h2 className="font-display text-xl font-semibold text-foreground">Adicionar Extras</h2>
+            <p className="text-sm text-muted-foreground">Nao entram no % principal</p>
+          </div>
           <Button variant="ghost" size="icon" onClick={onClose}>
             <X className="w-5 h-5" />
           </Button>
         </div>
 
-        <div className="flex gap-2 p-4 overflow-x-auto border-b border-border">
-          {categories.map((category) => (
-            <Button
-              key={category}
-              variant={activeCategory === category ? 'default' : 'secondary'}
-              size="sm"
-              onClick={() => setActiveCategory(category)}
-              className="whitespace-nowrap"
-            >
-              {categoryLabels[category].icon} {categoryLabels[category].name}
-            </Button>
-          ))}
-        </div>
-
-        <div className="p-4 space-y-2 max-h-[50vh] overflow-y-auto">
-          {filteredIngredients.map((ingredient) => {
+        <div className="p-4 space-y-2 max-h-[60vh] overflow-y-auto">
+          {extraIngredients.map((ingredient) => {
             const isSelected = selectedIds.includes(ingredient.id);
             return (
               <motion.button
@@ -77,10 +54,10 @@ export function IngredientPicker({ selectedIds, onSelect, onClose }: IngredientP
                 }}
                 disabled={isSelected}
                 className={cn(
-                  'w-full p-4 rounded-xl border-2 flex items-center gap-4 text-left transition-all',
+                  "w-full p-4 rounded-xl border-2 flex items-center gap-4 text-left transition-all",
                   isSelected
-                    ? 'bg-muted border-muted opacity-50 cursor-not-allowed'
-                    : 'bg-card border-border hover:border-primary hover:shadow-warm',
+                    ? "bg-muted border-muted opacity-50 cursor-not-allowed"
+                    : "bg-card border-border hover:border-primary hover:shadow-warm",
                 )}
               >
                 <span className="text-3xl">{ingredient.icon}</span>

@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+﻿import { motion } from 'framer-motion';
 import { Minus, Plus, Scale } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -32,9 +32,8 @@ export function QuantityCalculator({
         </div>
       </div>
 
-      {/* Burger Count */}
       <div className="space-y-3">
-        <label className="text-sm font-medium text-foreground">Quantidade de Hambúrgueres</label>
+        <label className="text-sm font-medium text-foreground">Quantidade de Hamburgueres</label>
         <div className="flex items-center justify-center gap-4">
           <Button
             variant="outline"
@@ -63,9 +62,8 @@ export function QuantityCalculator({
         </div>
       </div>
 
-      {/* Weight Selection */}
       <div className="space-y-3">
-        <label className="text-sm font-medium text-foreground">Peso por Hambúrguer (gramas)</label>
+        <label className="text-sm font-medium text-foreground">Peso por Hamburguer (gramas)</label>
         <div className="grid grid-cols-3 gap-2">
           {weightOptions.map((weight) => (
             <Button
@@ -73,10 +71,7 @@ export function QuantityCalculator({
               variant={burgerWeight === weight ? 'default' : 'secondary'}
               size="sm"
               onClick={() => onBurgerWeightChange(weight)}
-              className={cn(
-                'h-12 text-lg font-medium',
-                burgerWeight === weight && 'shadow-warm'
-              )}
+              className={cn('h-12 text-lg font-medium', burgerWeight === weight && 'shadow-warm')}
             >
               {weight}g
             </Button>
@@ -84,7 +79,6 @@ export function QuantityCalculator({
         </div>
       </div>
 
-      {/* Total */}
       <motion.div
         key={totalWeight}
         initial={{ scale: 0.95 }}
@@ -92,7 +86,7 @@ export function QuantityCalculator({
         className="p-4 rounded-xl bg-primary/10 border border-primary/20"
       >
         <div className="flex items-center justify-between">
-          <span className="text-sm text-muted-foreground">Peso Total Necessário</span>
+          <span className="text-sm text-muted-foreground">Peso Total Necessario</span>
           <span className="text-2xl font-display font-bold text-primary">
             {totalWeight >= 1000 ? `${(totalWeight / 1000).toFixed(1)}kg` : `${totalWeight}g`}
           </span>

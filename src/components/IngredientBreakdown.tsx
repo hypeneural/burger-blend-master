@@ -1,14 +1,21 @@
 import { motion } from 'framer-motion';
 import { ShoppingCart } from 'lucide-react';
 import { getIngredientById } from '@/data/ingredients';
+import { calculateExtrasWeight, formatWeight } from '@/lib/blendMath';
 import type { BlendIngredient } from '@/data/presets';
+import type { BlendExtra } from '@/types/blend';
 
 interface IngredientBreakdownProps {
   ingredients: BlendIngredient[];
-  totalWeight: number;
+  baseWeight: number;
+  extras?: BlendExtra[];
 }
 
-export function IngredientBreakdown({ ingredients, totalWeight }: IngredientBreakdownProps) {
+export function IngredientBreakdown({ ingredients, baseWeight, extras = [] }: IngredientBreakdownProps) {
+  const extrasWeight = calculateExtrasWeight(extras);
+  const totalWeight = baseWeight + extrasWeight;
+  const hasExtras = extras.length > 0;
+
   return (
     <div className="space-y-4 p-5 rounded-2xl bg-card border border-border">
       <div className="flex items-center gap-3">
@@ -26,7 +33,7 @@ export function IngredientBreakdown({ ingredients, totalWeight }: IngredientBrea
           const ingredient = getIngredientById(item.ingredientId);
           if (!ingredient) return null;
           
-          const weight = Math.round((item.percentage / 100) * totalWeight);
+          const weight = (item.percentage / 100) * baseWeight;
           
           return (
             <motion.div
@@ -44,17 +51,50 @@ export function IngredientBreakdown({ ingredients, totalWeight }: IngredientBrea
                 </div>
               </div>
               <span className="text-lg font-semibold text-primary">
-                {weight >= 1000 ? `${(weight / 1000).toFixed(2)}kg` : `${weight}g`}
+                {formatWeight(weight, 2)}
               </span>
             </motion.div>
           );
         })}
       </div>
 
+      {hasExtras && (
+        <div className="pt-4 border-t border-border space-y-2">
+          <div className="flex items-center justify-between text-xs uppercase tracking-wide text-muted-foreground">
+            <span>Extras</span>
+            <span>Nao entram no %</span>
+          </div>
+          {extras.map((extra) => {
+            const ingredient = getIngredientById(extra.ingredientId);
+            if (!ingredient) return null;
+
+            return (
+              <div
+                key={extra.ingredientId}
+                className="flex items-center justify-between p-3 rounded-lg bg-background"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-xl">{ingredient.icon}</span>
+                  <div>
+                    <span className="font-medium text-foreground">{ingredient.name}</span>
+                    <span className="text-muted-foreground text-sm ml-2">extra</span>
+                  </div>
+                </div>
+                <span className="text-lg font-semibold text-primary">
+                  {formatWeight(extra.grams)}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
       <div className="pt-3 border-t border-border flex items-center justify-between">
-        <span className="font-medium text-muted-foreground">Total</span>
+        <span className="font-medium text-muted-foreground">
+          {hasExtras ? "Total (com extras)" : "Total"}
+        </span>
         <span className="text-xl font-display font-bold text-foreground">
-          {totalWeight >= 1000 ? `${(totalWeight / 1000).toFixed(1)}kg` : `${totalWeight}g`}
+          {formatWeight(totalWeight)}
         </span>
       </div>
     </div>

@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+﻿import { motion } from 'framer-motion';
 import { ChefHat, Sparkles } from 'lucide-react';
 
 interface HeaderProps {
@@ -6,7 +6,7 @@ interface HeaderProps {
   subtitle?: string;
 }
 
-export function Header({ title = "Blend Master", subtitle = "Crie seu hambúrguer perfeito" }: HeaderProps) {
+export function Header({ title = 'Blend Master', subtitle = 'Crie seu hamburguer perfeito' }: HeaderProps) {
   return (
     <motion.header
       initial={{ opacity: 0, y: -20 }}
@@ -21,9 +21,7 @@ export function Header({ title = "Blend Master", subtitle = "Crie seu hambúrgue
       >
         <ChefHat className="w-8 h-8 text-primary-foreground" />
       </motion.div>
-      <h1 className="font-display text-3xl font-bold text-foreground">
-        {title}
-      </h1>
+      <h1 className="font-display text-3xl font-bold text-foreground">{title}</h1>
       <p className="text-muted-foreground mt-1 flex items-center justify-center gap-2">
         <Sparkles className="w-4 h-4" />
         {subtitle}
